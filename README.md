@@ -36,9 +36,9 @@
 | Этап | Статус | Где описан |
 |---|---|---|
 | Окружение: Flutter SDK, Android SDK, телефон по USB | ✅ готово | [docs/01-environment.md](docs/01-environment.md) |
-| Репозиторий, `.gitignore`, правила для секретов | ✅ готово (кроме `.env.example`, см. docs/02) | [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md) |
-| Регистрация приложения в интре (UID и SECRET), файл `.env` | ⏳ следующий шаг | будет |
-| Ручная проверка API через `curl` (токен и реальный JSON) | ⏳ | будет |
+| Репозиторий, `.gitignore`, правила для секретов | ✅ готово | [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md) |
+| Регистрация приложения в интре (UID и SECRET), файл `.env` | ✅ готово | [docs/02](docs/02-git-and-secrets.md), [docs/03](docs/03-api-exploration.md) |
+| Ручная проверка API через `curl` (токен и реальный JSON) | ✅ готово | [docs/03-api-exploration.md](docs/03-api-exploration.md) |
 | Модели данных и разбор JSON | ⏳ | будет |
 | Токен-сервис (кэш токена, бонус: обновление) | ⏳ | будет |
 | Экран поиска | ⏳ | будет |
@@ -160,23 +160,28 @@ Flutter это open-source фреймворк Google для построения
 
 ## 5. Как будет работать 42 API (план)
 
-> ⚠️ Это план, составленный по памяти. **Названия полей и детали токена нужно сверить с реальным ответом API** на шаге с `curl` (он описан отдельным этапом).
+> ✅ Раздел сверен с **реальным ответом API** (замер 17 октября 2026). Теория, скрипты с построчным разбором и все находки: [docs/03-api-exploration.md](docs/03-api-exploration.md). Открытые вопросы (в первую очередь формула процента скилла) перечислены там же.
 
 Для нашей задачи нужен **OAuth2, Client Credentials flow**: приложение авторизуется от своего имени, без входа пользователя.
 
-1. В интре: Settings → API → Register a new app. Получаем **UID** и **SECRET** (и кладём в `.env`).
-2. Запрашиваем токен: `POST https://api.intra.42.fr/oauth/token` с параметрами `grant_type=client_credentials`, `client_id`, `client_secret`. В ответе приходят `access_token` и срок жизни `expires_in` (примерно два часа, точное значение сверить).
+1. В интре регистрируем новое приложение (в моём плане был путь Settings → API → Register a new app, в официальном гайде путь меню не указан). Получаем **UID** и **SECRET** и кладём в `.env`.
+2. Запрашиваем токен: `POST https://api.intra.42.fr/oauth/token` с параметрами `grant_type=client_credentials`, `client_id`, `client_secret`. В ответе приходят `access_token` и срок жизни `expires_in` (в официальном гайде пример токена живёт 7200 секунд, то есть два часа).
 3. Запрашиваем профиль: `GET https://api.intra.42.fr/v2/users/{login}` с заголовком `Authorization: Bearer <token>`.
 
-Предварительная карта полей (**проверить**):
+Токен client credentials не привязан к студенту и даёт **только публичные данные**.
 
-| Что нужно | Где искать в ответе |
+Карта полей (проверена на реальном ответе):
+
+| Что нужно | Где в ответе |
 |---|---|
-| Фото | `image` (ссылки разных размеров) |
-| Уровень | `cursus_users[]` → `level` (например, 12.34 это уровень 12 и 34 %) |
-| Скиллы | `cursus_users[]` → `skills[]` (`name`, `level`) |
-| Проекты | `projects_users[]` → `status`, `validated?`, `final_mark`, `project.name` |
-| Скрытые данные | поля могут быть `null` или скрыты по приватности; показываем «N/A» |
+| Поля профиля | `login`, `displayname`, `email`, `phone`, `location`, `wallet`, `correction_point` (в единственном числе), `pool_month`, `pool_year` |
+| Фото | `image.versions` (`large`, `medium`, `small`, `micro`) и `image.link` |
+| Уровень | `cursus_users[]` → `level` (дробное число). Основной курс определяем по `cursus.slug == "42cursus"`: у студента может быть несколько курсов |
+| Скиллы | `cursus_users[]` → `skills[]`: только `id`, `level`, `name`. **Процента в API нет**, считаем сами (формула пока открытый вопрос) |
+| Проекты | `projects_users[]` → `status` (`finished` значит завершён), `validated?` (`true`, `false` или `null`), `final_mark`, `project.name` |
+| Скрытые данные | Скрытое приходит строкой `"hidden"` (например, `phone`), а не `null`. Показываем «N/A» |
+
+Важные нюансы (подробности в docs/03): уровни приходят с шумом чисел с плавающей точкой (`3.4699999999999998`), поэтому при показе округляем; любое поле может быть пустым, поэтому разбор JSON должен быть устойчивым; «Expertises» (звёзды «мне интересно») это не «Skills» из задания.
 
 Пошаговая симуляция работы с токеном:
 
@@ -220,7 +225,8 @@ swifty-companion/
 ├── README.md                  эта карта
 ├── docs/                      документация по этапам
 │   ├── 01-environment.md
-│   └── 02-git-and-secrets.md
+│   ├── 02-git-and-secrets.md
+│   └── 03-api-exploration.md
 ├── lib/main.dart              демо-приложение Flutter (счётчик), будет заменено
 ├── test/widget_test.dart      демо-тест
 ├── android/                   нативная Android-часть, собирается через Gradle
@@ -228,6 +234,7 @@ swifty-companion/
 ├── pubspec.lock               зафиксированные версии зависимостей (коммитим)
 ├── analysis_options.yaml      настройки анализатора кода (линтер)
 ├── .metadata                  служебный файл Flutter (коммитим)
+├── .env.example               шаблон переменных окружения, без значений (коммитим)
 └── .gitignore                 что git не должен видеть (в том числе `.env`)
 ```
 
@@ -249,7 +256,7 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 
 В процессе работы: `r` горячая перезагрузка, `R` горячий перезапуск, `q` выход.
 
-Когда появится код с токеном, понадобится файл `.env` (по образцу `.env.example`). Подробности в [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md).
+Для запросов к API нужен файл `.env` (по образцу `.env.example`, он в git не попадает). Подробности в [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md), примеры запросов в [docs/03-api-exploration.md](docs/03-api-exploration.md).
 
 ---
 
@@ -258,9 +265,10 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 | Файл | Тема |
 |---|---|
 | [docs/01-environment.md](docs/01-environment.md) | Окружение: Flutter SDK, Android SDK, Java, Gradle, телефон по USB, все пройденные ошибки, восстановление после чистки `goinfre` |
-| [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md) | Git и секреты: `.gitignore`, `.env`, проверки перед push, что делать при утечке |
+| [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md) | Git и секреты: `.gitignore`, `.env`, проверки перед push, что делать при утечке, урок про шаблон `.env.*` |
+| [docs/03-api-exploration.md](docs/03-api-exploration.md) | Исследование API 42: теория OAuth2, четыре консольных скрипта с построчным разбором, находки по реальному ответу, открытые вопросы |
 
-Дальше по мере работы появятся файлы по регистрации в интре и `curl`, по токен-сервису, по экранам, по обработке ошибок, по адаптивной вёрстке и по подготовке к защите. Документация обновляется после каждого этапа или по запросу.
+Дальше по мере работы появятся файлы по токен-сервису, по экранам, по обработке ошибок, по адаптивной вёрстке и по подготовке к защите. Документация обновляется после каждого этапа или по запросу.
 
 ---
 
@@ -268,7 +276,7 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 
 Требование задания жёсткое: учётные данные только в `.env`, который не попадает в git. Если секрет хотя бы раз попал в коммит, **он остаётся в истории даже после удаления файла**.
 
-Что уже сделано: правило `.env` стоит в `.gitignore` до первого коммита и проверено командой `git check-ignore -v .env`. Остальное в [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md).
+Что уже сделано: правило `.env` стоит в `.gitignore` и проверено командой `git check-ignore -v .env`. По дороге мы поймали и исправили ошибку, при которой строка `.env` случайно пропала из `.gitignore` (подробности и правило проверки после любой правки: [docs/02-git-and-secrets.md](docs/02-git-and-secrets.md), раздел 5).
 
 ---
 
@@ -282,7 +290,8 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 - Почему вы подключили каждую из библиотек? → раздел [6](#6-архитектура-план)
 - Что произойдёт, если токен истёк, если нет сети, если логин не существует?
 - Как интерфейс ведёт себя на экранах разного размера и при повороте?
-- Какие поля API могут быть скрыты и что показывает приложение в этом случае?
+- Какие поля API могут быть скрыты и что показывает приложение в этом случае? → [docs/03-api-exploration.md](docs/03-api-exploration.md)
+- Откуда берётся процент скилла и по какой формуле? Чем skills отличаются от expertises? → [docs/03-api-exploration.md](docs/03-api-exploration.md), разделы 9 и 11
 
 ---
 
@@ -293,4 +302,5 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 - [Документация Shorebird: актуальная версия Flutter](https://docs.shorebird.dev/getting-started/flutter-version.md): версия 3.47.1, изменения в 3.47
 - [Flutter SDK archive](https://docs.flutter.dev/release/archive): расписание релизов 2026
 - [Statista: кроссплатформенные фреймворки](https://www.statista.com/statistics/869224/worldwide-mobile-app-developer-survey-cross-platform-tools/): данные опроса 2023
+- [Getting started, API 42](https://api.intra.42.fr/apidoc/guides/getting_started): регистрация приложения, client credentials, срок жизни токена
 - [Flutter vs React Native, статистика 2026](https://www.confianzit.com/cit-blog/flutter-vs-react-native-for-business-app-development/): пересказ опроса Stack Overflow 2025
