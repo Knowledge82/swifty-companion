@@ -19,6 +19,7 @@ migrate_working_dir/
 .idea/
 
 # Secrets
+.env
 .env.*
 !.env.example
 
