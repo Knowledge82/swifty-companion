@@ -177,7 +177,7 @@ Flutter это open-source фреймворк Google для построения
 | Поля профиля | `login`, `displayname`, `email`, `phone`, `location`, `wallet`, `correction_point` (в единственном числе), `pool_month`, `pool_year` |
 | Фото | `image.versions` (`large`, `medium`, `small`, `micro`) и `image.link` |
 | Уровень | `cursus_users[]` → `level` (дробное число). Основной курс определяем по `cursus.slug == "42cursus"`: у студента может быть несколько курсов |
-| Скиллы | `cursus_users[]` → `skills[]`: только `id`, `level`, `name`. **Процента в API нет**, считаем сами (формула пока открытый вопрос) |
+| Скиллы | `cursus_users[]` → `skills[]`: только `id`, `level`, `name`. **Процента в API нет**, считаем сами: `level / 20 × 100` (максимум 20 косвенно подтверждён масштабом радара в интре, см. docs/03, раздел 11) |
 | Проекты | `projects_users[]` → `status` (`finished` значит завершён), `validated?` (`true`, `false` или `null`), `final_mark`, `project.name` |
 | Скрытые данные | Скрытое приходит строкой `"hidden"` (например, `phone`), а не `null`. Показываем «N/A» |
 
