@@ -1,21 +1,42 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/ui/splash_screen.dart';
+import 'package:swifty_companion/ui/steampunk/steampunk_widgets.dart';
 
 import 'fake_api.dart';
 import 'test_app.dart';
+
+/// Картинка, которая никогда не загружается: проверяем страховочный таймер.
+class _NeverLoadedImage extends ImageProvider<_NeverLoadedImage> {
+  const _NeverLoadedImage();
+
+  @override
+  Future<_NeverLoadedImage> obtainKey(ImageConfiguration configuration) =>
+      SynchronousFuture<_NeverLoadedImage>(this);
+
+  @override
+  ImageStreamCompleter loadImage(
+    _NeverLoadedImage key,
+    ImageDecoderCallback decode,
+  ) =>
+      OneFrameImageStreamCompleter(Completer<ImageInfo>().future);
+}
 
 void main() {
   final png = Uint8List.fromList(tinyPng);
 
   Widget app({
     Duration duration = const Duration(seconds: 3),
-    Duration fadeIn = const Duration(milliseconds: 800),
-    Duration fadeOut = const Duration(milliseconds: 700),
+    Duration fadeIn = const Duration(milliseconds: 700),
+    Duration fadeOut = const Duration(milliseconds: 600),
     bool disableAnimations = false,
+    bool waitForImage = false,
+    ImageProvider? image,
   }) {
     return testApp(
       SplashScreen(
@@ -23,7 +44,8 @@ void main() {
         duration: duration,
         fadeIn: fadeIn,
         fadeOut: fadeOut,
-        image: MemoryImage(png),
+        waitForImage: waitForImage,
+        image: image ?? MemoryImage(png),
       ),
       disableAnimations: disableAnimations,
     );
@@ -57,7 +79,7 @@ void main() {
     expect(middle, greaterThan(0));
     expect(middle, lessThan(1));
 
-    await tester.pump(const Duration(milliseconds: 450)); // 850 > 800
+    await tester.pump(const Duration(milliseconds: 400)); // 750 > 700
     expect(introOpacity(tester), 1);
   });
 
@@ -71,8 +93,8 @@ void main() {
 
   testWidgets('fade-out: перед концом картинка гаснет', (tester) async {
     await tester.pumpWidget(app());
-    // Общее время 3000, угасание последние 700: начинается на 2300.
-    await tester.pump(const Duration(milliseconds: 2650));
+    // Общее время 3000, угасание последние 600: начинается на 2400.
+    await tester.pump(const Duration(milliseconds: 2700));
 
     final value = introOpacity(tester);
     expect(value, greaterThan(0));
@@ -86,7 +108,7 @@ void main() {
     // Контроллер считает себя завершённым только когда время ПРЕВЫСИЛО
     // длительность (строго больше), поэтому берём чуть больше 3 секунд.
     await tester.pump(const Duration(milliseconds: 3100));
-    await tester.pump(const Duration(milliseconds: 700)); // дошла смена кадра
+    await tester.pump(const Duration(milliseconds: 500)); // дошла смена кадра
 
     expect(find.text('next-screen'), findsOneWidget);
     expect(find.text('Swifty Companion'), findsNothing);
@@ -104,9 +126,39 @@ void main() {
 
     await tester.tap(find.byType(Image));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.text('next-screen'), findsOneWidget);
+  });
+
+  testWidgets(
+      'часы ждут картинку: пока она не готова, заставка прозрачна; '
+      'страховочный таймер всё равно запускает проявление', (tester) async {
+    await tester.pumpWidget(
+      app(waitForImage: true, image: const _NeverLoadedImage()),
+    );
+
+    await tester.pump(const Duration(milliseconds: 1000));
+    expect(introOpacity(tester), 0); // ждём, время проявления не тратится
+
+    await tester.pump(const Duration(milliseconds: 600)); // ждали 1600 > 1500
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(introOpacity(tester), greaterThan(0)); // проявление пошло
+
+    await tester.pump(const Duration(seconds: 5)); // доиграть до конца
+    await tester.pump(const Duration(milliseconds: 500)); // смена экрана
+    expect(find.text('next-screen'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('уход с экрана во время ожидания картинки гасит таймер',
+      (tester) async {
+    await tester.pumpWidget(
+      app(waitForImage: true, image: const _NeverLoadedImage()),
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+    // Если бы таймер остался, тест упал бы с «Timer is still pending».
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('уход с экрана раньше времени не оставляет анимации и ошибок',
@@ -120,11 +172,24 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('фон заставки тёмный, но не чисто чёрный', (tester) async {
-    for (final color in splashBackdropColors) {
-      expect(color.computeLuminance(), lessThan(0.08)); // тёмный
-      expect(color.computeLuminance(), greaterThan(0.005)); // не чёрный
-    }
+  test('фон заставки: один сплошной очень тёмный цвет, но не чисто чёрный', () {
+    expect(splashBackgroundColor.a, 1); // сплошной, без прозрачности
+    expect(splashBackgroundColor.computeLuminance(), lessThan(0.02)); // очень тёмный
+    expect(splashBackgroundColor.computeLuminance(), greaterThan(0.003)); // не чёрный
+  });
+
+  testWidgets('на заставке нет узорного фона: шестерёнок и труб',
+      (tester) async {
+    await tester.pumpWidget(app());
+
+    expect(find.byType(SteampunkBackdrop), findsNothing);
+    final scaffold = tester.widget<Scaffold>(
+      find.descendant(
+        of: find.byType(SplashScreen),
+        matching: find.byType(Scaffold),
+      ),
+    );
+    expect(scaffold.backgroundColor, splashBackgroundColor);
   });
 
   testWidgets('телефон в портрете: картинка вписана по высоте и обрезана по бокам',
