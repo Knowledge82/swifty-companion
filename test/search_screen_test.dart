@@ -68,7 +68,9 @@ void main() {
     expect(fake.userRequests.single.url.path, '/v2/users/jdoe');
     expect(find.text('Jane Doe'), findsOneWidget);
 
-    await tester.pageBack();
+    // Не `tester.pageBack()`: он ищет подсказку 'Back', а при испанском
+    // языке подсказка называется 'Atrás'.
+    await tester.tap(find.byTooltip('Atrás'));
     await tester.pumpAndSettle();
 
     expect(find.byType(TextField), findsOneWidget);

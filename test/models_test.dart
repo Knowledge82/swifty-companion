@@ -149,6 +149,7 @@ void main() {
       final profile = UserProfile.fromJson({'login': 'x'});
       expect(profile.email, isNull);
       expect(profile.imageUrl, isNull);
+      expect(profile.imageUrls, isEmpty);
       expect(profile.mainCursus, isNull);
       expect(profile.cursuses, isEmpty);
       expect(profile.finishedProjects(), isEmpty);
@@ -172,6 +173,26 @@ void main() {
           'image': {'link': 'http://example.com/insecure.jpg'},
         }).imageUrl,
         isNull,
+      );
+    });
+
+    test('фото: список адресов в порядке предпочтения, без повторов', () {
+      expect(UserProfile.fromJson(sampleUserJson()).imageUrls, [
+        'https://example.com/medium.jpg',
+        'https://example.com/link.jpg',
+        'https://example.com/large.jpg',
+        'https://example.com/small.jpg',
+        'https://example.com/micro.jpg',
+      ]);
+      expect(
+        UserProfile.fromJson({
+          'login': 'x',
+          'image': {
+            'link': 'https://example.com/a.jpg',
+            'versions': {'medium': 'https://example.com/a.jpg'},
+          },
+        }).imageUrls,
+        ['https://example.com/a.jpg'],
       );
     });
 

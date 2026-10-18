@@ -17,7 +17,7 @@ class UserProfile {
     this.correctionPoints,
     this.poolMonth,
     this.poolYear,
-    this.imageUrl,
+    this.imageUrls = const [],
     this.cursuses = const [],
     this.projects = const [],
   });
@@ -41,7 +41,7 @@ class UserProfile {
       correctionPoints: readInt(json['correction_point']),
       poolMonth: readString(json['pool_month']),
       poolYear: readString(json['pool_year']),
-      imageUrl: _pickImageUrl(readMap(json['image'])),
+      imageUrls: _pickImageUrls(readMap(json['image'])),
       cursuses: readObjects(json['cursus_users'], CursusProgress.fromJson),
       projects: readObjects(json['projects_users'], ProjectResult.fromJson),
     );
@@ -57,7 +57,15 @@ class UserProfile {
   final int? correctionPoints;
   final String? poolMonth;
   final String? poolYear;
-  final String? imageUrl;
+
+  /// Адреса фото в порядке предпочтения (без повторов, только https).
+  /// Их несколько на случай, если какая-то версия картинки на CDN не отдаётся:
+  /// экран пробует их по очереди.
+  final List<String> imageUrls;
+
+  /// Самое предпочтительное фото или `null`, если подходящих адресов нет.
+  String? get imageUrl => imageUrls.isEmpty ? null : imageUrls.first;
+
   final List<CursusProgress> cursuses;
   final List<ProjectResult> projects;
 
@@ -91,9 +99,10 @@ class UserProfile {
   }
 }
 
-/// Фото: `medium`, иначе `link`, иначе другие размеры. Берём только https,
-/// потому что Android по умолчанию блокирует http-трафик.
-String? _pickImageUrl(Map<String, dynamic>? image) {
+/// Фото: `medium`, `link`, `large`, `small`, `micro` в таком порядке.
+/// Берём только https, потому что Android по умолчанию блокирует http-трафик.
+/// Повторяющиеся адреса отбрасываем.
+List<String> _pickImageUrls(Map<String, dynamic>? image) {
   final versions = readMap(image?['versions']);
   final candidates = <Object?>[
     versions?['medium'],
@@ -102,11 +111,12 @@ String? _pickImageUrl(Map<String, dynamic>? image) {
     versions?['small'],
     versions?['micro'],
   ];
+  final result = <String>[];
   for (final candidate in candidates) {
     final url = readString(candidate);
-    if (url != null && url.startsWith('https://')) {
-      return url;
+    if (url != null && url.startsWith('https://') && !result.contains(url)) {
+      result.add(url);
     }
   }
-  return null;
+  return result;
 }
