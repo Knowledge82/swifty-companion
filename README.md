@@ -255,14 +255,14 @@ swifty-companion/
 │   ├── l10n/                  app_strings (+ _es, _en): тексты интерфейса, испанский по умолчанию
 │   ├── models/                skill, project_result, project_category, cursus_progress, user_profile
 │   └── ui/                    search_screen, profile_screen, profile_avatar, skills_section, projects_section, section_title, error_banner, config_error_screen, easter_egg (пасхалки), splash_screen (заставка с фото),
-│       └── steampunk/         steampunk_theme (палитра, тема), gears (шестерёнки), wear (клёпки, окись, царапины), steampunk_widgets (фон, панель, кольцо, полоса GearStrip)
+│       └── steampunk/         steampunk_theme (палитра, тема), gears (шестерёнки), wear (клёпки, окись, царапины), logo42 (знак школы), steampunk_widgets (фон, панель, кольцо, полоса GearStrip)
 ├── test/                      config_test, login_test, search_screen_test,
 │                              json_reader_test, models_test, fixtures (вымышленный профиль),
 │                              token_service_test, api_exception_test, api_client_test,
-│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, steampunk_test, easter_egg_test, splash_screen_test, test_app,
+│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, steampunk_test, easter_egg_test, splash_screen_test, logo42_test, test_app,
 │                              fake_api (поддельный сервер)
 ├── assets/images/             splash.jpg: фото для заставки
-├── tool/                      generate_icons.py: рисует иконку и картинку splash (Pillow)
+├── tool/                      generate_icons.py: рисует иконку и картинку splash (Pillow); 42_logo.svg: знак школы (исходник)
 ├── android/                   нативная Android-часть, собирается через Gradle (иконки и splash в res/)
 ├── pubspec.yaml               манифест: имя, версия, зависимости, ассеты
 ├── pubspec.lock               зафиксированные версии зависимостей (коммитим)

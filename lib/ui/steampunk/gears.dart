@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'logo42.dart';
 import 'steampunk_theme.dart';
 import 'wear.dart';
 
@@ -124,8 +125,9 @@ class GearsPainter extends CustomPainter {
       oldDelegate.seed != seed;
 }
 
-/// Эмблема: три сцепленные латунные шестерёнки с окисью, царапинами и
-/// болтами в центрах. Чисто декоративная.
+/// Эмблема: три сцепленные латунные шестерёнки с окисью и царапинами.
+/// На большой шестерёнке изумрудная ступица со знаком школы 42, в малых
+/// болты. Чисто декоративная.
 class GearEmblem extends StatelessWidget {
   const GearEmblem({super.key, this.size = 120});
 
@@ -167,13 +169,17 @@ class _EmblemPainter extends CustomPainter {
       (Offset(s * 0.80, s * 0.28), s * 0.17, 8, math.pi / 8),
       (Offset(s * 0.76, s * 0.80), s * 0.14, 7, math.pi / 7),
     ];
+    var index = 0;
     for (final (center, radius, teeth, rotation) in gears) {
+      final isBig = index == 0;
+      index++;
       final path = gearPath(
         center: center,
         radius: radius,
         teeth: teeth,
         rotation: rotation,
-        holeRatio: 0.32,
+        // У большой шестерёнки отверстия нет: на его месте ступица со знаком.
+        holeRatio: isBig ? 0 : 0.32,
       );
       canvas.drawPath(path, fill);
       canvas.drawPath(path, edge);
@@ -206,7 +212,27 @@ class _EmblemPainter extends CustomPainter {
       }
       canvas.restore();
 
-      drawBolt(canvas, center, radius * 0.22, body: copper);
+      if (isBig) {
+        // Ступица: тёмно-изумрудный диск, латунный ободок и знак 42.
+        final hub = radius * 0.66;
+        canvas.drawCircle(center, hub, Paint()..color = emeraldDeep);
+        canvas.drawCircle(
+          center,
+          hub,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = radius * 0.06
+            ..color = brass,
+        );
+        drawLogo42(
+          canvas,
+          center,
+          hub * 1.42,
+          Paint()..color = const Color(0xFFE6C878),
+        );
+      } else {
+        drawBolt(canvas, center, radius * 0.22, body: copper);
+      }
     }
   }
 

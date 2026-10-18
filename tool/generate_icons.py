@@ -12,12 +12,13 @@
   drawable-xxhdpi/splash_icon.png       картинка для splash screen
 
 Эмблема повторяет GearEmblem из lib/ui/steampunk/gears.dart: три сцепленные
-латунные шестерёнки, но на большой шестерёнке вместо отверстия изумрудный
-диск с цифрами «42» шрифтом с засечками. Это обычный текст, а не официальный
-логотип школы.
+латунные шестерёнки, на большой шестерёнке изумрудная ступица со знаком
+школы 42. Знак берётся из файла tool/42_logo.svg (его предоставил владелец
+проекта) и рисуется как есть: многоугольники из файла, без переделок.
 """
 import math
 import os
+import re
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -31,11 +32,22 @@ EMERALD = (0x0F, 0x2B, 0x21)
 EMERALD_DEEP = (0x0A, 0x1F, 0x17)
 LEATHER_DEEP = (0x1A, 0x11, 0x0B)
 
-FONT_PATHS = [
-    '/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf',
-    '/usr/share/fonts/dejavu/DejaVuSerif-Bold.ttf',
-    'DejaVuSerif-Bold.ttf',
-]
+LOGO_SVG = os.path.join('tool', '42_logo.svg')
+
+
+def load_logo():
+    """Многоугольники знака из SVG (атрибуты points) и их габариты."""
+    with open(LOGO_SVG, encoding='utf-8') as f:
+        svg = f.read()
+    polys = []
+    for match in re.finditer(r'points="([^"]*)"', svg):
+        nums = [float(n) for n in re.findall(r'-?\d+(?:\.\d+)?', match.group(1))]
+        polys.append(list(zip(nums[0::2], nums[1::2])))
+    xs = [p[0] for poly in polys for p in poly]
+    ys = [p[1] for poly in polys for p in poly]
+    bounds = (min(xs), min(ys), max(xs), max(ys))
+    return polys, bounds
+
 
 # (центр x, центр y, радиус, число зубьев, поворот) в условных единицах 0..1:
 # те же числа, что в GearEmblem.
@@ -70,11 +82,14 @@ def gradient(size):
     return Image.fromarray(out.astype(np.uint8), 'RGB')
 
 
-def load_font(px):
-    for path in FONT_PATHS:
-        if os.path.exists(path):
-            return ImageFont.truetype(path, px)
-    raise SystemExit('Не найден шрифт DejaVu Serif Bold: поправь FONT_PATHS')
+def draw_logo(draw, center, width):
+    """Рисует знак 42 светлой латунью: центр габаритов в center, ширина width."""
+    polys, (x0, y0, x1, y1) = load_logo()
+    scale = width / (x1 - x0)
+    mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+    for poly in polys:
+        draw.polygon([(center[0] + (x - mx) * scale, center[1] + (y - my) * scale)
+                      for x, y in poly], fill=BRASS_LIGHT + (255,))
 
 
 def render(size, radius_frac, background=None):
@@ -123,13 +138,7 @@ def render(size, radius_frac, background=None):
             d.ellipse([cc[0] - hub, cc[1] - hub, cc[0] + hub, cc[1] + hub],
                       fill=EMERALD_DEEP + (255,), outline=BRASS + (255,),
                       width=max(2, int(r_px * 0.06)))
-            font = load_font(100)
-            l, t, r, b = d.textbbox((0, 0), '42', font=font)
-            target_w = hub * 1.25
-            font = load_font(max(8, int(100 * target_w / (r - l))))
-            l, t, r, b = d.textbbox((0, 0), '42', font=font)
-            d.text((cc[0] - (l + r) / 2, cc[1] - (t + b) / 2), '42',
-                   font=font, fill=BRASS_LIGHT + (255,))
+            draw_logo(d, cc, hub * 1.42)
         else:
             # Болт в отверстии: шляпка меди и косой шлиц.
             bolt = r_px * 0.22
