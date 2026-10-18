@@ -189,7 +189,7 @@ class _EmblemPainter extends CustomPainter {
           canvas,
           center + Offset(math.cos(angle), math.sin(angle)) * dist,
           radius * (0.08 + 0.12 * random.nextDouble()),
-          oxide.withValues(alpha: 0.4 + 0.3 * random.nextDouble()),
+          oxide.withValues(alpha: 0.2 + 0.2 * random.nextDouble()),
         );
       }
       for (var i = 0; i < 7; i++) {

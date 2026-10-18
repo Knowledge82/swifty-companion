@@ -124,7 +124,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final requestError = _requestError;
     final fieldError = _fieldError;
     return Scaffold(
-      appBar: AppBar(title: Text(strings.appTitle), bottom: const RivetLine()),
+      appBar: AppBar(title: Text(strings.appTitle), bottom: const GearStrip()),
       body: SteampunkBackdrop(
         child: SafeArea(
           child: Center(

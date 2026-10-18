@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Тёмная кожа: цвет экрана запуска и фона окна (leatherDeep в приложении) -->
+    <color name="splash_background">#1A110B</color>
+    <!-- Изумруд: фон адаптивной иконки (emerald в приложении) -->
+    <color name="ic_launcher_background">#0F2B21</color>
+</resources>

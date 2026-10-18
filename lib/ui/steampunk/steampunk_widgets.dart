@@ -107,6 +107,17 @@ class _WearPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
+    // Всё, что рисуется ниже, обрезается по скруглённому контуру панели
+    // (чуть внутрь от рамки): у пятен размытый край, и без обрезки он
+    // «светился» бы за рамкой.
+    canvas.save();
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(
+        (Offset.zero & size).deflate(1.5),
+        const Radius.circular(8.5),
+      ),
+    );
+
     // Медная вставка: тонкая линия внутри рамки.
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -127,12 +138,12 @@ class _WearPainter extends CustomPainter {
       (w, h, -1, -1),
     ];
     for (final (x, y, dx, dy) in corners) {
-      for (var i = 0; i < 9; i++) {
+      for (var i = 0; i < 7; i++) {
         drawBlotch(
           canvas,
-          Offset(x + dx * random.nextDouble() * 26, y + dy * random.nextDouble() * 26),
-          3 + random.nextDouble() * 7,
-          oxide.withValues(alpha: 0.18 + random.nextDouble() * 0.25),
+          Offset(x + dx * random.nextDouble() * 22, y + dy * random.nextDouble() * 22),
+          2.5 + random.nextDouble() * 4.5,
+          oxide.withValues(alpha: 0.08 + random.nextDouble() * 0.14),
         );
       }
     }
@@ -143,14 +154,14 @@ class _WearPainter extends CustomPainter {
       drawBlotch(
         canvas,
         Offset(x, random.nextDouble() * 5),
-        2.5 + random.nextDouble() * 3,
-        oxide.withValues(alpha: 0.15 + random.nextDouble() * 0.2),
+        2 + random.nextDouble() * 2.5,
+        oxide.withValues(alpha: 0.07 + random.nextDouble() * 0.1),
       );
       drawBlotch(
         canvas,
         Offset(x, h - random.nextDouble() * 5),
-        2.5 + random.nextDouble() * 3,
-        oxide.withValues(alpha: 0.15 + random.nextDouble() * 0.2),
+        2 + random.nextDouble() * 2.5,
+        oxide.withValues(alpha: 0.07 + random.nextDouble() * 0.1),
       );
     }
 
@@ -173,6 +184,7 @@ class _WearPainter extends CustomPainter {
           drawScratch(canvas, Offset(w - inset, along * h), length, math.pi / 2 + tilt, color);
       }
     }
+    canvas.restore();
   }
 
   @override
@@ -180,7 +192,7 @@ class _WearPainter extends CustomPainter {
 }
 
 /// Клёпки: крупные в углах, мелкие через каждые ~40 пикселей по периметру.
-/// Каждая четвёртая мелкая окислена (зелёная).
+/// Все латунные: окись на клёпках не рисуется.
 class _RivetPainter extends CustomPainter {
   const _RivetPainter({required this.brassColor});
 
@@ -206,19 +218,11 @@ class _RivetPainter extends CustomPainter {
       drawRivet(canvas, p, 4.5, body: brassColor);
     }
 
-    var index = 0;
     void along(Offset from, Offset to) {
       final length = (to - from).distance;
       final gaps = math.max(1, (length / _spacing).round());
       for (var i = 1; i < gaps; i++) {
-        final p = Offset.lerp(from, to, i / gaps)!;
-        drawRivet(
-          canvas,
-          p,
-          2.6,
-          body: index % 4 == 3 ? oxide : brassColor,
-        );
-        index++;
+        drawRivet(canvas, Offset.lerp(from, to, i / gaps)!, 2.6, body: brassColor);
       }
     }
 
@@ -234,7 +238,7 @@ class _RivetPainter extends CustomPainter {
 }
 
 /// Латунное кольцо вокруг круглого фото: градиент латуни в медь, тень и
-/// клёпки по кругу. Полный размер = размер фото + 2 × [thickness].
+/// клёпки по кругу (через каждые ~36 пикселей). Полный размер = размер фото + 2 × [thickness].
 class BrassRing extends StatelessWidget {
   const BrassRing({
     super.key,
@@ -283,14 +287,14 @@ class _RingRivetPainter extends CustomPainter {
     if (radius <= 0) {
       return;
     }
-    final count = math.max(8, (2 * math.pi * radius / 22).round());
+    final count = math.max(8, (2 * math.pi * radius / 36).round());
     for (var i = 0; i < count; i++) {
       final angle = 2 * math.pi * i / count;
       drawRivet(
         canvas,
         center + Offset(math.cos(angle), math.sin(angle)) * radius,
         thickness * 0.27,
-        body: i % 4 == 3 ? oxide : const Color(0xFFE9CE86),
+        body: const Color(0xFFE9CE86),
       );
     }
   }
@@ -300,11 +304,13 @@ class _RingRivetPainter extends CustomPainter {
       oldDelegate.thickness != thickness;
 }
 
-/// Полоска клёпок под AppBar (подставляется в `AppBar.bottom`).
-class RivetLine extends StatelessWidget implements PreferredSizeWidget {
-  const RivetLine({super.key});
+/// Полоса с узором под AppBar (подставляется в `AppBar.bottom`):
+/// цепочка мелких сцепленных шестерёнок между двумя тонкими линиями.
+/// Клёпок на ней нет.
+class GearStrip extends StatelessWidget implements PreferredSizeWidget {
+  const GearStrip({super.key});
 
-  static const double height = 14;
+  static const double height = 16;
 
   @override
   Size get preferredSize => const Size.fromHeight(height);
@@ -316,35 +322,59 @@ class RivetLine extends StatelessWidget implements PreferredSizeWidget {
         height: height,
         width: double.infinity,
         child: CustomPaint(
-          painter: _RivetLinePainter(brassColor: Theme.of(context).colorScheme.primary),
+          painter: _GearStripPainter(brassColor: Theme.of(context).colorScheme.primary),
         ),
       ),
     );
   }
 }
 
-class _RivetLinePainter extends CustomPainter {
-  const _RivetLinePainter({required this.brassColor});
+class _GearStripPainter extends CustomPainter {
+  const _GearStripPainter({required this.brassColor});
 
   final Color brassColor;
 
+  static const double _radius = 6.5;
+  static const double _step = 11.5; // расстояние между центрами соседних шестерёнок
+  static const int _teeth = 8;
+
   @override
   void paint(Canvas canvas, Size size) {
-    const spacing = 26.0;
-    final y = size.height / 2 - 1;
+    canvas.clipRect(Offset.zero & size);
+
+    // Тонкая медная линия сверху: «рамка» полосы.
+    canvas.drawLine(
+      Offset.zero,
+      Offset(size.width, 0),
+      Paint()
+        ..strokeWidth = 1
+        ..color = copper.withValues(alpha: 0.7),
+    );
+
+    final fill = Paint()..color = brassColor.withValues(alpha: 0.16);
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = brassColor.withValues(alpha: 0.9);
+
+    final y = size.height / 2 + 0.5;
     var index = 0;
-    for (var x = spacing / 2; x < size.width; x += spacing) {
-      drawRivet(
-        canvas,
-        Offset(x, y),
-        2.6,
-        body: index % 3 == 2 ? oxide : brassColor,
+    for (var x = 0.0; x < size.width + _step; x += _step) {
+      final path = gearPath(
+        center: Offset(x, y),
+        radius: _radius,
+        teeth: _teeth,
+        // Соседние шестерёнки повёрнуты на пол-зуба: зуб входит во впадину.
+        rotation: index.isEven ? 0 : math.pi / _teeth,
+        holeRatio: 0.3,
       );
+      canvas.drawPath(path, fill);
+      canvas.drawPath(path, stroke);
       index++;
     }
   }
 
   @override
-  bool shouldRepaint(_RivetLinePainter oldDelegate) =>
+  bool shouldRepaint(_GearStripPainter oldDelegate) =>
       oldDelegate.brassColor != brassColor;
 }

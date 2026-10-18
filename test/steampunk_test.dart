@@ -139,18 +139,18 @@ void main() {
       }
     });
 
-    testWidgets('полоска клёпок: высота и вставка в AppBar', (tester) async {
-      expect(const RivetLine().preferredSize.height, RivetLine.height);
+    testWidgets('полоса с узором: высота и вставка в AppBar', (tester) async {
+      expect(const GearStrip().preferredSize.height, GearStrip.height);
 
       await tester.pumpWidget(
         testApp(
           Scaffold(
-            appBar: AppBar(title: const Text('t'), bottom: const RivetLine()),
+            appBar: AppBar(title: const Text('t'), bottom: const GearStrip()),
           ),
         ),
       );
 
-      expect(find.byType(RivetLine), findsOneWidget);
+      expect(find.byType(GearStrip), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   });

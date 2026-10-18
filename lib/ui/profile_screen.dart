@@ -36,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
     final cursus = profile.mainCursus;
     final egg = easterEggFor(profile.login);
     return Scaffold(
-      appBar: AppBar(title: Text(profile.login), bottom: const RivetLine()),
+      appBar: AppBar(title: Text(profile.login), bottom: const GearStrip()),
       body: SteampunkBackdrop(
         child: SafeArea(
           child: SingleChildScrollView(
