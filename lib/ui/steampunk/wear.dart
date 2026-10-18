@@ -68,6 +68,21 @@ void drawBlotch(Canvas canvas, Offset center, double radius, Color color) {
   );
 }
 
+/// Мягкое пятно **без размытия**: радиальный градиент от [color] к
+/// прозрачному. Выглядит как [drawBlotch], но не использует `MaskFilter.blur`,
+/// поэтому дёшево и годится для вращающихся деталей, которые перерисовываются
+/// на каждом кадре.
+void drawSoftSpot(Canvas canvas, Offset center, double radius, Color color) {
+  canvas.drawCircle(
+    center,
+    radius,
+    Paint()
+      ..shader = RadialGradient(
+        colors: [color, color.withValues(alpha: 0)],
+      ).createShader(Rect.fromCircle(center: center, radius: radius)),
+  );
+}
+
 /// Царапина: тонкая светлая линия длиной [length] под углом [angle].
 void drawScratch(
   Canvas canvas,

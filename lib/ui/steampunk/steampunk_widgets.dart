@@ -3,19 +3,34 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'gears.dart';
+import 'pipes.dart';
 import 'steampunk_theme.dart';
 import 'wear.dart';
 
 /// Толщина латунного кольца вокруг фото по умолчанию.
-const double brassRingThickness = 9;
+const double brassRingThickness = 13;
 
-/// Фон экрана: тёмная кожа с лёгким светом в центре и узором шестерёнок.
-/// Узор рисуется один раз и закрыт `RepaintBoundary`, поэтому прокрутка
-/// содержимого его не перерисовывает.
+/// Цвета фона по умолчанию: тёмная кожа.
+const List<Color> backdropColors = [leather, leatherDeep];
+
+/// Фон экрана: тёмная кожа с лёгким светом в центре, слабым узором шестерёнок,
+/// трубами и кабелями по краям и большой медленно вращающейся шестерней,
+/// которая на четверть выглядывает из правого нижнего угла.
+///
+/// Узор, трубы и кабели рисуются один раз и закрыты `RepaintBoundary`, поэтому
+/// прокрутка содержимого их не перерисовывает. Вращается только угловая
+/// шестерня (и она не вращается при включённом «убрать анимации»).
 class SteampunkBackdrop extends StatelessWidget {
-  const SteampunkBackdrop({super.key, required this.child});
+  const SteampunkBackdrop({
+    super.key,
+    required this.child,
+    this.colors = backdropColors,
+  });
 
   final Widget child;
+
+  /// Два цвета радиального градиента: в центре и по краям.
+  final List<Color> colors;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +39,13 @@ class SteampunkBackdrop extends StatelessWidget {
       // expand: содержимое получает весь экран, а не «сколько ему нужно».
       fit: StackFit.expand,
       children: [
-        const Positioned.fill(
+        Positioned.fill(
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment(0, -0.3),
+                center: const Alignment(0, -0.3),
                 radius: 1.2,
-                colors: [leather, leatherDeep],
+                colors: colors,
               ),
             ),
           ),
@@ -40,6 +55,34 @@ class SteampunkBackdrop extends StatelessWidget {
             child: RepaintBoundary(
               child: CustomPaint(painter: GearsPainter(color: primary)),
             ),
+          ),
+        ),
+        const Positioned.fill(
+          child: ExcludeSemantics(
+            child: RepaintBoundary(child: CustomPaint(painter: PipesPainter())),
+          ),
+        ),
+        Positioned.fill(
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final shortest = math.min(box.maxWidth, box.maxHeight);
+              if (!shortest.isFinite) {
+                return const SizedBox.shrink();
+              }
+              // Радиус зависит от экрана, но в разумных пределах.
+              final radius = (shortest * 0.46).clamp(100.0, 260.0).toDouble();
+              return Stack(
+                // Всё, что вылезает за экран, обрезается: нужна только четверть.
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  Positioned(
+                    right: -radius,
+                    bottom: -radius,
+                    child: CornerGear(radius: radius),
+                  ),
+                ],
+              );
+            },
           ),
         ),
         child,
@@ -191,15 +234,15 @@ class _WearPainter extends CustomPainter {
   bool shouldRepaint(_WearPainter oldDelegate) => false;
 }
 
-/// Клёпки: крупные в углах, мелкие через каждые ~40 пикселей по периметру.
+/// Клёпки: крупные в углах, средние через каждые ~44 пикселя по периметру.
 /// Все латунные: окись на клёпках не рисуется.
 class _RivetPainter extends CustomPainter {
   const _RivetPainter({required this.brassColor});
 
   final Color brassColor;
 
-  static const double _inset = 9;
-  static const double _spacing = 40;
+  static const double _inset = 10;
+  static const double _spacing = 44;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -215,14 +258,14 @@ class _RivetPainter extends CustomPainter {
       Offset(_inset, h - _inset),
       Offset(w - _inset, h - _inset),
     ]) {
-      drawRivet(canvas, p, 4.5, body: brassColor);
+      drawRivet(canvas, p, 6, body: brassColor);
     }
 
     void along(Offset from, Offset to) {
       final length = (to - from).distance;
       final gaps = math.max(1, (length / _spacing).round());
       for (var i = 1; i < gaps; i++) {
-        drawRivet(canvas, Offset.lerp(from, to, i / gaps)!, 2.6, body: brassColor);
+        drawRivet(canvas, Offset.lerp(from, to, i / gaps)!, 3.6, body: brassColor);
       }
     }
 
@@ -238,7 +281,7 @@ class _RivetPainter extends CustomPainter {
 }
 
 /// Латунное кольцо вокруг круглого фото: градиент латуни в медь, тень и
-/// клёпки по кругу (через каждые ~36 пикселей). Полный размер = размер фото + 2 × [thickness].
+/// клёпки по кругу (через каждые ~40 пикселей). Полный размер = размер фото + 2 × [thickness].
 class BrassRing extends StatelessWidget {
   const BrassRing({
     super.key,
@@ -287,13 +330,13 @@ class _RingRivetPainter extends CustomPainter {
     if (radius <= 0) {
       return;
     }
-    final count = math.max(8, (2 * math.pi * radius / 36).round());
+    final count = math.max(8, (2 * math.pi * radius / 40).round());
     for (var i = 0; i < count; i++) {
       final angle = 2 * math.pi * i / count;
       drawRivet(
         canvas,
         center + Offset(math.cos(angle), math.sin(angle)) * radius,
-        thickness * 0.27,
+        thickness * 0.30,
         body: const Color(0xFFE9CE86),
       );
     }
@@ -304,77 +347,41 @@ class _RingRivetPainter extends CustomPainter {
       oldDelegate.thickness != thickness;
 }
 
-/// Полоса с узором под AppBar (подставляется в `AppBar.bottom`):
-/// цепочка мелких сцепленных шестерёнок между двумя тонкими линиями.
-/// Клёпок на ней нет.
-class GearStrip extends StatelessWidget implements PreferredSizeWidget {
-  const GearStrip({super.key});
+/// Простая латунная линия под AppBar (подставляется в `AppBar.bottom`):
+/// полоса латуни со светлой верхней кромкой, медной нижней и мягкой тенью.
+/// Ни клёпок, ни узора: узор мы пока заменили простой линией.
+class BrassLine extends StatelessWidget implements PreferredSizeWidget {
+  const BrassLine({super.key});
 
-  static const double height = 16;
+  static const double height = 5;
 
   @override
   Size get preferredSize => const Size.fromHeight(height);
 
   @override
   Widget build(BuildContext context) {
-    return ExcludeSemantics(
+    return const ExcludeSemantics(
       child: SizedBox(
         height: height,
         width: double.infinity,
-        child: CustomPaint(
-          painter: _GearStripPainter(brassColor: Theme.of(context).colorScheme.primary),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFFE6C878), brass, copper],
+              stops: [0, 0.55, 1],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x99000000),
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class _GearStripPainter extends CustomPainter {
-  const _GearStripPainter({required this.brassColor});
-
-  final Color brassColor;
-
-  static const double _radius = 6.5;
-  static const double _step = 11.5; // расстояние между центрами соседних шестерёнок
-  static const int _teeth = 8;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.clipRect(Offset.zero & size);
-
-    // Тонкая медная линия сверху: «рамка» полосы.
-    canvas.drawLine(
-      Offset.zero,
-      Offset(size.width, 0),
-      Paint()
-        ..strokeWidth = 1
-        ..color = copper.withValues(alpha: 0.7),
-    );
-
-    final fill = Paint()..color = brassColor.withValues(alpha: 0.16);
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = brassColor.withValues(alpha: 0.9);
-
-    final y = size.height / 2 + 0.5;
-    var index = 0;
-    for (var x = 0.0; x < size.width + _step; x += _step) {
-      final path = gearPath(
-        center: Offset(x, y),
-        radius: _radius,
-        teeth: _teeth,
-        // Соседние шестерёнки повёрнуты на пол-зуба: зуб входит во впадину.
-        rotation: index.isEven ? 0 : math.pi / _teeth,
-        holeRatio: 0.3,
-      );
-      canvas.drawPath(path, fill);
-      canvas.drawPath(path, stroke);
-      index++;
-    }
-  }
-
-  @override
-  bool shouldRepaint(_GearStripPainter oldDelegate) =>
-      oldDelegate.brassColor != brassColor;
 }

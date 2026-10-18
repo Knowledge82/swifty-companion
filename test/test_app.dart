@@ -7,10 +7,15 @@ import 'package:swifty_companion/ui/steampunk/steampunk_theme.dart';
 /// и тексты в проверках зависели бы от настроек машины.
 ///
 /// [textScale] имитирует крупный системный шрифт.
+///
+/// [disableAnimations] по умолчанию `true` (как «убрать анимации» в системе):
+/// вращающиеся шестерёнки стоят, и `pumpAndSettle` не зависает на вечной
+/// анимации. Тесты, которым нужно движение, передают `false`.
 Widget testApp(
   Widget home, {
   Locale locale = const Locale('es'),
   double textScale = 1,
+  bool disableAnimations = true,
 }) {
   return MaterialApp(
     // Настоящая тема приложения: тесты видят то же оформление, что и пользователь.
@@ -21,6 +26,7 @@ Widget testApp(
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(textScale),
+        disableAnimations: disableAnimations,
       ),
       child: child!,
     ),

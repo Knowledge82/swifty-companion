@@ -49,6 +49,7 @@
 | Этап 6: скиллы с процентами, завершённые проекты (сданные и проваленные), полоса уровня | ✅ на телефоне, проекты сверены с реальными данными (40 проектов) | [docs/11-profile-content.md](docs/11-profile-content.md) |
 | Этап 7: стимпанк-оформление, фото ×2, шестерёнки, проекты по разделам, изумруд/окись/клёпки, пасхалки | ✅ итерации 1–2 просмотрены; итерация 3 (приглушённая окись, полоса с шестерёнками) 🟡 ждёт взгляда на телефоне | [docs/12-steampunk-design.md](docs/12-steampunk-design.md) |
 | Этап 7.2: иконка, экран запуска (системный и заставка с фото), логотип 42 из SVG | 🟡 `flutter analyze` чист, 223 из 223 тестов; **на телефоне не проверено** (нужна полная пересборка и удаление старого приложения) | [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) |
+| Этап 7.3 (итерация 4): заставка по высоте с fade-in/out, пять вращающихся сцепленных шестерён, угловая шестерня, гофротрубы и кабели, массивнее обод и клёпки, линия вместо узора, сворачиваемые проекты | 🟡 написано вместе с тестами, **ждёт `flutter analyze`, `flutter test` и взгляда на телефоне** | [docs/12](docs/12-steampunk-design.md#16-итерация-4-движение-трубы-и-кабели-сворачиваемые-проекты) |
 | Этап 8: что осталось до защиты (сценарии ошибок, адаптивность, аудит секретов, релизная сборка, вопросы) | ⏳ чек-лист для тебя | [docs/14-remaining-work.md](docs/14-remaining-work.md) |
 | Справка: Flutter и React Native, плюсы и минусы обоих | ✅ написано | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) |
 
@@ -256,11 +257,11 @@ swifty-companion/
 │   ├── l10n/                  app_strings (+ _es, _en): тексты интерфейса, испанский по умолчанию
 │   ├── models/                skill, project_result, project_category, cursus_progress, user_profile
 │   └── ui/                    search_screen, profile_screen, profile_avatar, skills_section, projects_section, section_title, error_banner, config_error_screen, easter_egg (пасхалки), splash_screen (заставка с фото),
-│       └── steampunk/         steampunk_theme (палитра, тема), gears (шестерёнки), wear (клёпки, окись, царапины), logo42 (знак школы), steampunk_widgets (фон, панель, кольцо, полоса GearStrip)
+│       └── steampunk/         steampunk_theme (палитра, тема), gears (шестерёнки: эмблема из пяти, угловая шестерня), gear_motion (часы вращения), pipes (гофротрубы и кабели), wear (клёпки, окись, царапины), logo42 (знак школы), steampunk_widgets (фон, панель, кольцо, латунная линия BrassLine)
 ├── test/                      config_test, login_test, search_screen_test,
 │                              json_reader_test, models_test, fixtures (вымышленный профиль),
 │                              token_service_test, api_exception_test, api_client_test,
-│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, steampunk_test, easter_egg_test, splash_screen_test, logo42_test, test_app,
+│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, projects_section_test, steampunk_test, easter_egg_test, splash_screen_test, logo42_test, test_app,
 │                              fake_api (поддельный сервер)
 ├── assets/images/             splash.jpg: фото для заставки
 ├── tool/                      generate_icons.py: рисует иконку и картинку splash (Pillow); 42_logo.svg: знак школы (исходник)
@@ -310,7 +311,7 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 | [docs/09-first-live-run.md](docs/09-first-live-run.md) | Этап 5: внедрение зависимостей, состояния экрана поиска, ловушки `async` (`mounted`, двойное нажатие), баннер ошибок, журнал, чек-лист живого запуска |
 | [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) | Этап 5.1: интерфейс на испанском (Испания) и английском без кодогенерации, выбор языка по телефону, фото с CDN (разбор причины 403, `PhotoLoader`, защита токена) |
 | [docs/11-profile-content.md](docs/11-profile-content.md) | Этап 6: полоса уровня, скиллы с процентом (формула и альтернативы), проекты сдан/провален, прокрутка, переполнение, доступность |
-| [docs/12-steampunk-design.md](docs/12-steampunk-design.md) | Этап 7: рисование на `Canvas`, геометрия шестерёнки, палитра и контраст, тема, панели, фото ×2, разбиение проектов по разделам и скрипт проверки, изумруд/окись/клёпки, пасхалки |
+| [docs/12-steampunk-design.md](docs/12-steampunk-design.md) | Этап 7: рисование на `Canvas`, геометрия шестерёнки, палитра и контраст, тема, панели, фото ×2, разбиение проектов по разделам и скрипт проверки, изумруд/окись/клёпки, пасхалки, итерация 4: вращение шестерён с расчётом сцепления, fade заставки, трубы и кабели, сворачиваемые списки |
 | [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) | Этап 7.2: иконки Android (плотности, адаптивная иконка, безопасная зона), экран запуска до и после Android 12, генератор рисунков, заставка с фото и растушёвкой краёв (`ShaderMask`), подводные камни, альтернативы |
 | [docs/14-remaining-work.md](docs/14-remaining-work.md) | Этап 8: что осталось, статусы «телефон / тесты», сценарии ошибок, адаптивность, бонус, аудит секретов, релиз, чистый клон, вопросы на защиту |
 | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) | Flutter и React Native: устройство, сравнение по темам, цифры рынка с оговорками, плюсы и минусы, когда что выбирать |

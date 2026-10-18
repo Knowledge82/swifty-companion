@@ -20,6 +20,14 @@ void main() {
     );
   }
 
+  /// Проекты по умолчанию свёрнуты: раскрываем группу касанием на заголовок.
+  Future<void> expandGroup(WidgetTester tester, String title) async {
+    await tester.ensureVisible(find.text(title));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(title));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('показывает основные поля профиля', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
@@ -65,16 +73,19 @@ void main() {
       (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
+    // Заголовки групп со счётчиком; пустая группа Outer Core не показывается.
+    expect(find.text('Common Core · 3'), findsOneWidget);
+    expect(find.text('Piscina · 1'), findsOneWidget);
+    expect(find.textContaining('Outer Core'), findsNothing);
+
+    await expandGroup(tester, 'Common Core · 3');
+    await expandGroup(tester, 'Piscina · 1');
+
     expect(find.text('Aprobado · 2024-06-01'), findsOneWidget); // push_swap
     expect(find.text('Suspendido · 2024-05-01'), findsOneWidget); // ft_printf
     expect(find.text('Sin resultado · 2024-04-01'), findsOneWidget);
     expect(find.text('Aprobado · 2024-03-01'), findsOneWidget); // libft
     expect(find.text('minishell'), findsNothing); // не завершён
-
-    // Заголовки групп со счётчиком; пустая группа Outer Core не показывается.
-    expect(find.text('Common Core · 3'), findsOneWidget);
-    expect(find.text('Piscina · 1'), findsOneWidget);
-    expect(find.textContaining('Outer Core'), findsNothing);
 
     // Внутри Common Core новые сверху, Piscina ниже.
     final y = [
@@ -141,8 +152,9 @@ void main() {
 
     expect(find.text('Skills'), findsOneWidget);
     expect(find.text('Completed projects'), findsOneWidget);
-    expect(find.text('Passed · 2024-06-01'), findsOneWidget);
     expect(find.text('Common Core · 3'), findsOneWidget);
+    await expandGroup(tester, 'Common Core · 3');
+    expect(find.text('Passed · 2024-06-01'), findsOneWidget);
     expect(find.text('Piscine · 1'), findsOneWidget);
   });
 
@@ -177,8 +189,11 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    // Содержимое прокручивается: до последнего проекта можно долистать.
+    // Содержимое прокручивается: раскрываем группы и долистываем до проектов.
+    await expandGroup(tester, 'Outer Core · 1');
+    await expandGroup(tester, 'Common Core · 3');
     await tester.scrollUntilVisible(find.text('libft'), 300);
+    expect(find.textContaining('Очень длинное название'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -195,8 +210,8 @@ void main() {
 
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // 280 - 2*24 (поля) = 232 ширины содержимого, минус 2*9 кольца.
-    expect(tester.getSize(find.byType(ProfileAvatar)), const Size(214, 214));
+    // 280 - 2*24 (поля) = 232 ширины содержимого, минус 2*13 кольца.
+    expect(tester.getSize(find.byType(ProfileAvatar)), const Size(206, 206));
     expect(tester.takeException(), isNull);
   });
 

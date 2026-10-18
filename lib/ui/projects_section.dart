@@ -8,18 +8,37 @@ import 'section_title.dart';
 
 /// Раздел «Проекты»: завершённые проекты (сданные и проваленные), разложенные
 /// по группам Outer Core, Common Core, Piscina. Пустые группы не показываются.
+///
+/// Каждая группа **свёрнута** и раскрывается по касанию на заголовок: список
+/// из 40 проектов целиком забил бы экран. Какие группы раскрыты, помнит
+/// состояние этого виджета (пока открыт профиль).
 /// Результат передаётся значком, цветом **и** словом, чтобы не зависеть от цвета.
-class ProjectsSection extends StatelessWidget {
+class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key, required this.groups});
 
   final Map<ProjectCategory, List<ProjectResult>> groups;
+
+  @override
+  State<ProjectsSection> createState() => _ProjectsSectionState();
+}
+
+class _ProjectsSectionState extends State<ProjectsSection> {
+  final Set<ProjectCategory> _expanded = {};
+
+  void _toggle(ProjectCategory category) {
+    setState(() {
+      if (!_expanded.remove(category)) {
+        _expanded.add(category);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
     final nonEmpty = [
       for (final category in ProjectCategory.values)
-        if (groups[category]?.isNotEmpty ?? false) category,
+        if (widget.groups[category]?.isNotEmpty ?? false) category,
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -31,43 +50,142 @@ class ProjectsSection extends StatelessWidget {
           for (final category in nonEmpty) ...[
             _GroupHeading(
               title: strings.projectCategoryTitle(category),
-              count: groups[category]!.length,
+              count: widget.groups[category]!.length,
+              expanded: _expanded.contains(category),
+              onTap: () => _toggle(category),
             ),
-            for (final project in groups[category]!) _ProjectRow(project: project),
+            _Collapsible(
+              expanded: _expanded.contains(category),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final project in widget.groups[category]!)
+                    _ProjectRow(project: project),
+                ],
+              ),
+            ),
           ],
       ],
     );
   }
 }
 
+/// Заголовок группы: нажимается целиком, справа стрелка, которая
+/// поворачивается при раскрытии.
 class _GroupHeading extends StatelessWidget {
-  const _GroupHeading({required this.title, required this.count});
+  const _GroupHeading({
+    required this.title,
+    required this.count,
+    required this.expanded,
+    required this.onTap,
+  });
 
   final String title;
   final int count;
+  final bool expanded;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 12, bottom: 2),
-      child: Row(
-        children: [
-          Icon(Icons.settings, size: 16, color: colors.secondary),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(
-                '$title · $count',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
+    // Material с прозрачным типом нужен, чтобы волна от касания рисовалась
+    // ПОВЕРХ панели: иначе она рисовалась бы на Material экрана, под панелью,
+    // и была бы не видна.
+    return Material(
+      type: MaterialType.transparency,
+      child: Semantics(
+        button: true,
+        header: true,
+        expanded: expanded,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(6),
+          child: ConstrainedBox(
+            // 48 пикселей: минимальный удобный размер для пальца.
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Row(
+              children: [
+                Icon(Icons.settings, size: 16, color: colors.secondary),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    '$title · $count',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
+                AnimatedRotation(
+                  turns: expanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(Icons.expand_more, color: colors.primary),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+/// Плавно раскрывающийся блок. Пока блок полностью свёрнут, содержимое
+/// **не строится** в дереве виджетов (ни одной строки списка).
+class _Collapsible extends StatefulWidget {
+  const _Collapsible({required this.expanded, required this.child});
+
+  final bool expanded;
+  final Widget child;
+
+  @override
+  State<_Collapsible> createState() => _CollapsibleState();
+}
+
+class _CollapsibleState extends State<_Collapsible>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 220),
+    value: widget.expanded ? 1 : 0,
+  );
+  late final Animation<double> _size = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeInOut,
+  );
+
+  @override
+  void didUpdateWidget(_Collapsible oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expanded != oldWidget.expanded) {
+      if (widget.expanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        if (_controller.isDismissed) {
+          return const SizedBox(width: double.infinity);
+        }
+        return SizeTransition(
+          sizeFactor: _size,
+          axisAlignment: -1,
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }
