@@ -83,7 +83,9 @@ void main() {
   testWidgets('по истечении времени заставка сменяется следующим экраном',
       (tester) async {
     await tester.pumpWidget(app());
-    await tester.pump(const Duration(seconds: 3)); // контроллер дошёл до конца
+    // Контроллер считает себя завершённым только когда время ПРЕВЫСИЛО
+    // длительность (строго больше), поэтому берём чуть больше 3 секунд.
+    await tester.pump(const Duration(milliseconds: 3100));
     await tester.pump(const Duration(milliseconds: 700)); // дошла смена кадра
 
     expect(find.text('next-screen'), findsOneWidget);

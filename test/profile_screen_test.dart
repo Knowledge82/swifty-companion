@@ -42,7 +42,11 @@ void main() {
   testWidgets('скрытое и пустое выводится как N/A', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // телефон ("hidden"), место (null) и итог проекта без оценки
+    // Проекты свёрнуты, поэтому видны только телефон ("hidden") и место (null).
+    expect(find.text('N/A'), findsNWidgets(2));
+
+    // Раскрыли группу: добавился итог проекта без оценки.
+    await expandGroup(tester, 'Piscina · 1');
     expect(find.text('N/A'), findsNWidgets(3));
   });
 
