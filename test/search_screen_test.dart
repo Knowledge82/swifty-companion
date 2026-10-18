@@ -9,6 +9,7 @@ import 'package:swifty_companion/ui/search_screen.dart';
 
 import 'fake_api.dart';
 import 'fixtures.dart';
+import 'test_app.dart';
 
 /// Профиль без фото: в тестах виджетов `Image.network` не ходит в сеть,
 /// и нам незачем проверять его здесь (заглушка проверяется в profile_screen_test).
@@ -17,7 +18,7 @@ Map<String, dynamic> _userWithoutImage() => sampleUserJson()..remove('image');
 void main() {
   Future<void> pumpScreen(WidgetTester tester, FakeApi fake) {
     return tester.pumpWidget(
-      MaterialApp(home: SearchScreen(repository: UserRepository(fake.api))),
+      testApp(SearchScreen(repository: UserRepository(fake.api))),
     );
   }
 
@@ -38,7 +39,7 @@ void main() {
     await tester.tap(find.byType(FilledButton));
     await tester.pump();
 
-    expect(find.text('Введите логин'), findsOneWidget);
+    expect(find.text('Introduce un login'), findsOneWidget);
     expect(find.byType(ErrorBanner), findsNothing);
     expect(fake.tokenCalls, 0);
     expect(fake.userRequests, isEmpty);
@@ -52,7 +53,7 @@ void main() {
     await search(tester, 'a b');
     await tester.pump();
 
-    expect(find.textContaining('только латинские буквы'), findsOneWidget);
+    expect(find.textContaining('Solo letras latinas'), findsOneWidget);
     expect(fake.userRequests, isEmpty);
   });
 
@@ -71,7 +72,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('Найти'), findsOneWidget);
+    expect(find.text('Buscar'), findsOneWidget);
   });
 
   testWidgets('логин не найден: баннер, остаёмся на экране поиска',
@@ -84,9 +85,9 @@ void main() {
     await search(tester, 'nobody');
     await tester.pumpAndSettle();
 
-    expect(find.text('Пользователь с таким логином не найден.'), findsOneWidget);
+    expect(find.text('No se ha encontrado ningún usuario con ese login.'), findsOneWidget);
     expect(find.byIcon(Icons.person_off_outlined), findsOneWidget);
-    expect(find.text('Найти'), findsOneWidget);
+    expect(find.text('Buscar'), findsOneWidget);
   });
 
   testWidgets('нет сети: баннер про соединение', (tester) async {
@@ -99,7 +100,7 @@ void main() {
     await search(tester, 'jdoe');
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Нет соединения с интернетом'), findsOneWidget);
+    expect(find.textContaining('Sin conexión a internet'), findsOneWidget);
     expect(find.byIcon(Icons.wifi_off), findsOneWidget);
   });
 
@@ -114,7 +115,7 @@ void main() {
     await search(tester, 'jdoe');
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Повторить можно через 30 с.'), findsOneWidget);
+    expect(find.textContaining('Puedes reintentar en 30 s.'), findsOneWidget);
   });
 
   testWidgets('ошибка в нашем коде: общее сообщение, приложение живо',
@@ -128,7 +129,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(ErrorBanner), findsOneWidget);
-    expect(find.text('Найти'), findsOneWidget);
+    expect(find.text('Buscar'), findsOneWidget);
   });
 
   testWidgets('загрузка: индикатор, поле и кнопка заблокированы, запрос один',
@@ -146,7 +147,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    expect(find.text('Найти'), findsNothing);
+    expect(find.text('Buscar'), findsNothing);
     expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
     expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
 

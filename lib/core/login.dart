@@ -7,16 +7,20 @@ final RegExp _loginPattern = RegExp(r'^[a-z0-9_-]+$');
 /// без пробелов по краям и в нижнем регистре.
 String normalizeLogin(String raw) => raw.trim().toLowerCase();
 
-/// Возвращает текст ошибки или `null`, если логин годится для запроса.
+/// Что не так с введённым логином. Тексты для пользователя здесь не хранятся:
+/// их выбирает интерфейс по языку (`AppStrings.loginProblemText`).
+enum LoginProblem { empty, invalidChars }
+
+/// Возвращает проблему или `null`, если логин годится для запроса.
 /// Проверка нужна, чтобы не тратить сетевой запрос на заведомый мусор
 /// и не подставлять в адрес запроса произвольные символы (`/`, `?`, `..`).
-String? validateLogin(String raw) {
+LoginProblem? validateLogin(String raw) {
   final login = normalizeLogin(raw);
   if (login.isEmpty) {
-    return 'Введите логин';
+    return LoginProblem.empty;
   }
   if (!_loginPattern.hasMatch(login)) {
-    return 'Логин: только латинские буквы, цифры, «-» и «_»';
+    return LoginProblem.invalidChars;
   }
   return null;
 }

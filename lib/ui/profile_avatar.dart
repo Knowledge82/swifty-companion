@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Круглое фото профиля. Без адреса, при ошибке загрузки и пока картинка
@@ -25,7 +26,14 @@ class ProfileAvatar extends StatelessWidget {
             : Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => placeholder,
+                errorBuilder: (context, error, stackTrace) {
+                  // Причина видна только в отладке. Адрес картинки публичный
+                  // (CDN интры), секретов в нём нет.
+                  if (kDebugMode) {
+                    debugPrint('Фото не загрузилось ($imageUrl): $error');
+                  }
+                  return placeholder;
+                },
                 loadingBuilder: (context, child, progress) {
                   if (progress == null) {
                     return child;

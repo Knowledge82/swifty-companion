@@ -6,6 +6,7 @@ import 'core/api_client.dart';
 import 'core/config.dart';
 import 'core/token_service.dart';
 import 'data/user_repository.dart';
+import 'l10n/app_strings.dart';
 import 'ui/config_error_screen.dart';
 import 'ui/search_screen.dart';
 
@@ -20,11 +21,9 @@ Future<void> main() async {
     debugPrint('Конфиг загружен');
     runApp(SwiftyApp(repository: _buildRepository(config)));
   } on ConfigException catch (e) {
-    runApp(ConfigErrorApp(message: e.message));
+    runApp(ConfigErrorApp(missingKeys: e.missing));
   } catch (_) {
-    runApp(
-      const ConfigErrorApp(message: 'Не удалось прочитать файл .env из ассетов'),
-    );
+    runApp(const ConfigErrorApp(unreadable: true));
   }
 }
 
@@ -47,7 +46,9 @@ class SwiftyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Swifty Companion',
+      onGenerateTitle: (context) => AppStrings.of(context).appTitle,
+      localizationsDelegates: AppStrings.localizationsDelegates,
+      supportedLocales: AppStrings.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),

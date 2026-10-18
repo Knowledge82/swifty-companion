@@ -6,7 +6,9 @@
 sealed class ApiException implements Exception {
   const ApiException(this.message);
 
-  /// Текст, который можно показать пользователю.
+  /// Описание для разработчика (логи, отладка, тесты). Пользователю
+  /// показывается не оно, а перевод из `AppStrings.errorText`: так язык
+  /// ошибки совпадает с языком интерфейса.
   final String message;
 
   @override
@@ -16,10 +18,16 @@ sealed class ApiException implements Exception {
 /// Нет сети, DNS не отвечает или сервер не ответил за отведённое время.
 final class NetworkException extends ApiException {
   const NetworkException()
-      : super('Нет соединения с интернетом. Проверьте сеть и повторите.');
+      : isTimeout = false,
+        super('Нет соединения с интернетом. Проверьте сеть и повторите.');
 
   const NetworkException.timeout()
-      : super('Сервер не ответил вовремя. Повторите попытку позже.');
+      : isTimeout = true,
+        super('Сервер не ответил вовремя. Повторите попытку позже.');
+
+  /// `true`, если сеть есть, но сервер не ответил за отведённое время.
+  /// Интерфейс по этому признаку выбирает текст.
+  final bool isTimeout;
 }
 
 /// Приложение не смогло авторизоваться: неверные ключи или отклонённый токен.

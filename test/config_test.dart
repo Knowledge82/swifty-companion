@@ -25,6 +25,19 @@ void main() {
       );
     });
 
+    test('ConfigException.missing перечисляет все недостающие имена', () {
+      expect(
+        () => AppConfig.fromMap({}),
+        throwsA(
+          isA<ConfigException>().having(
+            (e) => e.missing,
+            'missing',
+            ['FT_UID', 'FT_SECRET'],
+          ),
+        ),
+      );
+    });
+
     test('пустые значения считаются отсутствующими', () {
       expect(
         () => AppConfig.fromMap({'FT_UID': '', 'FT_SECRET': '  '}),

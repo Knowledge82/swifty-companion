@@ -41,6 +41,11 @@ void main() {
     });
   });
 
+  test('isTimeout отличает таймаут от обрыва сети', () {
+    expect(const NetworkException().isTimeout, isFalse);
+    expect(const NetworkException.timeout().isTimeout, isTrue);
+  });
+
   test('toString содержит тип и текст', () {
     expect(const NotFoundException().toString(), contains('NotFoundException'));
     expect(const NotFoundException().toString(), contains('не найден'));

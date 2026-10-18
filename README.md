@@ -45,7 +45,9 @@
 | Этап 3: токен-сервис (кэш, срок жизни, один запрос на всех, бонус: автообновление) и ошибки API | ✅ 73 из 73 тестов; `flutter analyze`: 5 замечаний `info` исправлены, ждём подтверждения (docs/07) | [docs/07-token-service.md](docs/07-token-service.md) |
 | Этап 4: клиент API (Bearer, повтор после 401, коды → ошибки) и репозиторий | ✅ 101 из 101 тест, мутационные проверки пройдены (docs/08) | [docs/08-api-client.md](docs/08-api-client.md) |
 | [docs/09-first-live-run.md](docs/09-first-live-run.md) | Этап 5: внедрение зависимостей, состояния экрана поиска, ловушки `async` (`mounted`, двойное нажатие), баннер ошибок, журнал, чек-лист живого запуска |
+| [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) | Этап 5.1: интерфейс на испанском (Испания) и английском без кодогенерации, разделение «что случилось» и «как сказать», выбор языка по телефону, диагностика фото |
 | Этап 5: первый сквозной запуск: поиск → API → профиль, индикатор, баннер ошибок, отладочный журнал | 🟡 `flutter analyze` чист, 115 из 115 тестов; **живой запуск на телефоне ещё не проведён** (чек-лист docs/09) | [docs/09-first-live-run.md](docs/09-first-live-run.md) |
+| Этап 5.1: язык интерфейса (es-ES по умолчанию, en) и диагностика фото | 🟡 код и тесты написаны, **не проверены**; фото на телефоне не показывалось, причина выясняется (docs/10) | [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) |
 | Экран поиска | ⏳ | будет |
 | Экран профиля (данные, скиллы, проекты) | ⏳ | будет |
 | Обработка всех ошибок | ⏳ | будет |
@@ -237,7 +239,8 @@ swifty-companion/
 │   ├── 06-models.md
 │   ├── 07-token-service.md
 │   ├── 08-api-client.md
-│   └── 09-first-live-run.md
+│   ├── 09-first-live-run.md
+│   └── 10-localization-and-photo.md
 ├── lib/
 │   ├── main.dart              точка входа: загрузка .env, сборка зависимостей, запуск приложения
 │   ├── core/                  config.dart (AppConfig), login.dart (проверка логина),
@@ -245,12 +248,13 @@ swifty-companion/
 │   │                          token_service.dart (токен), api_exception.dart (ошибки API),
 │   │                          api_client.dart (запросы), http_helpers.dart, api_constants.dart
 │   ├── data/                  user_repository.dart (логин → UserProfile)
+│   ├── l10n/                  app_strings (+ _es, _en): тексты интерфейса, испанский по умолчанию
 │   ├── models/                skill, project_result, cursus_progress, user_profile
 │   └── ui/                    search_screen, profile_screen, profile_avatar, error_banner, config_error_screen
 ├── test/                      config_test, login_test, search_screen_test,
 │                              json_reader_test, models_test, fixtures (вымышленный профиль),
 │                              token_service_test, api_exception_test, api_client_test,
-│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test,
+│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, test_app,
 │                              fake_api (поддельный сервер)
 ├── android/                   нативная Android-часть, собирается через Gradle
 ├── pubspec.yaml               манифест: имя, версия, зависимости, ассеты

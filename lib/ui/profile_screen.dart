@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/display.dart';
+import '../l10n/app_strings.dart';
 import '../models/user_profile.dart';
 import 'profile_avatar.dart';
 
@@ -13,6 +14,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
     final cursus = profile.mainCursus;
     return Scaffold(
       appBar: AppBar(title: Text(profile.login)),
@@ -33,16 +35,16 @@ class ProfileScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 24),
-                  _InfoRow(label: 'Email', value: profile.email.orNA),
-                  _InfoRow(label: 'Телефон', value: profile.phone.orNA),
-                  _InfoRow(label: 'Место', value: profile.location.orNA),
+                  _InfoRow(label: strings.emailLabel, value: profile.email.orNA),
+                  _InfoRow(label: strings.phoneLabel, value: profile.phone.orNA),
+                  _InfoRow(label: strings.locationLabel, value: profile.location.orNA),
                   _InfoRow(
-                    label: 'Уровень',
+                    label: strings.levelLabel,
                     value: cursus == null ? notAvailable : formatLevel(cursus.level),
                   ),
-                  _InfoRow(label: 'Кошелёк', value: profile.wallet.orNA),
+                  _InfoRow(label: strings.walletLabel, value: profile.wallet.orNA),
                   _InfoRow(
-                    label: 'Очки оценки',
+                    label: strings.correctionPointsLabel,
                     value: profile.correctionPoints.orNA,
                   ),
                 ],

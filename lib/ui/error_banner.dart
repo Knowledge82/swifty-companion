@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/api_exception.dart';
+import '../l10n/app_strings.dart';
 
 /// Блок с сообщением об ошибке запроса: значок по виду ошибки + текст.
 class ErrorBanner extends StatelessWidget {
@@ -20,14 +21,6 @@ class ErrorBanner extends StatelessWidget {
         UnexpectedResponseException() => Icons.error_outline,
       };
 
-  String get _text {
-    final e = error;
-    if (e is RateLimitException && e.retryAfter != null) {
-      return '${e.message} Повторить можно через ${e.retryAfter!.inSeconds} с.';
-    }
-    return e.message;
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -46,7 +39,7 @@ class ErrorBanner extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _text,
+                AppStrings.of(context).errorText(error),
                 style: TextStyle(color: colors.onErrorContainer),
               ),
             ),

@@ -9,9 +9,9 @@ void main() {
   });
 
   group('validateLogin', () {
-    test('пустой ввод и пробелы — ошибка', () {
-      expect(validateLogin(''), isNotNull);
-      expect(validateLogin('   '), isNotNull);
+    test('пустой ввод и пробелы — LoginProblem.empty', () {
+      expect(validateLogin(''), LoginProblem.empty);
+      expect(validateLogin('   '), LoginProblem.empty);
     });
 
     test('обычные логины проходят', () {
@@ -21,10 +21,10 @@ void main() {
     });
 
     test('опасные и лишние символы отклоняются', () {
-      expect(validateLogin('a b'), isNotNull);
-      expect(validateLogin('../me'), isNotNull);
-      expect(validateLogin('a?b=c'), isNotNull);
-      expect(validateLogin('логин'), isNotNull);
+      expect(validateLogin('a b'), LoginProblem.invalidChars);
+      expect(validateLogin('../me'), LoginProblem.invalidChars);
+      expect(validateLogin('a?b=c'), LoginProblem.invalidChars);
+      expect(validateLogin('логин'), LoginProblem.invalidChars);
     });
   });
 }

@@ -4,11 +4,12 @@ import 'package:swifty_companion/models/user_profile.dart';
 import 'package:swifty_companion/ui/profile_screen.dart';
 
 import 'fixtures.dart';
+import 'test_app.dart';
 
 void main() {
   Future<void> pumpProfile(WidgetTester tester, Map<String, dynamic> json) {
     return tester.pumpWidget(
-      MaterialApp(home: ProfileScreen(profile: UserProfile.fromJson(json))),
+      testApp(ProfileScreen(profile: UserProfile.fromJson(json))),
     );
   }
 

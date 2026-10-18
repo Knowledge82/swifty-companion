@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/api_exception.dart';
 import '../core/login.dart';
 import '../data/user_repository.dart';
+import '../l10n/app_strings.dart';
 import 'error_banner.dart';
 import 'profile_screen.dart';
 
@@ -28,7 +29,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _controller = TextEditingController();
 
   bool _loading = false;
-  String? _fieldError;
+  LoginProblem? _fieldError;
   ApiException? _requestError;
 
   @override
@@ -107,9 +108,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = AppStrings.of(context);
     final requestError = _requestError;
+    final fieldError = _fieldError;
     return Scaffold(
-      appBar: AppBar(title: const Text('Swifty Companion')),
+      appBar: AppBar(title: Text(strings.appTitle)),
       body: SafeArea(
         child: Center(
           // Прокрутка спасает от переполнения, когда открыта клавиатура
@@ -131,8 +134,10 @@ class _SearchScreenState extends State<SearchScreen> {
                     onChanged: (_) => _clearErrors(),
                     onSubmitted: (_) => _submit(),
                     decoration: InputDecoration(
-                      labelText: 'Логин 42',
-                      errorText: _fieldError,
+                      labelText: strings.loginLabel,
+                      errorText: fieldError == null
+                          ? null
+                          : strings.loginProblemText(fieldError),
                       border: const OutlineInputBorder(),
                     ),
                   ),
@@ -145,7 +150,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             height: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Найти'),
+                        : Text(strings.searchButton),
                   ),
                   if (requestError != null) ...[
                     const SizedBox(height: 16),

@@ -1,8 +1,12 @@
 /// Ошибка конфигурации: в `.env` нет обязательных значений.
 class ConfigException implements Exception {
-  const ConfigException(this.message);
+  const ConfigException(this.message, {this.missing = const []});
 
+  /// Описание для разработчика. Экран ошибки показывает перевод.
   final String message;
+
+  /// Имена переменных, которых не хватает.
+  final List<String> missing;
 
   @override
   String toString() => 'ConfigException: $message';
@@ -25,7 +29,10 @@ class AppConfig {
       if (secret.isEmpty) 'FT_SECRET',
     ];
     if (missing.isNotEmpty) {
-      throw ConfigException('В .env не заполнено: ${missing.join(', ')}');
+      throw ConfigException(
+        'В .env не заполнено: ${missing.join(', ')}',
+        missing: missing,
+      );
     }
     return AppConfig(clientId: id, clientSecret: secret);
   }
