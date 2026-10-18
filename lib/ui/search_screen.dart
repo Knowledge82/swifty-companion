@@ -8,6 +8,9 @@ import '../data/user_repository.dart';
 import '../l10n/app_strings.dart';
 import 'error_banner.dart';
 import 'profile_screen.dart';
+import 'steampunk/gears.dart';
+import 'steampunk/steampunk_theme.dart';
+import 'steampunk/steampunk_widgets.dart';
 
 /// Экран 1: поле логина, кнопка поиска, индикатор загрузки, сообщение об ошибке.
 ///
@@ -122,50 +125,61 @@ class _SearchScreenState extends State<SearchScreen> {
     final fieldError = _fieldError;
     return Scaffold(
       appBar: AppBar(title: Text(strings.appTitle)),
-      body: SafeArea(
-        child: Center(
-          // Прокрутка спасает от переполнения, когда открыта клавиатура
-          // или экран повёрнут.
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    controller: _controller,
-                    enabled: !_loading,
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    textInputAction: TextInputAction.search,
-                    onChanged: (_) => _clearErrors(),
-                    onSubmitted: (_) => _submit(),
-                    decoration: InputDecoration(
-                      labelText: strings.loginLabel,
-                      errorText: fieldError == null
-                          ? null
-                          : strings.loginProblemText(fieldError),
-                      border: const OutlineInputBorder(),
+      body: SteampunkBackdrop(
+        child: SafeArea(
+          child: Center(
+            // Прокрутка спасает от переполнения, когда открыта клавиатура
+            // или экран повёрнут.
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(child: GearEmblem(size: 140)),
+                    const SizedBox(height: 20),
+                    BrassPanel(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextField(
+                            controller: _controller,
+                            enabled: !_loading,
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            textInputAction: TextInputAction.search,
+                            onChanged: (_) => _clearErrors(),
+                            onSubmitted: (_) => _submit(),
+                            decoration: steampunkInputDecoration(
+                              label: strings.loginLabel,
+                              errorText: fieldError == null
+                                  ? null
+                                  : strings.loginProblemText(fieldError),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          FilledButton(
+                            onPressed: _loading ? null : _submit,
+                            child: _loading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : Text(strings.searchButton),
+                          ),
+                          if (requestError != null) ...[
+                            const SizedBox(height: 16),
+                            ErrorBanner(error: requestError),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _loading ? null : _submit,
-                    child: _loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(strings.searchButton),
-                  ),
-                  if (requestError != null) ...[
-                    const SizedBox(height: 16),
-                    ErrorBanner(error: requestError),
                   ],
-                ],
+                ),
               ),
             ),
           ),

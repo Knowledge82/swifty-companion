@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/api_exception.dart';
 import '../core/login.dart';
+import '../models/project_category.dart';
 import 'app_strings_en.dart';
 import 'app_strings_es.dart';
 
@@ -77,6 +78,9 @@ abstract class AppStrings {
   String skillsFormulaNote(int maxLevel);
   String get projectsTitle;
   String get projectsEmpty;
+  String get projectsOuterCore;
+  String get projectsCommonCore;
+  String get projectsPiscine;
   String get projectPassed;
   String get projectFailed;
   String get projectUnknown;
@@ -87,6 +91,13 @@ abstract class AppStrings {
   String configMissing(List<String> keys);
   String get configUnreadable;
   String get configHint;
+
+  /// Название раздела проектов. `switch` по enum исчерпывающий.
+  String projectCategoryTitle(ProjectCategory category) => switch (category) {
+        ProjectCategory.outerCore => projectsOuterCore,
+        ProjectCategory.commonCore => projectsCommonCore,
+        ProjectCategory.piscine => projectsPiscine,
+      };
 
   /// Текст проблемы с логином. `switch` по enum исчерпывающий.
   String loginProblemText(LoginProblem problem) => switch (problem) {

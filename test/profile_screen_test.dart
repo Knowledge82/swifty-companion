@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/models/user_profile.dart';
+import 'package:swifty_companion/ui/profile_avatar.dart';
 import 'package:swifty_companion/ui/profile_screen.dart';
 
 import 'fixtures.dart';
@@ -60,7 +61,8 @@ void main() {
     expect(find.textContaining('nivel ÷ 20'), findsOneWidget);
   });
 
-  testWidgets('проекты: сданные и проваленные, новые сверху', (tester) async {
+  testWidgets('проекты: сданные и проваленные, по разделам, новые сверху',
+      (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     expect(find.text('Aprobado · 2024-06-01'), findsOneWidget); // push_swap
@@ -69,9 +71,36 @@ void main() {
     expect(find.text('Aprobado · 2024-03-01'), findsOneWidget); // libft
     expect(find.text('minishell'), findsNothing); // не завершён
 
+    // Заголовки групп со счётчиком; пустая группа Outer Core не показывается.
+    expect(find.text('Common Core · 3'), findsOneWidget);
+    expect(find.text('Piscina · 1'), findsOneWidget);
+    expect(find.textContaining('Outer Core'), findsNothing);
+
+    // Внутри Common Core новые сверху, Piscina ниже.
     final y = [
-      for (final name in ['push_swap', 'ft_printf', 'c-piscine-shell-00', 'libft'])
+      for (final name in ['push_swap', 'ft_printf', 'libft', 'c-piscine-shell-00'])
         tester.getTopLeft(find.text(name)).dy,
+    ];
+    expect(y, [...y]..sort());
+  });
+
+  testWidgets('порядок разделов: Outer Core, Common Core, Piscina', (tester) async {
+    final json = sampleUserJson()..remove('image');
+    (json['projects_users'] as List).add({
+      'id': 50,
+      'status': 'finished',
+      'validated?': true,
+      'final_mark': 100,
+      'marked_at': '2020-01-01T10:00:00.000Z', // самый старый: порядок не от даты
+      'cursus_ids': [21],
+      'project': {'id': 50, 'name': 'Swifty Companion', 'slug': 'swifty-companion'},
+    });
+    await pumpProfile(tester, json);
+
+    expect(find.text('Outer Core · 1'), findsOneWidget);
+    final y = [
+      for (final title in ['Outer Core · 1', 'Common Core · 3', 'Piscina · 1'])
+        tester.getTopLeft(find.text(title)).dy,
     ];
     expect(y, [...y]..sort());
   });
@@ -97,6 +126,8 @@ void main() {
     expect(find.text('Skills'), findsOneWidget);
     expect(find.text('Completed projects'), findsOneWidget);
     expect(find.text('Passed · 2024-06-01'), findsOneWidget);
+    expect(find.text('Common Core · 3'), findsOneWidget);
+    expect(find.text('Piscine · 1'), findsOneWidget);
   });
 
   testWidgets('узкий экран и крупный шрифт: ничего не переполняется',
@@ -132,6 +163,24 @@ void main() {
     expect(tester.takeException(), isNull);
     // Содержимое прокручивается: до последнего проекта можно долистать.
     await tester.scrollUntilVisible(find.text('libft'), 300);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('фото крупное: 224 на обычном экране', (tester) async {
+    await pumpProfile(tester, sampleUserJson()..remove('image'));
+
+    expect(tester.getSize(find.byType(ProfileAvatar)), const Size(224, 224));
+  });
+
+  testWidgets('на узком экране фото уменьшается и не вылезает', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(280, 600);
+    addTearDown(tester.view.reset);
+
+    await pumpProfile(tester, sampleUserJson()..remove('image'));
+
+    // 280 - 2*24 (поля) = 232 ширины содержимого, минус 2*6 кольца.
+    expect(tester.getSize(find.byType(ProfileAvatar)), const Size(220, 220));
     expect(tester.takeException(), isNull);
   });
 

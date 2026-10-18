@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/data/user_repository.dart';
 import 'package:swifty_companion/ui/error_banner.dart';
 import 'package:swifty_companion/ui/search_screen.dart';
+import 'package:swifty_companion/ui/steampunk/gears.dart';
 
 import 'fake_api.dart';
 import 'fixtures.dart';
@@ -203,5 +204,13 @@ void main() {
 
     expect(fake.userRequests, hasLength(2));
     expect(find.text('Jane Doe'), findsOneWidget);
+  });
+
+  testWidgets('стимпанк: на экране поиска есть эмблема из шестерёнок', (tester) async {
+    await pumpScreen(tester, okApi());
+
+    expect(find.byType(GearEmblem), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

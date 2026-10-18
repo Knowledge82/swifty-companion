@@ -10,6 +10,7 @@ import 'data/user_repository.dart';
 import 'l10n/app_strings.dart';
 import 'ui/config_error_screen.dart';
 import 'ui/search_screen.dart';
+import 'ui/steampunk/steampunk_theme.dart';
 
 Future<void> main() async {
   // Нужно, чтобы вызывать платформенный код (чтение ассета) до runApp.
@@ -61,9 +62,7 @@ class SwiftyApp extends StatelessWidget {
       onGenerateTitle: (context) => AppStrings.of(context).appTitle,
       localizationsDelegates: AppStrings.localizationsDelegates,
       supportedLocales: AppStrings.supportedLocales,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-      ),
+      theme: buildSteampunkTheme(),
       home: SearchScreen(repository: repository, photoLoader: photoLoader),
     );
   }

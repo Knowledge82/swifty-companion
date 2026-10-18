@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/app_strings.dart';
+import 'steampunk/steampunk_theme.dart';
 
 /// Показывается вместо приложения, если `.env` не прочитан или не заполнен.
 ///
@@ -23,6 +24,7 @@ class ConfigErrorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: buildSteampunkTheme(),
       localizationsDelegates: AppStrings.localizationsDelegates,
       supportedLocales: AppStrings.supportedLocales,
       onGenerateTitle: (context) => AppStrings.of(context).appTitle,
@@ -40,7 +42,11 @@ class ConfigErrorApp extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         strings.configErrorTitle,

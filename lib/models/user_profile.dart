@@ -1,5 +1,6 @@
 import '../core/json_reader.dart';
 import 'cursus_progress.dart';
+import 'project_category.dart';
 import 'project_result.dart';
 
 /// Профиль студента: только то, что приложение показывает.
@@ -96,6 +97,19 @@ class UserProfile {
       return second.compareTo(first);
     });
     return result;
+  }
+
+  /// Завершённые проекты по разделам (Outer Core, Common Core, Piscina).
+  /// В карте всегда все три раздела, в порядке [ProjectCategory.values];
+  /// внутри раздела порядок тот же, что в [finishedProjects]: новые сверху.
+  Map<ProjectCategory, List<ProjectResult>> finishedProjectsByCategory() {
+    final grouped = <ProjectCategory, List<ProjectResult>>{
+      for (final category in ProjectCategory.values) category: <ProjectResult>[],
+    };
+    for (final project in finishedProjects()) {
+      grouped[categoryOf(project)]!.add(project);
+    }
+    return grouped;
   }
 }
 

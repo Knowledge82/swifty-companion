@@ -56,12 +56,14 @@ class _SkillRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // Wrap вместо Row: при крупном шрифте или длинном названии уровень
+          // переходит на следующую строку, а не вылезает за край экрана.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: 12,
+            runSpacing: 2,
             children: [
-              // Expanded: длинное название переносится, а не вылезает за край.
-              Expanded(child: Text(name)),
-              const SizedBox(width: 12),
+              Text(name),
               Text('${formatLevel(skill.level)} · $percent'),
             ],
           ),

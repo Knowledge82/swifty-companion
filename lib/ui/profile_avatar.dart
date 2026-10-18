@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +15,7 @@ class ProfileAvatar extends StatefulWidget {
     required this.urls,
     required this.loadPhoto,
     this.initials = '',
-    this.size = 112,
+    this.size = 224,
   });
 
   final List<String> urls;

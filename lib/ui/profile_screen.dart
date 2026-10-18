@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../core/display.dart';
@@ -7,9 +9,13 @@ import '../models/user_profile.dart';
 import 'profile_avatar.dart';
 import 'projects_section.dart';
 import 'skills_section.dart';
+import 'steampunk/steampunk_widgets.dart';
 
-/// Экран 2: данные студента. Пока основные поля; скиллы и проекты
-/// добавятся на следующем этапе. Кнопка «назад» в AppBar возвращает на экран 1.
+/// Размер фото на экране профиля (в два раза больше первой версии).
+const double avatarMaxSize = 224;
+
+/// Экран 2: данные студента. Кнопка «назад» в AppBar возвращает на экран 1.
+/// Содержимое разложено по латунным панелям на фоне из шестерёнок.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
     super.key,
@@ -25,48 +31,99 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
+    final colors = Theme.of(context).colorScheme;
     final cursus = profile.mainCursus;
     return Scaffold(
       appBar: AppBar(title: Text(profile.login)),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: ProfileAvatar(
-                      urls: profile.imageUrls,
-                      loadPhoto: loadPhoto,
-                      initials: initialsOf(profile.displayName ?? profile.login),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    profile.displayName.orNA,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 24),
-                  _InfoRow(label: strings.emailLabel, value: profile.email.orNA),
-                  _InfoRow(label: strings.phoneLabel, value: profile.phone.orNA),
-                  _InfoRow(label: strings.locationLabel, value: profile.location.orNA),
-                  _InfoRow(
-                    label: strings.levelLabel,
-                    value: cursus == null ? notAvailable : formatLevel(cursus.level),
-                  ),
-                  if (cursus != null) _LevelBar(level: cursus.level),
-                  _InfoRow(label: strings.walletLabel, value: profile.wallet.orNA),
-                  _InfoRow(
-                    label: strings.correctionPointsLabel,
-                    value: profile.correctionPoints.orNA,
-                  ),
-                  SkillsSection(skills: cursus?.skills ?? const []),
-                  ProjectsSection(projects: profile.finishedProjects()),
-                ],
+      body: SteampunkBackdrop(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                // LayoutBuilder: узнаём реальную ширину и не даём фото
+                // выйти за неё на очень узком экране (constraints вниз).
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    const ring = 6.0;
+                    final avatarSize = math.min(
+                      avatarMaxSize,
+                      constraints.maxWidth - 2 * ring,
+                    );
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: BrassRing(
+                            thickness: ring,
+                            child: ProfileAvatar(
+                              urls: profile.imageUrls,
+                              loadPhoto: loadPhoto,
+                              initials:
+                                  initialsOf(profile.displayName ?? profile.login),
+                              size: avatarSize,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          profile.displayName.orNA,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: colors.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(height: 20),
+                        BrassPanel(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _InfoRow(
+                                label: strings.emailLabel,
+                                value: profile.email.orNA,
+                              ),
+                              _InfoRow(
+                                label: strings.phoneLabel,
+                                value: profile.phone.orNA,
+                              ),
+                              _InfoRow(
+                                label: strings.locationLabel,
+                                value: profile.location.orNA,
+                              ),
+                              _InfoRow(
+                                label: strings.levelLabel,
+                                value: cursus == null
+                                    ? notAvailable
+                                    : formatLevel(cursus.level),
+                              ),
+                              if (cursus != null) _LevelBar(level: cursus.level),
+                              _InfoRow(
+                                label: strings.walletLabel,
+                                value: profile.wallet.orNA,
+                              ),
+                              _InfoRow(
+                                label: strings.correctionPointsLabel,
+                                value: profile.correctionPoints.orNA,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        BrassPanel(
+                          child: SkillsSection(skills: cursus?.skills ?? const []),
+                        ),
+                        const SizedBox(height: 20),
+                        BrassPanel(
+                          child: ProjectsSection(
+                            groups: profile.finishedProjectsByCategory(),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
           ),

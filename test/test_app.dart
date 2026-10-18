@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:swifty_companion/l10n/app_strings.dart';
+import 'package:swifty_companion/ui/steampunk/steampunk_theme.dart';
 
 /// Обёртка для тестов виджетов: тот же набор языков и делегатов, что в
 /// приложении. Язык задаём явно, иначе тестовая среда выберет английский
@@ -12,6 +13,8 @@ Widget testApp(
   double textScale = 1,
 }) {
   return MaterialApp(
+    // Настоящая тема приложения: тесты видят то же оформление, что и пользователь.
+    theme: buildSteampunkTheme(),
     locale: locale,
     localizationsDelegates: AppStrings.localizationsDelegates,
     supportedLocales: AppStrings.supportedLocales,

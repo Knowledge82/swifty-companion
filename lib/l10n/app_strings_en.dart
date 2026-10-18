@@ -62,6 +62,12 @@ class AppStringsEn extends AppStrings {
   @override
   String get projectsEmpty => 'No completed projects yet';
   @override
+  String get projectsOuterCore => 'Outer Core';
+  @override
+  String get projectsCommonCore => 'Common Core';
+  @override
+  String get projectsPiscine => 'Piscine';
+  @override
   String get projectPassed => 'Passed';
   @override
   String get projectFailed => 'Failed';
