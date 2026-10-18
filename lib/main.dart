@@ -10,6 +10,7 @@ import 'data/user_repository.dart';
 import 'l10n/app_strings.dart';
 import 'ui/config_error_screen.dart';
 import 'ui/search_screen.dart';
+import 'ui/splash_screen.dart';
 import 'ui/steampunk/steampunk_theme.dart';
 
 Future<void> main() async {
@@ -63,7 +64,11 @@ class SwiftyApp extends StatelessWidget {
       localizationsDelegates: AppStrings.localizationsDelegates,
       supportedLocales: AppStrings.supportedLocales,
       theme: buildSteampunkTheme(),
-      home: SearchScreen(repository: repository, photoLoader: photoLoader),
+      home: introEnabled
+          ? SplashScreen(
+              next: SearchScreen(repository: repository, photoLoader: photoLoader),
+            )
+          : SearchScreen(repository: repository, photoLoader: photoLoader),
     );
   }
 }

@@ -72,6 +72,7 @@ flutter:
   # В git он не попадает (.gitignore); шаблон: .env.example.
   assets:
     - .env
+    - assets/images/splash.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

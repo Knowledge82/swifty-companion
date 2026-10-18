@@ -48,7 +48,7 @@
 | Этап 5.1: язык интерфейса (es-ES по умолчанию, en) и диагностика фото | 🟡 код и тесты написаны, **не проверены**; 131 из 131 тест; фото: причина найдена (CDN требует токен), добавлен `PhotoLoader`, **не проверен** (docs/10) | [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) |
 | Этап 6: скиллы с процентами, завершённые проекты (сданные и проваленные), полоса уровня | 🟡 код и тесты написаны, **не проверены**; ждём `analyze`, тесты и взгляд на телефоне (чек-лист docs/11) | [docs/11-profile-content.md](docs/11-profile-content.md) |
 | Этап 7: стимпанк-оформление, фото ×2, шестерёнки на фоне, проекты по разделам (Outer Core / Common Core / Piscina) | ✅ итерация 1: `analyze` чист, 196 из 196 тестов; 🟡 итерация 2 (изумруд, окись, потёртости, клёпки, пасхалки, два адреса фото) написана, **не проверена** (docs/12, раздел 14) | [docs/12-steampunk-design.md](docs/12-steampunk-design.md) |
-| Этап 7.2: иконка приложения и экран запуска (splash) в нашем дизайне; правки по скриншоту (окись, клёпки, полоса с узором) | 🟡 написано, **не проверено**; нужна полная пересборка и взгляд на телефоне (docs/12, раздел 15; docs/13) | [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) |
+| Этап 7.2: иконка приложения, экран запуска (системный с эмблемой и заставка с фото), правки по скриншоту (окись, клёпки, полоса с узором) | 🟡 написано, **не проверено**; нужна полная пересборка и взгляд на телефоне (docs/12, раздел 15; docs/13) | [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) |
 | Экран поиска | ⏳ | будет |
 | Экран профиля (данные, скиллы, проекты) | ⏳ | будет |
 | Обработка всех ошибок | ⏳ | будет |
@@ -254,13 +254,14 @@ swifty-companion/
 │   ├── data/                  user_repository.dart (логин → UserProfile), photo_loader.dart (фото с токеном)
 │   ├── l10n/                  app_strings (+ _es, _en): тексты интерфейса, испанский по умолчанию
 │   ├── models/                skill, project_result, project_category, cursus_progress, user_profile
-│   └── ui/                    search_screen, profile_screen, profile_avatar, skills_section, projects_section, section_title, error_banner, config_error_screen, easter_egg (пасхалки),
+│   └── ui/                    search_screen, profile_screen, profile_avatar, skills_section, projects_section, section_title, error_banner, config_error_screen, easter_egg (пасхалки), splash_screen (заставка с фото),
 │       └── steampunk/         steampunk_theme (палитра, тема), gears (шестерёнки), wear (клёпки, окись, царапины), steampunk_widgets (фон, панель, кольцо, полоса GearStrip)
 ├── test/                      config_test, login_test, search_screen_test,
 │                              json_reader_test, models_test, fixtures (вымышленный профиль),
 │                              token_service_test, api_exception_test, api_client_test,
-│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, steampunk_test, easter_egg_test, test_app,
+│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, steampunk_test, easter_egg_test, splash_screen_test, test_app,
 │                              fake_api (поддельный сервер)
+├── assets/images/             splash.jpg: фото для заставки
 ├── tool/                      generate_icons.py: рисует иконку и картинку splash (Pillow)
 ├── android/                   нативная Android-часть, собирается через Gradle (иконки и splash в res/)
 ├── pubspec.yaml               манифест: имя, версия, зависимости, ассеты
@@ -309,7 +310,7 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 | [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) | Этап 5.1: интерфейс на испанском (Испания) и английском без кодогенерации, выбор языка по телефону, фото с CDN (разбор причины 403, `PhotoLoader`, защита токена) |
 | [docs/11-profile-content.md](docs/11-profile-content.md) | Этап 6: полоса уровня, скиллы с процентом (формула и альтернативы), проекты сдан/провален, прокрутка, переполнение, доступность |
 | [docs/12-steampunk-design.md](docs/12-steampunk-design.md) | Этап 7: рисование на `Canvas`, геометрия шестерёнки, палитра и контраст, тема, панели, фото ×2, разбиение проектов по разделам и скрипт проверки, изумруд/окись/клёпки, пасхалки |
-| [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) | Этап 7.2: иконки Android (плотности, адаптивная иконка, безопасная зона), экран запуска до и после Android 12, генератор рисунков, подводные камни, альтернативы |
+| [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) | Этап 7.2: иконки Android (плотности, адаптивная иконка, безопасная зона), экран запуска до и после Android 12, генератор рисунков, заставка с фото и растушёвкой краёв (`ShaderMask`), подводные камни, альтернативы |
 
 Дальше по мере работы появятся файлы по токен-сервису, по экранам, по обработке ошибок, по адаптивной вёрстке и по подготовке к защите. Документация обновляется после каждого этапа или по запросу.
 
