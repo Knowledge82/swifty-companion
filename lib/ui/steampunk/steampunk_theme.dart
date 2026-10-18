@@ -7,11 +7,16 @@ const Color brass = Color(0xFFC8A04A);
 const Color copper = Color(0xFFB87333);
 const Color leather = Color(0xFF2A1C12);
 const Color leatherDeep = Color(0xFF1A110B);
-const Color leatherLight = Color(0xFF3A281A);
 const Color parchment = Color(0xFFEADFC4);
 const Color verdigris = Color(0xFF6FB39C);
 const Color rust = Color(0xFFE0745A);
 const Color mutedBrass = Color(0xFFA8946F);
+
+// Изумруд: эмалевые панели. Окись (патина) на латуни и меди зелёная.
+const Color emeraldDeep = Color(0xFF0A1F17); // поле ввода, самые тёмные места
+const Color emerald = Color(0xFF0F2B21); // фон панелей
+const Color emeraldLight = Color(0xFF17402F); // заглушка фото
+const Color oxide = Color(0xFF3F9E80); // пятна окиси на металле
 
 /// Тёмная цветовая схема. Контраст текста к фону проверяется тестом
 /// (`steampunk_test.dart`): основной текст не ниже 7:1, остальной не ниже 4.5:1.
@@ -27,12 +32,12 @@ const ColorScheme steampunkColors = ColorScheme(
   onError: leatherDeep,
   errorContainer: Color(0xFF4A1F16),
   onErrorContainer: Color(0xFFFFDAD2),
-  surface: leather,
+  surface: emerald,
   onSurface: parchment,
   onSurfaceVariant: mutedBrass,
   outline: mutedBrass,
-  outlineVariant: Color(0xFF5A4630),
-  surfaceContainerHighest: leatherLight,
+  outlineVariant: Color(0xFF4F6B58),
+  surfaceContainerHighest: emeraldLight,
 );
 
 /// Шрифт с засечками, который есть в системе Android (`serif`), чтобы не
@@ -110,7 +115,7 @@ InputDecoration steampunkInputDecoration({
     labelText: label,
     errorText: errorText,
     filled: true,
-    fillColor: leatherDeep,
+    fillColor: emeraldDeep,
     labelStyle: const TextStyle(color: mutedBrass),
     floatingLabelStyle: const TextStyle(color: brass),
     errorStyle: const TextStyle(color: rust),

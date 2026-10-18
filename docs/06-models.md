@@ -120,7 +120,7 @@ final level = json['level'] as double;
 | `wallet` | `wallet` | `null` |
 | `correction_point` (единственное число) | `correctionPoints` | `null` |
 | `pool_month`, `pool_year` | `poolMonth`, `poolYear` | `null` |
-| `image.versions.medium` → `image.link` → `large` → `small` → `micro` | `imageUrl` | первый подходящий https-адрес, иначе `null` (экран покажет заглушку) |
+| `image.versions.medium` → `image.link` → `large` (не больше двух адресов, этап 7.1) | `imageUrls`, `imageUrl` | первый подходящий https-адрес, иначе `null` (экран покажет заглушку) |
 | `cursus_users[]` | `cursuses` | пустой список |
 | `cursus_users[].cursus_id` (иначе `cursus.id`) | `CursusProgress.cursusId` | `null` |
 | `cursus_users[].cursus.name` / `.slug` | `name`, `slug` | `null` |
@@ -294,7 +294,7 @@ double skillPercent(double level, {double maxLevel = maxSkillLevel})
 
 ### 5.8 Фото
 
-Порядок: `versions.medium` → `link` → `large` → `small` → `micro`. Берётся первый **непустой https-адрес**. `http://` отвергается, потому что Android с версии 9 по умолчанию блокирует незащищённый трафик, и картинка всё равно не загрузилась бы. Если подходящего нет, `imageUrl == null`, и экран покажет заглушку.
+Порядок: `versions.medium` → `link` → `large` (с этапа 7.1 хранятся не больше двух адресов, `small` и `micro` не используются, см. docs/12, раздел 14.5). Берётся первый **непустой https-адрес**. `http://` отвергается, потому что Android с версии 9 по умолчанию блокирует незащищённый трафик, и картинка всё равно не загрузилась бы. Если подходящего нет, `imageUrl == null`, и экран покажет заглушку.
 
 ---
 

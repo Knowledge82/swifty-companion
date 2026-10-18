@@ -6,6 +6,7 @@ import '../core/display.dart';
 import '../data/photo_loader.dart';
 import '../l10n/app_strings.dart';
 import '../models/user_profile.dart';
+import 'easter_egg.dart';
 import 'profile_avatar.dart';
 import 'projects_section.dart';
 import 'skills_section.dart';
@@ -33,8 +34,9 @@ class ProfileScreen extends StatelessWidget {
     final strings = AppStrings.of(context);
     final colors = Theme.of(context).colorScheme;
     final cursus = profile.mainCursus;
+    final egg = easterEggFor(profile.login);
     return Scaffold(
-      appBar: AppBar(title: Text(profile.login)),
+      appBar: AppBar(title: Text(profile.login), bottom: const RivetLine()),
       body: SteampunkBackdrop(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -46,7 +48,7 @@ class ProfileScreen extends StatelessWidget {
                 // выйти за неё на очень узком экране (constraints вниз).
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    const ring = 6.0;
+                    const ring = brassRingThickness;
                     final avatarSize = math.min(
                       avatarMaxSize,
                       constraints.maxWidth - 2 * ring,
@@ -75,6 +77,10 @@ class ProfileScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
+                        if (egg != null) ...[
+                          const SizedBox(height: 10),
+                          Center(child: EasterEggBadge(text: egg)),
+                        ],
                         const SizedBox(height: 20),
                         BrassPanel(
                           child: Column(

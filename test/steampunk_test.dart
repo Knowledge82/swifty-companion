@@ -17,7 +17,7 @@ double contrast(Color a, Color b) {
 
 void main() {
   group('палитра', () {
-    // Фон панелей и экрана: surface и leatherDeep. Текст и значки на них.
+    // Фон панелей (изумруд) и экрана/AppBar (тёмная кожа). Текст и значки на них.
     final pairs = <(String, Color, Color, double)>[
       ('основной текст на панели', steampunkColors.onSurface, steampunkColors.surface, 7),
       ('основной текст на фоне', steampunkColors.onSurface, leatherDeep, 7),
@@ -28,7 +28,8 @@ void main() {
       ('«провален» на панели', steampunkColors.error, steampunkColors.surface, 4.5),
       ('текст кнопки', steampunkColors.onPrimary, steampunkColors.primary, 4.5),
       ('текст ошибки', steampunkColors.onErrorContainer, steampunkColors.errorContainer, 4.5),
-      ('подпись поля ввода', mutedBrass, leatherDeep, 4.5),
+      ('подпись поля ввода', mutedBrass, emeraldDeep, 4.5),
+      ('инициалы на заглушке фото (крупный текст)', mutedBrass, emeraldLight, 3),
     ];
 
     for (final (name, foreground, background, minimum) in pairs) {
@@ -72,6 +73,11 @@ void main() {
       recorder.endRecording().dispose();
     });
 
+    test('окисленные шестерёнки: смена цвета окиси тоже перерисовывает', () {
+      const base = GearsPainter(color: brass);
+      expect(base.shouldRepaint(const GearsPainter(color: brass, patina: copper)), isTrue);
+    });
+
     test('shouldRepaint: только при смене цвета или зерна', () {
       const base = GearsPainter(color: brass);
       expect(base.shouldRepaint(const GearsPainter(color: brass)), isFalse);
@@ -109,8 +115,43 @@ void main() {
       );
 
       expect(find.byType(GearEmblem), findsOneWidget);
-      // 100 (эмблема) + 2 * 6 (кольцо по умолчанию)
-      expect(tester.getSize(find.byType(BrassRing)), const Size(112, 112));
+      // 100 (эмблема) + 2 * 9 (кольцо по умолчанию)
+      expect(tester.getSize(find.byType(BrassRing)), const Size(118, 118));
+    });
+
+    testWidgets('панели любых размеров рисуются без ошибок, в том числе крошечные',
+        (tester) async {
+      for (final side in [20.0, 59.0, 61.0, 120.0, 400.0]) {
+        await tester.pumpWidget(
+          testApp(
+            Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: side,
+                  height: side,
+                  child: const BrassPanel(padding: EdgeInsets.zero, child: SizedBox.expand()),
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(tester.takeException(), isNull, reason: 'сторона $side');
+      }
+    });
+
+    testWidgets('полоска клёпок: высота и вставка в AppBar', (tester) async {
+      expect(const RivetLine().preferredSize.height, RivetLine.height);
+
+      await tester.pumpWidget(
+        testApp(
+          Scaffold(
+            appBar: AppBar(title: const Text('t'), bottom: const RivetLine()),
+          ),
+        ),
+      );
+
+      expect(find.byType(RivetLine), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 }

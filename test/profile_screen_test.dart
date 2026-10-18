@@ -179,8 +179,8 @@ void main() {
 
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // 280 - 2*24 (поля) = 232 ширины содержимого, минус 2*6 кольца.
-    expect(tester.getSize(find.byType(ProfileAvatar)), const Size(220, 220));
+    // 280 - 2*24 (поля) = 232 ширины содержимого, минус 2*9 кольца.
+    expect(tester.getSize(find.byType(ProfileAvatar)), const Size(214, 214));
     expect(tester.takeException(), isNull);
   });
 

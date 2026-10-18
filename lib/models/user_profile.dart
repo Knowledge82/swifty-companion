@@ -113,7 +113,15 @@ class UserProfile {
   }
 }
 
-/// Фото: `medium`, `link`, `large`, `small`, `micro` в таком порядке.
+/// Сколько адресов фото хранить: основной и один запасной.
+/// Запасной нужен на случай, если CDN не отдаёт первую версию. Остальные
+/// версии (`small`, `micro`) не нужны: на крупном фото они выглядели бы
+/// размытой кашей, а заглушка с инициалами лучше. Лишние адреса не грузятся
+/// (экран пробует следующий, только если предыдущий не загрузился), но так
+/// меньше шансов впустую потратить лимит запросов к API.
+const int maxPhotoUrls = 2;
+
+/// Фото: `medium`, `link`, `large` в таком порядке, не больше [maxPhotoUrls].
 /// Берём только https, потому что Android по умолчанию блокирует http-трафик.
 /// Повторяющиеся адреса отбрасываем.
 List<String> _pickImageUrls(Map<String, dynamic>? image) {
@@ -122,14 +130,15 @@ List<String> _pickImageUrls(Map<String, dynamic>? image) {
     versions?['medium'],
     image?['link'],
     versions?['large'],
-    versions?['small'],
-    versions?['micro'],
   ];
   final result = <String>[];
   for (final candidate in candidates) {
     final url = readString(candidate);
     if (url != null && url.startsWith('https://') && !result.contains(url)) {
       result.add(url);
+      if (result.length == maxPhotoUrls) {
+        break;
+      }
     }
   }
   return result;

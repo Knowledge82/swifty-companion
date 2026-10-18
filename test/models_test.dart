@@ -176,14 +176,13 @@ void main() {
       );
     });
 
-    test('фото: список адресов в порядке предпочтения, без повторов', () {
+    test('фото: основной и один запасной адрес, без повторов', () {
+      // В образце пять версий, но хранятся только medium и link.
       expect(UserProfile.fromJson(sampleUserJson()).imageUrls, [
         'https://example.com/medium.jpg',
         'https://example.com/link.jpg',
-        'https://example.com/large.jpg',
-        'https://example.com/small.jpg',
-        'https://example.com/micro.jpg',
       ]);
+      expect(maxPhotoUrls, 2);
       expect(
         UserProfile.fromJson({
           'login': 'x',
@@ -193,6 +192,22 @@ void main() {
           },
         }).imageUrls,
         ['https://example.com/a.jpg'],
+      );
+    });
+
+    test('фото: нет medium и link, берутся large, затем (если есть) ничего лишнего', () {
+      expect(
+        UserProfile.fromJson({
+          'login': 'x',
+          'image': {
+            'versions': {
+              'large': 'https://example.com/l.jpg',
+              'small': 'https://example.com/s.jpg',
+              'micro': 'https://example.com/m.jpg',
+            },
+          },
+        }).imageUrls,
+        ['https://example.com/l.jpg'], // small и micro не используются
       );
     });
 

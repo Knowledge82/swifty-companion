@@ -64,6 +64,35 @@ void main() {
       expect(of('  libft '), ProjectCategory.commonCore);
     });
 
+    test('настоящие slug из интры (вывод скрипта проверки): разложены верно', () {
+      // Так они записаны в API у реального студента: часть с префиксом
+      // 42cursus-, часть без; бассейн и «перезагрузка» с курсом 66.
+      const expected = {
+        '42cursus-ft_printf': ProjectCategory.commonCore,
+        '42cursus-get_next_line': ProjectCategory.commonCore,
+        '42cursus-libft': ProjectCategory.commonCore,
+        '42cursus-minishell': ProjectCategory.commonCore,
+        '42cursus-philosophers': ProjectCategory.commonCore,
+        '42cursus-push_swap': ProjectCategory.commonCore,
+        'born2beroot': ProjectCategory.commonCore,
+        'cub3d': ProjectCategory.commonCore,
+        'ft_transcendence': ProjectCategory.commonCore,
+        'inception': ProjectCategory.commonCore,
+        'minitalk': ProjectCategory.commonCore,
+        'netpractice': ProjectCategory.commonCore,
+        'so_long': ProjectCategory.commonCore,
+        'webserv': ProjectCategory.commonCore,
+        '42_collaborative_resume': ProjectCategory.outerCore,
+        '42cursus-ft_hangouts': ProjectCategory.outerCore,
+        'c-piscine-c-00': ProjectCategory.piscine,
+        'c-piscine-reloaded': ProjectCategory.piscine,
+        'c-piscine-shell-01': ProjectCategory.piscine,
+      };
+      expected.forEach((slug, category) {
+        expect(of(slug), category, reason: slug);
+      });
+    });
+
     test('всё неизвестное, включая проект без slug, уходит в Outer Core', () {
       expect(of('swifty-companion'), ProjectCategory.outerCore);
       expect(of('mobile-0'), ProjectCategory.outerCore);
