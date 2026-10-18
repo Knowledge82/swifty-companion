@@ -19,13 +19,17 @@ void main() {
   });
 
   group('decodeJsonObject', () {
-    test('читает UTF-8, даже если в Content-Type нет charset', () {
-      final response = http.Response.bytes(
-        utf8.encode('{"name":"José Ñandú"}'),
+    test('читает UTF-8 без charset и вообще без Content-Type', () {
+      final bytes = utf8.encode('{"name":"José Ñandú"}');
+      final withoutCharset = http.Response.bytes(
+        bytes,
         200,
         headers: {'content-type': 'application/json'},
       );
-      expect(decodeJsonObject(response)['name'], 'José Ñandú');
+      final withoutHeader = http.Response.bytes(bytes, 200);
+
+      expect(decodeJsonObject(withoutCharset)['name'], 'José Ñandú');
+      expect(decodeJsonObject(withoutHeader)['name'], 'José Ñandú');
     });
 
     test('не объект, не JSON и не UTF-8 — UnexpectedResponseException', () {

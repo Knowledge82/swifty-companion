@@ -57,12 +57,12 @@ void main() {
       expect(url.query, isEmpty);
     });
 
-    test('тело читается как UTF-8 без указания charset', () async {
+    test('тело читается как UTF-8, даже если Content-Type не указан', () async {
       final fake = FakeApi(
+        // Без заголовка Content-Type: `response.body` читал бы это как latin1.
         onUser: (request, attempt) async => http.Response.bytes(
           utf8.encode(jsonEncode({'login': 'jdoe', 'displayname': 'José Ñandú'})),
           200,
-          headers: {'content-type': 'application/json'},
         ),
       );
 
