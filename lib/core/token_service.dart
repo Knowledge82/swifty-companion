@@ -1,14 +1,10 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:http/http.dart' as http;
 
+import 'api_constants.dart';
 import 'api_exception.dart';
 import 'config.dart';
+import 'http_helpers.dart';
 import 'json_reader.dart';
-
-const String apiBaseUrl = 'https://api.intra.42.fr';
 
 /// Выдаёт токен доступа к API 42 (OAuth2, Client Credentials).
 ///
@@ -82,10 +78,9 @@ class TokenService {
   }
 
   Future<String> _fetchAndStore() async {
-    final http.Response response;
-    try {
-      response = await _client.post(
-        Uri.parse('$apiBaseUrl/oauth/token'),
+    final response = await guardedRequest(
+      () => _client.post(
+        Uri.https(apiHost, '/oauth/token'),
         // Map превращается в форму application/x-www-form-urlencoded.
         // Секрет идёт в теле запроса, а не в адресе.
         body: {
@@ -93,27 +88,19 @@ class TokenService {
           'client_id': _config.clientId,
           'client_secret': _config.clientSecret,
         },
-      ).timeout(_requestTimeout);
-    } on TimeoutException {
-      throw const NetworkException.timeout();
-    } on SocketException {
-      throw const NetworkException();
-    } on http.ClientException {
-      throw const NetworkException();
-    }
+      ),
+      _requestTimeout,
+    );
 
     final status = response.statusCode;
     if (status == 200) {
-      return _storeFromBody(response.body);
+      return _storeFromResponse(response);
     }
     if (status == 400 || status == 401 || status == 403) {
       throw const AuthException();
     }
     if (status == 429) {
-      final seconds = int.tryParse(response.headers['retry-after'] ?? '');
-      throw RateLimitException(
-        retryAfter: seconds == null ? null : Duration(seconds: seconds),
-      );
+      throw RateLimitException(retryAfter: parseRetryAfter(response.headers));
     }
     if (status >= 500) {
       throw const ServerException();
@@ -121,19 +108,13 @@ class TokenService {
     throw const UnexpectedResponseException();
   }
 
-  String _storeFromBody(String body) {
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(body);
-    } on FormatException {
-      throw const UnexpectedResponseException();
-    }
-    final json = readMap(decoded);
-    final token = json?['access_token'];
+  String _storeFromResponse(http.Response response) {
+    final json = decodeJsonObject(response);
+    final token = json['access_token'];
     if (token is! String || token.isEmpty) {
       throw const UnexpectedResponseException();
     }
-    final seconds = readInt(json?['expires_in']);
+    final seconds = readInt(json['expires_in']);
     final lifetime =
         (seconds != null && seconds > 0) ? Duration(seconds: seconds) : _defaultLifetime;
 
