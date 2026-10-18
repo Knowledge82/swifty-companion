@@ -19,18 +19,19 @@ double skillPercent(double level, {double maxLevel = maxSkillLevel}) {
 }
 
 class Skill {
-  const Skill({this.id, required this.name, required this.level});
+  const Skill({this.id, this.name, required this.level});
 
   factory Skill.fromJson(Map<String, dynamic> json) {
     return Skill(
       id: readInt(json['id']),
-      name: readString(json['name']) ?? 'Без названия',
+      name: readString(json['name']),
       level: roundLevel(readDouble(json['level']) ?? 0),
     );
   }
 
   final int? id;
-  final String name;
+  /// Название или `null`, если в ответе его нет (интерфейс подставит свой текст).
+  final String? name;
 
   /// Уровень, округлённый до двух знаков.
   final double level;

@@ -7,7 +7,7 @@ enum ProjectOutcome { passed, failed, unknown }
 class ProjectResult {
   const ProjectResult({
     this.id,
-    required this.name,
+    this.name,
     this.slug,
     this.status,
     this.validated,
@@ -21,7 +21,7 @@ class ProjectResult {
     final slug = readString(project?['slug']);
     return ProjectResult(
       id: readInt(json['id']),
-      name: readString(project?['name']) ?? slug ?? 'Без названия',
+      name: readString(project?['name']) ?? slug,
       slug: slug,
       status: readString(json['status']),
       // Ключ в JSON действительно называется «validated?» с вопросом.
@@ -36,7 +36,8 @@ class ProjectResult {
   }
 
   final int? id;
-  final String name;
+  /// Название проекта, иначе slug, иначе `null` (интерфейс подставит свой текст).
+  final String? name;
   final String? slug;
 
   /// Сырой статус: `finished`, `in_progress` и другие.

@@ -38,7 +38,7 @@ void main() {
 
     test('нет названия и уровня — запасные значения', () {
       final skill = Skill.fromJson({'level': 'abc'});
-      expect(skill.name, 'Без названия');
+      expect(skill.name, isNull);
       expect(skill.level, 0);
     });
 
@@ -75,7 +75,7 @@ void main() {
 
     test('совсем пустая запись не падает', () {
       final project = ProjectResult.fromJson({});
-      expect(project.name, 'Без названия');
+      expect(project.name, isNull);
       expect(project.isFinished, isFalse);
       expect(project.cursusIds, isEmpty);
     });
@@ -200,7 +200,7 @@ void main() {
       final main = UserProfile.fromJson(sampleUserJson()).mainCursus;
       expect(main?.slug, '42cursus');
       expect(main?.cursusId, 21);
-      expect(main?.skills.map((s) => s.name), ['Rigor', 'Web', 'Без названия']);
+      expect(main?.skills.map((s) => s.name), ['Rigor', 'Web', null]);
     });
 
     test('скилл с шумом в бассейне округлён', () {

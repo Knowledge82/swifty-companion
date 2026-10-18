@@ -71,6 +71,17 @@ abstract class AppStrings {
   String get walletLabel;
   String get correctionPointsLabel;
 
+  // Скиллы и проекты
+  String get skillsTitle;
+  String get skillsEmpty;
+  String skillsFormulaNote(int maxLevel);
+  String get projectsTitle;
+  String get projectsEmpty;
+  String get projectPassed;
+  String get projectFailed;
+  String get projectUnknown;
+  String get unnamed;
+
   // Экран ошибки конфигурации
   String get configErrorTitle;
   String configMissing(List<String> keys);

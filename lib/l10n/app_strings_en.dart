@@ -51,6 +51,26 @@ class AppStringsEn extends AppStrings {
   String get correctionPointsLabel => 'Evaluation points';
 
   @override
+  String get skillsTitle => 'Skills';
+  @override
+  String get skillsEmpty => 'No skills yet';
+  @override
+  String skillsFormulaNote(int maxLevel) =>
+      'Calculated percentage: level ÷ $maxLevel (the API does not provide it)';
+  @override
+  String get projectsTitle => 'Completed projects';
+  @override
+  String get projectsEmpty => 'No completed projects yet';
+  @override
+  String get projectPassed => 'Passed';
+  @override
+  String get projectFailed => 'Failed';
+  @override
+  String get projectUnknown => 'No result';
+  @override
+  String get unnamed => 'Unnamed';
+
+  @override
   String get configErrorTitle => 'Configuration error';
   @override
   String configMissing(List<String> keys) =>

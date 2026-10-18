@@ -46,6 +46,7 @@
 | Этап 4: клиент API (Bearer, повтор после 401, коды → ошибки) и репозиторий | ✅ 101 из 101 тест, мутационные проверки пройдены (docs/08) | [docs/08-api-client.md](docs/08-api-client.md) |
 | Этап 5: первый сквозной запуск: поиск → API → профиль, индикатор, баннер ошибок, отладочный журнал | 🟡 `flutter analyze` чист, 115 из 115 тестов; **живой запуск на телефоне ещё не проведён** (чек-лист docs/09) | [docs/09-first-live-run.md](docs/09-first-live-run.md) |
 | Этап 5.1: язык интерфейса (es-ES по умолчанию, en) и диагностика фото | 🟡 код и тесты написаны, **не проверены**; 131 из 131 тест; фото: причина найдена (CDN требует токен), добавлен `PhotoLoader`, **не проверен** (docs/10) | [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) |
+| Этап 6: скиллы с процентами, завершённые проекты (сданные и проваленные), полоса уровня | 🟡 код и тесты написаны, **не проверены**; ждём `analyze`, тесты и взгляд на телефоне (чек-лист docs/11) | [docs/11-profile-content.md](docs/11-profile-content.md) |
 | Экран поиска | ⏳ | будет |
 | Экран профиля (данные, скиллы, проекты) | ⏳ | будет |
 | Обработка всех ошибок | ⏳ | будет |
@@ -238,7 +239,8 @@ swifty-companion/
 │   ├── 07-token-service.md
 │   ├── 08-api-client.md
 │   ├── 09-first-live-run.md
-│   └── 10-localization-and-photo.md
+│   ├── 10-localization-and-photo.md
+│   └── 11-profile-content.md
 ├── lib/
 │   ├── main.dart              точка входа: загрузка .env, сборка зависимостей, запуск приложения
 │   ├── core/                  config.dart (AppConfig), login.dart (проверка логина),
@@ -248,7 +250,7 @@ swifty-companion/
 │   ├── data/                  user_repository.dart (логин → UserProfile), photo_loader.dart (фото с токеном)
 │   ├── l10n/                  app_strings (+ _es, _en): тексты интерфейса, испанский по умолчанию
 │   ├── models/                skill, project_result, cursus_progress, user_profile
-│   └── ui/                    search_screen, profile_screen, profile_avatar, error_banner, config_error_screen
+│   └── ui/                    search_screen, profile_screen, profile_avatar, skills_section, projects_section, section_title, error_banner, config_error_screen
 ├── test/                      config_test, login_test, search_screen_test,
 │                              json_reader_test, models_test, fixtures (вымышленный профиль),
 │                              token_service_test, api_exception_test, api_client_test,
@@ -299,6 +301,7 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 | [docs/08-api-client.md](docs/08-api-client.md) | Этап 4: слои (экран → репозиторий → клиент → токен), адрес через `Uri`, повтор после 401, коды ответа, ловушка кодировки, альтернативы, тесты |
 | [docs/09-first-live-run.md](docs/09-first-live-run.md) | Этап 5: внедрение зависимостей, состояния экрана поиска, ловушки `async` (`mounted`, двойное нажатие), баннер ошибок, журнал, чек-лист живого запуска |
 | [docs/10-localization-and-photo.md](docs/10-localization-and-photo.md) | Этап 5.1: интерфейс на испанском (Испания) и английском без кодогенерации, выбор языка по телефону, фото с CDN (разбор причины 403, `PhotoLoader`, защита токена) |
+| [docs/11-profile-content.md](docs/11-profile-content.md) | Этап 6: полоса уровня, скиллы с процентом (формула и альтернативы), проекты сдан/провален, прокрутка, переполнение, доступность |
 
 Дальше по мере работы появятся файлы по токен-сервису, по экранам, по обработке ошибок, по адаптивной вёрстке и по подготовке к защите. Документация обновляется после каждого этапа или по запросу.
 

@@ -128,10 +128,10 @@ final level = json['level'] as double;
 | `cursus_users[].begin_at` / `end_at` | `beginAt`, `endAt` | `null` |
 | `cursus_users[].skills[]` | `skills` | пустой список |
 | `skills[].id` | `Skill.id` | `null` |
-| `skills[].name` | `Skill.name` | «Без названия» |
+| `skills[].name` | `Skill.name` | `null` (интерфейс подставляет «Sin nombre»; см. docs/11, раздел 6) |
 | `skills[].level` | `Skill.level` | `0`, округляется до 2 знаков |
 | `projects_users[]` | `projects` | пустой список; элементы не-объекты пропускаются |
-| `projects_users[].project.name` → `project.slug` | `ProjectResult.name` | название, иначе slug, иначе «Без названия» |
+| `projects_users[].project.name` → `project.slug` | `ProjectResult.name` | название, иначе slug, иначе `null` (интерфейс подставляет «Sin nombre») |
 | `projects_users[].status` | `status` | `null`; `isFinished` это `status == 'finished'` |
 | `projects_users[].validated?` | `validated` | `null` значит `ProjectOutcome.unknown` |
 | `projects_users[].final_mark` | `finalMark` | `null` → N/A |

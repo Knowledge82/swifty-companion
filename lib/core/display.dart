@@ -16,6 +16,17 @@ String initialsOf(String name) {
       .join();
 }
 
+/// Дробная часть уровня как доля пути до следующего уровня: `9.63` → `0.63`.
+double levelFraction(double level) =>
+    (level - level.floorToDouble()).clamp(0.0, 1.0).toDouble();
+
+/// Дата как `2024-03-01` (одинаково на любом языке и в любом часовом поясе:
+/// берутся поля самого значения, без перевода в местное время).
+String formatDate(DateTime date) {
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${date.year}-${two(date.month)}-${two(date.day)}';
+}
+
 /// Уровень с двумя знаками: `9.63`, `3.00`.
 String formatLevel(double level) => level.toStringAsFixed(2);
 

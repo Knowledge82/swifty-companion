@@ -5,6 +5,8 @@ import '../data/photo_loader.dart';
 import '../l10n/app_strings.dart';
 import '../models/user_profile.dart';
 import 'profile_avatar.dart';
+import 'projects_section.dart';
+import 'skills_section.dart';
 
 /// Экран 2: данные студента. Пока основные поля; скиллы и проекты
 /// добавятся на следующем этапе. Кнопка «назад» в AppBar возвращает на экран 1.
@@ -56,15 +58,42 @@ class ProfileScreen extends StatelessWidget {
                     label: strings.levelLabel,
                     value: cursus == null ? notAvailable : formatLevel(cursus.level),
                   ),
+                  if (cursus != null) _LevelBar(level: cursus.level),
                   _InfoRow(label: strings.walletLabel, value: profile.wallet.orNA),
                   _InfoRow(
                     label: strings.correctionPointsLabel,
                     value: profile.correctionPoints.orNA,
                   ),
+                  SkillsSection(skills: cursus?.skills ?? const []),
+                  ProjectsSection(projects: profile.finishedProjects()),
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Полоса «сколько пройдено до следующего уровня» (дробная часть уровня).
+class _LevelBar extends StatelessWidget {
+  const _LevelBar({required this.level});
+
+  final double level;
+
+  @override
+  Widget build(BuildContext context) {
+    final fraction = levelFraction(level);
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 6),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: LinearProgressIndicator(
+          value: fraction,
+          minHeight: 8,
+          semanticsLabel: AppStrings.of(context).levelLabel,
+          semanticsValue: formatPercent(fraction * 100),
         ),
       ),
     );
