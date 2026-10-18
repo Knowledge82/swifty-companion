@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Доступ в сеть для запросов к API 42. В debug/profile манифестах он уже есть,
+         но в release-сборке без этой строки сети не будет. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="swifty_companion"
         android:name="${applicationName}"
