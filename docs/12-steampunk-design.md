@@ -27,7 +27,7 @@
 | Фото ×2 | было 112, стало 224 (на узком экране уменьшается, чтобы влезть) | `profile_screen.dart`, `profile_avatar.dart` |
 | Шестерёнки на фоне | статичный узор: около тридцати шестерёнок разного размера, с разным числом зубьев и поворотом | `ui/steampunk/gears.dart` |
 | Стимпанк | тёмная кожа, латунь, медь, патина, шрифт с засечками, панели с заклёпками, латунное кольцо вокруг фото, эмблема из трёх сцепленных шестерёнок на экране поиска | `ui/steampunk/*` |
-| Проекты по разделам | Outer Core, Common Core, Piscina; пустые разделы не показываются; в заголовке счётчик | `models/project_category.dart`, `projects_section.dart` |
+| Проекты по разделам | Outer Core, Common Core, Piscina (и отдельно Piscina Reloaded, см. раздел 9); пустые разделы не показываются; в заголовке счётчик | `models/project_category.dart`, `projects_section.dart` |
 
 Файлы:
 
@@ -151,13 +151,16 @@ lib/models/project_category.dart   ProjectCategory и categoryOf (правила
 
 | Порядок проверки | Условие | Раздел |
 |---|---|---|
-| 1 | slug начинается с `c-piscine` или `piscine` | Piscina |
-| 2 | slug есть в `commonCoreSlugs`, либо `cpp-module-NN`, либо `exam-rank-NN` | Common Core |
-| 3 | всё остальное, включая проект без slug | Outer Core |
+| 1 | slug содержит `piscine` и `reloaded` | Piscina Reloaded (отдельный раздел) |
+| 2 | slug начинается с `c-piscine` или `piscine` | Piscina |
+| 3 | slug есть в `commonCoreSlugs`, либо `cpp-module-NN`, либо `exam-rank-NN` | Common Core |
+| 4 | всё остальное, включая проект без slug | Outer Core |
+
+Reloaded проверяется **раньше** Piscina, потому что его slug `c-piscine-reloaded` начинается так же, как у обычного бассейна, и иначе он попал бы туда. По твоему уточнению Reloaded это отдельный проект между Piscine и Common Core: он не входит ни в то, ни в другое, поэтому у него свой раздел, который показывается последним и только если в нём что-то есть.
 
 Раздел «по умолчанию» Outer Core выбран сознательно: новый или неизвестный проект не пропадёт и не окажется в неправильной «старой» группе. Внутри раздела порядок прежний: новые сверху. Пустые разделы скрыты.
 
-Список Common Core сейчас: libft, get_next_line, ft_printf, born2beroot, netwhat, push_swap, so_long, minitalk, pipex, fdf, fract-ol (и fractol), philosophers, minishell, minirt, cub3d, netpractice, ft_irc, webserv, inception, ft_containers, ft_transcendence, а также cpp-module-00…09 и exam-rank-NN.
+Список Common Core сейчас (с коллективным резюме `42_collaborative_resume`, которое по твоему уточнению стоит на последнем круге вместе с ft_transcendence): libft, get_next_line, ft_printf, born2beroot, netwhat, push_swap, so_long, minitalk, pipex, fdf, fract-ol (и fractol), philosophers, minishell, minirt, cub3d, netpractice, ft_irc, webserv, inception, ft_containers, ft_transcendence, 42_collaborative_resume, а также cpp-module-00…09 и exam-rank-NN.
 
 ### Почему именно по slug
 
@@ -187,7 +190,7 @@ CORE = {
     'libft', 'get_next_line', 'ft_printf', 'born2beroot', 'netwhat', 'push_swap',
     'so_long', 'minitalk', 'pipex', 'fdf', 'fract-ol', 'fractol', 'philosophers',
     'minishell', 'minirt', 'cub3d', 'netpractice', 'ft_irc', 'webserv', 'inception',
-    'ft_containers', 'ft_transcendence',
+    'ft_containers', 'ft_transcendence', '42_collaborative_resume',
 }
 
 def norm(s):
@@ -198,6 +201,8 @@ def category(slug):
     if slug is None:
         return 'Outer'
     s = norm(slug)
+    if 'piscine' in s and 'reloaded' in s:
+        return 'Reloaded'
     if s.startswith('c-piscine') or s.startswith('piscine'):
         return 'Piscina'
     if s in CORE or re.fullmatch(r'cpp-module-\d{2}', s) or re.fullmatch(r'exam-rank-\d{2}', s):
@@ -228,15 +233,18 @@ unset TOKEN
 
 Пришли вывод. Если какой-то проект лежит не там, поправим `commonCoreSlugs` или правила. Это одна константа и один тест.
 
-**Результат проверки (вывод вашего скрипта, 40 завершённых проектов).** Все строки разложены по правилам верно:
+**Результат проверки (вывод вашего скрипта, 40 завершённых проектов).** После твоих уточнений разбиение такое:
 
-- Common Core (29): `42cursus-ft_printf`, `42cursus-get_next_line`, `42cursus-libft`, `42cursus-minishell`, `42cursus-philosophers`, `42cursus-push_swap`, `born2beroot`, `cub3d`, `inception`, `minitalk`, `netpractice`, `so_long`, `webserv`, `ft_transcendence`, `cpp-module-00…09`, `exam-rank-02…06`;
-- Outer Core (2): `42cursus-ft_hangouts`, `42_collaborative_resume` (он же ft_resume);
-- Piscina (9): `c-piscine-c-00…05`, `c-piscine-shell-00/01`, `c-piscine-reloaded` (курс 66, а не 9: поэтому разбиение по номеру курса не годилось бы).
+- Common Core (30): `42cursus-ft_printf`, `42cursus-get_next_line`, `42cursus-libft`, `42cursus-minishell`, `42cursus-philosophers`, `42cursus-push_swap`, `born2beroot`, `cub3d`, `inception`, `minitalk`, `netpractice`, `so_long`, `webserv`, `ft_transcendence`, `42_collaborative_resume` (он же ft_resume), `cpp-module-00…09`, `exam-rank-02…06`;
+- Outer Core (1): `42cursus-ft_hangouts`;
+- Piscina (8): `c-piscine-c-00…05`, `c-piscine-shell-00/01`;
+- Piscina Reloaded (1): `c-piscine-reloaded` (курс 66, а не 9: разбиение по номеру курса тут тоже не годилось бы).
+
+Первая версия правил ошиблась в двух местах, и обе поправки сделала твоя проверка: я положила коллективное резюме в Outer Core (его нет в общепринятых списках рангов, и по правилу «всё прочее» оно уходило туда), а Reloaded в Piscina (по префиксу slug). Урок: правила по slug хороши, но последнее слово за тем, кто знает программу; поэтому исключения вынесены в явные константы и тесты.
 
 Ключевая находка: **slug записаны непоследовательно**: часть с префиксом `42cursus-`, часть без (`born2beroot`, `cub3d`, `inception`). Нормализация префикса, которую мы заложили заранее, оказалась необходимой: без неё `libft`, `ft_printf` и другие с префиксом упали бы в Outer Core. Эти настоящие slug теперь зашиты в тест `project_category_test.dart` как регрессия.
 
-`ft_transcendence` в Common Core верен: в общепринятом разборе программы (ранги 00-06) он единственный проект ранга 06 и стоит последним перед отметкой «конец Common Core» ([42 Common Core Guide](https://github.com/MarkosComK/42-Common-Core-Guide)). А вот `42_collaborative_resume` в этом списке рангов вообще не упомянут, поэтому он остаётся в Outer Core по правилу «всё прочее». Если у вас он считается частью Common Core, добавляется одной строкой в `commonCoreSlugs`.
+`ft_transcendence` в Common Core верен: в общепринятом разборе программы (ранги 00-06) он единственный проект ранга 06 и стоит последним перед отметкой «конец Common Core» ([42 Common Core Guide](https://github.com/MarkosComK/42-Common-Core-Guide)). Коллективное резюме там не упомянуто, поэтому о его месте мы узнали только от тебя.
 
 ## 10. Две правки по результатам твоих тестов
 
@@ -309,8 +317,7 @@ Wrap(alignment: WrapAlignment.spaceBetween, spacing: 12, runSpacing: 2,
 
 ## 13. Открытые вопросы
 
-- Правильно ли разложены проекты (раздел 9, нужен вывод скрипта).
-- Относится ли `ft_transcendence` в вашей школе к Common Core.
+- (Решено.) `ft_transcendence` и коллективное резюме относятся к Common Core, Reloaded вынесен в отдельный раздел.
 - Хватает ли чёткости фото при ×2 (раздел 8).
 - Формула процента скилла `level / 20` и показ проектов всех курсов, а не только основного (вопросы из docs/11) остаются открытыми.
 

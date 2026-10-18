@@ -47,6 +47,18 @@ void main() {
       }
     });
 
+    test('Reloaded: отдельный раздел, не бассейн и не Common Core', () {
+      expect(of('c-piscine-reloaded'), ProjectCategory.piscineReloaded);
+      expect(of('42cursus-c-piscine-reloaded'), ProjectCategory.piscineReloaded);
+      expect(of('C-Piscine-Reloaded'), ProjectCategory.piscineReloaded);
+      // а обычный бассейн по-прежнему бассейн
+      expect(of('c-piscine-c-00'), ProjectCategory.piscine);
+    });
+
+    test('коллективное резюме относится к Common Core', () {
+      expect(of('42_collaborative_resume'), ProjectCategory.commonCore);
+    });
+
     test('Common Core: серии cpp-module и exam-rank', () {
       for (var i = 0; i <= 9; i++) {
         expect(of('cpp-module-0$i'), ProjectCategory.commonCore);
@@ -82,10 +94,10 @@ void main() {
         'netpractice': ProjectCategory.commonCore,
         'so_long': ProjectCategory.commonCore,
         'webserv': ProjectCategory.commonCore,
-        '42_collaborative_resume': ProjectCategory.outerCore,
+        '42_collaborative_resume': ProjectCategory.commonCore,
         '42cursus-ft_hangouts': ProjectCategory.outerCore,
         'c-piscine-c-00': ProjectCategory.piscine,
-        'c-piscine-reloaded': ProjectCategory.piscine,
+        'c-piscine-reloaded': ProjectCategory.piscineReloaded,
         'c-piscine-shell-01': ProjectCategory.piscine,
       };
       expected.forEach((slug, category) {
@@ -103,7 +115,7 @@ void main() {
   });
 
   group('finishedProjectsByCategory', () {
-    test('все три раздела всегда есть, в порядке показа', () {
+    test('все разделы всегда есть, в порядке показа', () {
       final grouped = const UserProfile(login: 'x').finishedProjectsByCategory();
       expect(grouped.keys.toList(), ProjectCategory.values);
       expect(grouped.values.every((list) => list.isEmpty), isTrue);

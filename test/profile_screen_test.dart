@@ -84,7 +84,8 @@ void main() {
     expect(y, [...y]..sort());
   });
 
-  testWidgets('порядок разделов: Outer Core, Common Core, Piscina', (tester) async {
+  testWidgets('порядок разделов: Outer Core, Common Core, Piscina, Reloaded',
+      (tester) async {
     final json = sampleUserJson()..remove('image');
     (json['projects_users'] as List).add({
       'id': 50,
@@ -95,11 +96,26 @@ void main() {
       'cursus_ids': [21],
       'project': {'id': 50, 'name': 'Swifty Companion', 'slug': 'swifty-companion'},
     });
+    (json['projects_users'] as List).add({
+      'id': 51,
+      'status': 'finished',
+      'validated?': true,
+      'final_mark': 100,
+      'marked_at': '2025-01-01T10:00:00.000Z', // самый новый: порядок не от даты
+      'cursus_ids': [66],
+      'project': {'id': 51, 'name': 'C-piscine-reloaded', 'slug': 'c-piscine-reloaded'},
+    });
     await pumpProfile(tester, json);
 
     expect(find.text('Outer Core · 1'), findsOneWidget);
+    expect(find.text('Piscina Reloaded · 1'), findsOneWidget);
     final y = [
-      for (final title in ['Outer Core · 1', 'Common Core · 3', 'Piscina · 1'])
+      for (final title in [
+        'Outer Core · 1',
+        'Common Core · 3',
+        'Piscina · 1',
+        'Piscina Reloaded · 1',
+      ])
         tester.getTopLeft(find.text(title)).dy,
     ];
     expect(y, [...y]..sort());

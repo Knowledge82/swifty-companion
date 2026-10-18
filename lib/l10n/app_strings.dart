@@ -81,6 +81,7 @@ abstract class AppStrings {
   String get projectsOuterCore;
   String get projectsCommonCore;
   String get projectsPiscine;
+  String get projectsPiscineReloaded;
   String get projectPassed;
   String get projectFailed;
   String get projectUnknown;
@@ -97,6 +98,7 @@ abstract class AppStrings {
         ProjectCategory.outerCore => projectsOuterCore,
         ProjectCategory.commonCore => projectsCommonCore,
         ProjectCategory.piscine => projectsPiscine,
+        ProjectCategory.piscineReloaded => projectsPiscineReloaded,
       };
 
   /// Текст проблемы с логином. `switch` по enum исчерпывающий.

@@ -70,6 +70,8 @@ class AppStringsEs extends AppStrings {
   @override
   String get projectsPiscine => 'Piscina';
   @override
+  String get projectsPiscineReloaded => 'Piscina Reloaded';
+  @override
   String get projectPassed => 'Aprobado';
   @override
   String get projectFailed => 'Suspendido';
