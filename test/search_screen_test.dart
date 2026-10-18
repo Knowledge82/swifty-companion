@@ -18,7 +18,12 @@ Map<String, dynamic> _userWithoutImage() => sampleUserJson()..remove('image');
 void main() {
   Future<void> pumpScreen(WidgetTester tester, FakeApi fake) {
     return tester.pumpWidget(
-      testApp(SearchScreen(repository: UserRepository(fake.api))),
+      testApp(
+        SearchScreen(
+          repository: UserRepository(fake.api),
+          photoLoader: fake.photos,
+        ),
+      ),
     );
   }
 

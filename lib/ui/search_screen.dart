@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../core/api_exception.dart';
 import '../core/login.dart';
+import '../data/photo_loader.dart';
 import '../data/user_repository.dart';
 import '../l10n/app_strings.dart';
 import 'error_banner.dart';
@@ -17,9 +18,14 @@ import 'profile_screen.dart';
 /// - ошибка запроса (`_requestError`): баннер под кнопкой;
 /// - успех: открывается экран профиля.
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key, required this.repository});
+  const SearchScreen({
+    super.key,
+    required this.repository,
+    required this.photoLoader,
+  });
 
   final UserRepository repository;
+  final PhotoLoader photoLoader;
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -70,7 +76,10 @@ class _SearchScreenState extends State<SearchScreen> {
       setState(() => _loading = false);
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => ProfileScreen(profile: profile),
+          builder: (_) => ProfileScreen(
+            profile: profile,
+            loadPhoto: widget.photoLoader.load,
+          ),
         ),
       );
     } on ApiException catch (e) {

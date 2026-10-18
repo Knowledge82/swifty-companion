@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/display.dart';
+import '../data/photo_loader.dart';
 import '../l10n/app_strings.dart';
 import '../models/user_profile.dart';
 import 'profile_avatar.dart';
@@ -8,9 +9,16 @@ import 'profile_avatar.dart';
 /// Экран 2: данные студента. Пока основные поля; скиллы и проекты
 /// добавятся на следующем этапе. Кнопка «назад» в AppBar возвращает на экран 1.
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key, required this.profile});
+  const ProfileScreen({
+    super.key,
+    required this.profile,
+    required this.loadPhoto,
+  });
 
   final UserProfile profile;
+
+  /// Как скачать фото (токен нужен CDN, поэтому обычный `Image.network` не годится).
+  final PhotoFetcher loadPhoto;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +38,7 @@ class ProfileScreen extends StatelessWidget {
                   Center(
                     child: ProfileAvatar(
                       urls: profile.imageUrls,
+                      loadPhoto: loadPhoto,
                       initials: initialsOf(profile.displayName ?? profile.login),
                     ),
                   ),

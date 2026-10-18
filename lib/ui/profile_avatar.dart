@@ -1,21 +1,29 @@
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../data/photo_loader.dart';
 
 /// Круглое фото профиля.
 ///
 /// Получает несколько адресов в порядке предпочтения и пробует их по очереди:
-/// если первый не загрузился (например, этой версии нет на CDN), берётся
-/// следующий. Если не загрузился ни один или адресов нет, показывается
-/// заглушка с инициалами (или значком человечка), а не падение.
+/// если первый не загрузился, берётся следующий. Если не загрузился ни один
+/// или адресов нет, показывается заглушка с инициалами (или значком человечка),
+/// а не падение. Пока идёт загрузка, виден индикатор.
 class ProfileAvatar extends StatefulWidget {
   const ProfileAvatar({
     super.key,
     required this.urls,
+    required this.loadPhoto,
     this.initials = '',
     this.size = 112,
   });
 
   final List<String> urls;
+
+  /// Как скачать байты картинки по адресу (в приложении это `PhotoLoader.load`).
+  final PhotoFetcher loadPhoto;
 
   /// Буквы для заглушки; пусто — значок человечка.
   final String initials;
@@ -26,33 +34,44 @@ class ProfileAvatar extends StatefulWidget {
 }
 
 class _ProfileAvatarState extends State<ProfileAvatar> {
-  /// Номер адреса, который пробуем сейчас.
-  int _index = 0;
+  /// Результат загрузки; `null`, если адресов нет (грузить нечего).
+  Future<Uint8List?>? _photo;
+
+  @override
+  void initState() {
+    super.initState();
+    _photo = _start();
+  }
 
   @override
   void didUpdateWidget(ProfileAvatar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!listEquals(oldWidget.urls, widget.urls)) {
-      _index = 0;
+      _photo = _start();
     }
   }
 
-  /// Переход к следующему адресу откладываем до конца кадра: менять
-  /// состояние прямо во время `build` нельзя.
-  void _tryNext(int failedIndex) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // `errorBuilder` может сработать не один раз для одного адреса;
-      // сравнение номера не даёт перескочить сразу через два.
-      if (mounted && _index == failedIndex) {
-        setState(() => _index = failedIndex + 1);
+  Future<Uint8List?>? _start() =>
+      widget.urls.isEmpty ? null : _loadFirstAvailable(widget.urls);
+
+  Future<Uint8List?> _loadFirstAvailable(List<String> urls) async {
+    for (var i = 0; i < urls.length; i++) {
+      try {
+        return await widget.loadPhoto(urls[i]);
+      } catch (e) {
+        // Причина видна только в отладке. Любая неудача (сеть, 403, мусор)
+        // означает «пробуем следующий адрес», а в итоге «показываем заглушку».
+        if (kDebugMode) {
+          debugPrint('Фото не загрузилось (${i + 1} из ${urls.length}) (${urls[i]}): $e');
+        }
       }
-    });
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     final size = widget.size;
-    final urls = widget.urls;
     final colors = Theme.of(context).colorScheme;
     final placeholder = ColoredBox(
       color: colors.surfaceContainerHighest,
@@ -70,33 +89,27 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
       ),
     );
 
+    final photo = _photo;
     final Widget content;
-    if (_index >= urls.length) {
+    if (photo == null) {
       content = placeholder;
     } else {
-      final index = _index;
-      final url = urls[index];
-      content = Image.network(
-        url,
-        key: ValueKey(url),
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          // Причина видна только в отладке. Адрес картинки публичный
-          // (CDN интры), секретов в нём нет.
-          if (kDebugMode) {
-            debugPrint(
-              'Фото не загрузилось (${index + 1} из ${urls.length}) '
-              '($url): $error',
-            );
+      content = FutureBuilder<Uint8List?>(
+        future: photo,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Center(child: CircularProgressIndicator(strokeWidth: 2));
           }
-          _tryNext(index);
-          return placeholder;
-        },
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) {
-            return child;
+          final bytes = snapshot.data;
+          if (bytes == null) {
+            return placeholder;
           }
-          return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+          return Image.memory(
+            bytes,
+            fit: BoxFit.cover,
+            // Если байты не картинка, остаёмся с заглушкой.
+            errorBuilder: (_, _, _) => placeholder,
+          );
         },
       );
     }

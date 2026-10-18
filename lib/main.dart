@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/api_client.dart';
 import 'core/config.dart';
 import 'core/token_service.dart';
+import 'data/photo_loader.dart';
 import 'data/user_repository.dart';
 import 'l10n/app_strings.dart';
 import 'ui/config_error_screen.dart';
@@ -19,7 +20,8 @@ Future<void> main() async {
     final config = AppConfig.fromMap(dotenv.env);
     // Только факт загрузки; значения секретов в лог не выводим никогда.
     debugPrint('Конфиг загружен');
-    runApp(SwiftyApp(repository: _buildRepository(config)));
+    final deps = _buildDependencies(config);
+    runApp(SwiftyApp(repository: deps.repository, photoLoader: deps.photos));
   } on ConfigException catch (e) {
     runApp(ConfigErrorApp(missingKeys: e.missing));
   } catch (_) {
@@ -27,21 +29,31 @@ Future<void> main() async {
   }
 }
 
-/// Собирает цепочку зависимостей: токен → клиент API → репозиторий.
-/// Один экземпляр на всё приложение, поэтому токен общий и запрашивается один раз.
-UserRepository _buildRepository(AppConfig config) {
+/// Собирает зависимости: один `TokenService` на всё приложение, на нём
+/// клиент API (профиль) и загрузчик фото. Токен общий и запрашивается один раз.
+({UserRepository repository, PhotoLoader photos}) _buildDependencies(
+  AppConfig config,
+) {
   // В отладочной сборке пишем технический журнал в консоль (без секретов),
   // в релизной молчим.
   final void Function(String)? log = kDebugMode ? debugPrint : null;
   final tokens = TokenService(config: config, onLog: log);
   final api = ApiClient(tokenService: tokens, onLog: log);
-  return UserRepository(api);
+  return (
+    repository: UserRepository(api),
+    photos: PhotoLoader(tokenService: tokens, onLog: log),
+  );
 }
 
 class SwiftyApp extends StatelessWidget {
-  const SwiftyApp({super.key, required this.repository});
+  const SwiftyApp({
+    super.key,
+    required this.repository,
+    required this.photoLoader,
+  });
 
   final UserRepository repository;
+  final PhotoLoader photoLoader;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +64,7 @@ class SwiftyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
-      home: SearchScreen(repository: repository),
+      home: SearchScreen(repository: repository, photoLoader: photoLoader),
     );
   }
 }

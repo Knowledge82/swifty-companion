@@ -9,7 +9,13 @@ import 'test_app.dart';
 void main() {
   Future<void> pumpProfile(WidgetTester tester, Map<String, dynamic> json) {
     return tester.pumpWidget(
-      testApp(ProfileScreen(profile: UserProfile.fromJson(json))),
+      testApp(
+        ProfileScreen(
+          profile: UserProfile.fromJson(json),
+          // Профили в этих тестах без фото, загрузка не должна вызываться.
+          loadPhoto: (url) => Future.error(StateError('не должно вызываться: $url')),
+        ),
+      ),
     );
   }
 
