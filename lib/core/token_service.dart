@@ -20,19 +20,17 @@ const String apiBaseUrl = 'https://api.intra.42.fr';
 ///    После истечения следующий вызов сам получает новый токен (бонус задания).
 /// 4. Токен и секрет никогда не попадают в логи, сообщения об ошибках и адрес запроса.
 class TokenService {
+  // Приватные именованные параметры (Dart 3.12+): `this._config` означает
+  // параметр с публичным именем `config`, который сразу кладётся в поле `_config`.
   TokenService({
-    required AppConfig config,
+    required this._config,
     http.Client? client,
     DateTime Function()? now,
-    Duration requestTimeout = const Duration(seconds: 15),
-    Duration safetyMargin = const Duration(seconds: 60),
-    Duration defaultLifetime = const Duration(hours: 1),
-  })  : _config = config,
-        _client = client ?? http.Client(),
-        _now = now ?? DateTime.now,
-        _requestTimeout = requestTimeout,
-        _safetyMargin = safetyMargin,
-        _defaultLifetime = defaultLifetime;
+    this._requestTimeout = const Duration(seconds: 15),
+    this._safetyMargin = const Duration(seconds: 60),
+    this._defaultLifetime = const Duration(hours: 1),
+  })  : _client = client ?? http.Client(),
+        _now = now ?? DateTime.now;
 
   final AppConfig _config;
   final http.Client _client;

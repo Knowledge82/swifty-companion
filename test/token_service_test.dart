@@ -23,7 +23,7 @@ http.Response _token(String value, {int? expiresIn = 7200}) {
   return _json({
     'access_token': value,
     'token_type': 'bearer',
-    if (expiresIn != null) 'expires_in': expiresIn,
+    'expires_in': ?expiresIn, // «?» — добавить пару, только если значение не null
   });
 }
 
