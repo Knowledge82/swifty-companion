@@ -181,7 +181,7 @@ class _CollapsibleState extends State<_Collapsible>
         }
         return SizeTransition(
           sizeFactor: _size,
-          axisAlignment: -1,
+          alignment: Alignment.topCenter,
           child: child,
         );
       },
