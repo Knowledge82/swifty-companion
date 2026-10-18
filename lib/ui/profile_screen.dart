@@ -27,7 +27,12 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Center(child: ProfileAvatar(urls: profile.imageUrls)),
+                  Center(
+                    child: ProfileAvatar(
+                      urls: profile.imageUrls,
+                      initials: initialsOf(profile.displayName ?? profile.login),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     profile.displayName.orNA,

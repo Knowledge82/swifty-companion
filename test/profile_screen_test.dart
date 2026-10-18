@@ -39,9 +39,16 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('без фото показывается заглушка', (tester) async {
+  testWidgets('без фото в заглушке инициалы имени', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    expect(find.byIcon(Icons.person), findsOneWidget);
+    expect(find.text('JD'), findsOneWidget); // Jane Doe
+    expect(find.byIcon(Icons.person), findsNothing);
+  });
+
+  testWidgets('без имени инициал берётся из логина', (tester) async {
+    await pumpProfile(tester, {'login': 'x'});
+
+    expect(find.text('X'), findsOneWidget);
   });
 }

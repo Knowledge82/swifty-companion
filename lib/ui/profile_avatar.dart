@@ -1,20 +1,24 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
-import '../core/photo_request.dart';
 
 /// Круглое фото профиля.
 ///
 /// Получает несколько адресов в порядке предпочтения и пробует их по очереди:
 /// если первый не загрузился (например, этой версии нет на CDN), берётся
 /// следующий. Если не загрузился ни один или адресов нет, показывается
-/// нейтральная заглушка, а не падение.
+/// заглушка с инициалами (или значком человечка), а не падение.
 class ProfileAvatar extends StatefulWidget {
-  const ProfileAvatar({super.key, required this.urls, this.size = 112});
+  const ProfileAvatar({
+    super.key,
+    required this.urls,
+    this.initials = '',
+    this.size = 112,
+  });
 
   final List<String> urls;
+
+  /// Буквы для заглушки; пусто — значок человечка.
+  final String initials;
   final double size;
 
   @override
@@ -24,9 +28,6 @@ class ProfileAvatar extends StatefulWidget {
 class _ProfileAvatarState extends State<ProfileAvatar> {
   /// Номер адреса, который пробуем сейчас.
   int _index = 0;
-
-  /// Временная отладочная проба CDN запускается один раз за жизнь виджета.
-  bool _probed = false;
 
   @override
   void didUpdateWidget(ProfileAvatar oldWidget) {
@@ -52,9 +53,21 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
   Widget build(BuildContext context) {
     final size = widget.size;
     final urls = widget.urls;
+    final colors = Theme.of(context).colorScheme;
     final placeholder = ColoredBox(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Icon(Icons.person, size: size / 2),
+      color: colors.surfaceContainerHighest,
+      child: Center(
+        child: widget.initials.isEmpty
+            ? Icon(Icons.person, size: size / 2, color: colors.onSurfaceVariant)
+            : Text(
+                widget.initials,
+                style: TextStyle(
+                  fontSize: size / 3,
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+      ),
     );
 
     final Widget content;
@@ -66,7 +79,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
       content = Image.network(
         url,
         key: ValueKey(url),
-        headers: photoRequestHeaders,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           // Причина видна только в отладке. Адрес картинки публичный
@@ -76,10 +88,6 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
               'Фото не загрузилось (${index + 1} из ${urls.length}) '
               '($url): $error',
             );
-          }
-          if (kDebugMode && !_probed) {
-            _probed = true;
-            unawaited(probePhoto(url));
           }
           _tryNext(index);
           return placeholder;
