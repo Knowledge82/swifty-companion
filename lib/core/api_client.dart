@@ -15,11 +15,16 @@ class ApiClient {
     required this._tokenService,
     http.Client? client,
     this._requestTimeout = const Duration(seconds: 15),
+    this._onLog,
   }) : _client = client ?? http.Client();
 
   final TokenService _tokenService;
   final http.Client _client;
   final Duration _requestTimeout;
+
+  /// Куда писать отладочные сообщения (или `null` — молчать).
+  /// Пишем только адрес, код, размер и время; токен не попадает никогда.
+  final void Function(String message)? _onLog;
 
   /// GET `https://api.intra.42.fr/<segments>` с токеном. Возвращает JSON-объект.
   ///
@@ -41,8 +46,9 @@ class ApiClient {
     return _handle(response);
   }
 
-  Future<http.Response> _get(Uri uri, String token) {
-    return guardedRequest(
+  Future<http.Response> _get(Uri uri, String token) async {
+    final watch = Stopwatch()..start();
+    final response = await guardedRequest(
       () => _client.get(
         uri,
         headers: {
@@ -52,6 +58,11 @@ class ApiClient {
       ),
       _requestTimeout,
     );
+    _onLog?.call(
+      'GET ${uri.path} → ${response.statusCode}, '
+      '${response.bodyBytes.length} байт, ${watch.elapsedMilliseconds} мс',
+    );
+    return response;
   }
 
   Map<String, dynamic> _handle(http.Response response) {

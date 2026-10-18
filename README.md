@@ -43,7 +43,9 @@
 | Этап 1: зависимости, конфиг из `.env`, скелет двух экранов, тесты | 🟡 `pub get` и тесты у тебя прошли; **запуск на телефоне не подтверждён** (чек-лист в docs/05) | [docs/05-config-and-skeleton.md](docs/05-config-and-skeleton.md) |
 | Этап 2: модели данных и устойчивый разбор JSON (скрытые поля, выбор курса, процент скилла) | ✅ `flutter test`: 47 из 47, `flutter analyze` чист после правки линтера (docs/06) | [docs/06-models.md](docs/06-models.md) |
 | Этап 3: токен-сервис (кэш, срок жизни, один запрос на всех, бонус: автообновление) и ошибки API | ✅ 73 из 73 тестов; `flutter analyze`: 5 замечаний `info` исправлены, ждём подтверждения (docs/07) | [docs/07-token-service.md](docs/07-token-service.md) |
-| Этап 4: клиент API (Bearer, повтор после 401, коды → ошибки) и репозиторий | 🟡 код и 28 тестов написаны, **не проверены** (чек-лист в docs/08) | [docs/08-api-client.md](docs/08-api-client.md) |
+| Этап 4: клиент API (Bearer, повтор после 401, коды → ошибки) и репозиторий | ✅ 101 из 101 тест, мутационные проверки пройдены (docs/08) | [docs/08-api-client.md](docs/08-api-client.md) |
+| [docs/09-first-live-run.md](docs/09-first-live-run.md) | Этап 5: внедрение зависимостей, состояния экрана поиска, ловушки `async` (`mounted`, двойное нажатие), баннер ошибок, журнал, чек-лист живого запуска |
+| Этап 5: первый сквозной запуск: поиск → API → профиль, индикатор, баннер ошибок, отладочный журнал | 🟡 код и тесты написаны, **не проверены**; живой запуск на телефоне по чек-листу docs/09 | [docs/09-first-live-run.md](docs/09-first-live-run.md) |
 | Экран поиска | ⏳ | будет |
 | Экран профиля (данные, скиллы, проекты) | ⏳ | будет |
 | Обработка всех ошибок | ⏳ | будет |
@@ -234,20 +236,22 @@ swifty-companion/
 │   ├── 05-config-and-skeleton.md
 │   ├── 06-models.md
 │   ├── 07-token-service.md
-│   └── 08-api-client.md
+│   ├── 08-api-client.md
+│   └── 09-first-live-run.md
 ├── lib/
-│   ├── main.dart              точка входа: загрузка .env, запуск приложения
+│   ├── main.dart              точка входа: загрузка .env, сборка зависимостей, запуск приложения
 │   ├── core/                  config.dart (AppConfig), login.dart (проверка логина),
 │   │                          json_reader.dart (безопасное чтение JSON), display.dart (N/A),
 │   │                          token_service.dart (токен), api_exception.dart (ошибки API),
 │   │                          api_client.dart (запросы), http_helpers.dart, api_constants.dart
 │   ├── data/                  user_repository.dart (логин → UserProfile)
 │   ├── models/                skill, project_result, cursus_progress, user_profile
-│   └── ui/                    search_screen, profile_screen, config_error_screen
+│   └── ui/                    search_screen, profile_screen, profile_avatar, error_banner, config_error_screen
 ├── test/                      config_test, login_test, search_screen_test,
 │                              json_reader_test, models_test, fixtures (вымышленный профиль),
 │                              token_service_test, api_exception_test, api_client_test,
-│                              user_repository_test, http_helpers_test, fake_api (поддельный сервер)
+│                              user_repository_test, http_helpers_test, profile_screen_test, logging_test,
+│                              fake_api (поддельный сервер)
 ├── android/                   нативная Android-часть, собирается через Gradle
 ├── pubspec.yaml               манифест: имя, версия, зависимости, ассеты
 ├── pubspec.lock               зафиксированные версии зависимостей (коммитим)

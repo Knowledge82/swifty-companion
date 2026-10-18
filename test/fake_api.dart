@@ -50,10 +50,13 @@ class FakeApi {
   int tokenCalls = 0;
   final List<http.Request> userRequests = [];
 
+  /// Всё, что токен-сервис и клиент написали в свой отладочный журнал.
+  final List<String> logs = [];
+
   late final MockClient client = MockClient(_handle);
   late final TokenService tokens =
-      TokenService(config: testConfig, client: client);
-  late final ApiClient api = ApiClient(tokenService: tokens, client: client);
+      TokenService(config: testConfig, client: client, onLog: logs.add);
+  late final ApiClient api = ApiClient(tokenService: tokens, client: client, onLog: logs.add);
 
   Future<http.Response> _handle(http.Request request) async {
     if (request.url.path == '/oauth/token') {

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import 'core/api_client.dart';
 import 'core/config.dart';
+import 'core/token_service.dart';
+import 'data/user_repository.dart';
 import 'ui/config_error_screen.dart';
 import 'ui/search_screen.dart';
 
@@ -14,7 +17,7 @@ Future<void> main() async {
     final config = AppConfig.fromMap(dotenv.env);
     // Только факт загрузки; значения секретов в лог не выводим никогда.
     debugPrint('Конфиг загружен');
-    runApp(SwiftyApp(config: config));
+    runApp(SwiftyApp(repository: _buildRepository(config)));
   } on ConfigException catch (e) {
     runApp(ConfigErrorApp(message: e.message));
   } catch (_) {
@@ -24,11 +27,21 @@ Future<void> main() async {
   }
 }
 
-class SwiftyApp extends StatelessWidget {
-  // config пока не используется: он понадобится токен-сервису (этап 3).
-  const SwiftyApp({super.key, required this.config});
+/// Собирает цепочку зависимостей: токен → клиент API → репозиторий.
+/// Один экземпляр на всё приложение, поэтому токен общий и запрашивается один раз.
+UserRepository _buildRepository(AppConfig config) {
+  // В отладочной сборке пишем технический журнал в консоль (без секретов),
+  // в релизной молчим.
+  final void Function(String)? log = kDebugMode ? debugPrint : null;
+  final tokens = TokenService(config: config, onLog: log);
+  final api = ApiClient(tokenService: tokens, onLog: log);
+  return UserRepository(api);
+}
 
-  final AppConfig config;
+class SwiftyApp extends StatelessWidget {
+  const SwiftyApp({super.key, required this.repository});
+
+  final UserRepository repository;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +50,7 @@ class SwiftyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
-      home: const SearchScreen(),
+      home: SearchScreen(repository: repository),
     );
   }
 }

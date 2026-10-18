@@ -25,6 +25,7 @@ class TokenService {
     this._requestTimeout = const Duration(seconds: 15),
     this._safetyMargin = const Duration(seconds: 60),
     this._defaultLifetime = const Duration(hours: 1),
+    this._onLog,
   })  : _client = client ?? http.Client(),
         _now = now ?? DateTime.now;
 
@@ -34,6 +35,10 @@ class TokenService {
   final Duration _requestTimeout;
   final Duration _safetyMargin;
   final Duration _defaultLifetime;
+
+  /// Куда писать отладочные сообщения (или `null` — молчать). В сообщения
+  /// не попадают ни токен, ни секрет, только факты вроде срока жизни.
+  final void Function(String message)? _onLog;
 
   String? _token;
   DateTime? _expiresAt;
@@ -62,6 +67,7 @@ class TokenService {
     if (_token == failedToken) {
       _token = null;
       _expiresAt = null;
+      _onLog?.call('Токен отвергнут сервером и сброшен');
     }
   }
 
@@ -120,6 +126,7 @@ class TokenService {
 
     _token = token;
     _expiresAt = _now().add(lifetime);
+    _onLog?.call('Получен токен, срок жизни ${lifetime.inSeconds} с');
     return token;
   }
 }

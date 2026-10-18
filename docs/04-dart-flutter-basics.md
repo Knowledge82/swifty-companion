@@ -234,7 +234,7 @@ MaterialApp
 | Когда перерисовывается | когда родитель передал новые данные | то же, **и** когда вызван `setState` |
 | Пример у нас | `ProfileScreen`, `ConfigErrorApp` | `SearchScreen` |
 
-`SearchScreen` хранит текст ошибки `_error`, который меняется, поэтому он `StatefulWidget`. Строка вида `String? _error;` живёт в классе `_SearchScreenState`. Подчёркивание в начале имени делает его **приватным для файла**.
+`SearchScreen` хранит меняющиеся данные (`_loading`, `_fieldError`, `_requestError`; на этапе 1 это был один `_error`), поэтому он `StatefulWidget`. Такие поля, например `String? _fieldError;`, живут в классе `_SearchScreenState`. Подробнее про состояния: [docs/09](09-first-live-run.md). Подчёркивание в начале имени делает его **приватным для файла**.
 
 Ключевое правило: **меняешь состояние только внутри `setState(() { ... })`**. Он помечает виджет «грязным» и просит Flutter вызвать `build` заново.
 
@@ -263,7 +263,7 @@ MaterialApp
 
 ```dart
 Navigator.of(context).push(
-  MaterialPageRoute<void>(builder: (_) => ProfileScreen(login: ...)),
+  MaterialPageRoute<void>(builder: (_) => ProfileScreen(profile: ...)),
 );
 ```
 
