@@ -54,7 +54,7 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({
     super.key,
     required this.next,
-    this.duration = const Duration(milliseconds: 3000),
+    this.duration = const Duration(milliseconds: 5000),
     this.fadeIn = const Duration(milliseconds: 700),
     this.fadeOut = const Duration(milliseconds: 600),
     this.imageWait = const Duration(milliseconds: 1500),
