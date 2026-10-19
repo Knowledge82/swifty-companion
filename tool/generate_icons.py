@@ -46,6 +46,10 @@ LEATHER_DEEP = (0x17, 0x0E, 0x09)
 
 LOGO_SVG = os.path.join('tool', '42_logo.svg')
 
+# Длительность одного прохода анимации splash, секунд. Скорость вращения не зависит
+# от неё (большая шестерёнка делает 83 градуса в секунду).
+ANIM_SECONDS = 60
+
 
 def load_logo():
     """Многоугольники знака из SVG (атрибуты points) и их габариты."""
@@ -191,10 +195,18 @@ def write_animated_splash(placed, chain):
 
     Идея: каждая шестерёнка это <group> со своим pivot в центре; AnimatedVectorDrawable
     вращает группы. Угол поворота шестерёнки = передаточное число × угол большой,
-    поэтому зацепление не нарушается в любой момент. Большая крутится на ТРИ шага
-    зубьев (3 · 360/13 градусов), и тогда каждая из остальных проворачивается ровно
-    на 3 своих зуба: картинка в конце совпадает с картинкой в начале, и анимацию
-    можно зациклить без скачка. Знак 42 лежит в отдельной группе без анимации.
+    поэтому зацепление не нарушается в любой момент. Знак 42 лежит в отдельной
+    группе без анимации.
+
+    ПОЧЕМУ НЕТ ЗАЦИКЛИВАНИЯ. Раньше анимация длилась 1 с и повторялась: большая
+    поворачивалась на три шага зубьев, остальные на три своих зуба, так что ЗУБЬЯ
+    в конце цикла совпадали с началом. Но у малых шестерёнок есть болт со шлицем
+    (отвёрточной прорезью), и он совпадает с исходным положением только при
+    повороте на целое число оборотов (точнее, на 180 градусов). Три зуба это 216
+    градусов у шестерёнки на 5 зубьев, 154 на 7, 120 на 9: на стыке повторов шлиц
+    «соскакивал». Поэтому теперь ОДИН длинный проход (ANIM_SECONDS) без повтора:
+    скорость вращения та же, а скачка нет, потому что сброса в начало нет вовсе
+    (сплэш виден секунды, а не минуту).
     """
     viewport = 288.0
     radius_frac = 0.30
@@ -271,20 +283,20 @@ def write_animated_splash(placed, chain):
         f.write('\n'.join(out))
     print('записано', path)
 
-    # Анимация: одна секунда (максимум для splash Android 12), линейно, по кругу.
-    step = 3 * 360.0 / chain[0][3]  # три зуба большой, градусов
+    # Анимация: один длинный проход, линейно, без повтора (см. docstring).
+    step = 3 * 360.0 / chain[0][3]  # градусов в секунду у большой (три зуба за секунду)
     anim = ['<?xml version="1.0" encoding="utf-8"?>',
             '<!-- СОЗДАНО tool/generate_icons.py, руками не править. Анимированный значок splash',
             '     Android 12+: каждая шестерёнка вращается с передаточным числом цепочки. -->',
             f'<animated-vector {ns}',
             '    android:drawable="@drawable/splash_icon_vector">']
     for index, g in enumerate(placed):
-        angle = g['ratio'] * step
+        angle = g['ratio'] * step * ANIM_SECONDS
         anim += [f'    <target android:name="gear{index}">',
                  '        <aapt:attr name="android:animation">',
                  '            <objectAnimator android:propertyName="rotation" '
-                 f'android:valueFrom="0" android:valueTo="{fmt(angle)}" android:duration="1000" '
-                 'android:repeatCount="infinite" android:interpolator="@android:interpolator/linear" />',
+                 f'android:valueFrom="0" android:valueTo="{fmt(angle)}" '
+                 f'android:duration="{ANIM_SECONDS * 1000}" android:interpolator="@android:interpolator/linear" />',
                  '        </aapt:attr>',
                  '    </target>']
     anim += ['</animated-vector>', '']
