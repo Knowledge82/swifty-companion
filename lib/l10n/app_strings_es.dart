@@ -43,8 +43,15 @@ class AppStringsEs extends AppStrings {
   String get emailLabel => 'Correo';
   @override
   String get phoneLabel => 'Teléfono';
+  // Puesto: "puesto de trabajo" (ordenador concreto del campus, p. ej. c1r2s3).
   @override
-  String get locationLabel => 'Ubicación';
+  String get locationLabel => 'Puesto';
+  @override
+  String get onlineLabel => 'Online';
+  @override
+  String get onlineOn => 'En el campus';
+  @override
+  String get onlineOff => 'Fuera del campus';
   @override
   String get levelLabel => 'Nivel';
   @override

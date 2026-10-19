@@ -10,6 +10,7 @@ import 'easter_egg.dart';
 import 'profile_avatar.dart';
 import 'projects_section.dart';
 import 'skills_section.dart';
+import 'steampunk/steampunk_theme.dart';
 import 'steampunk/steampunk_widgets.dart';
 
 /// Размер фото на экране профиля (в два раза больше первой версии).
@@ -94,10 +95,18 @@ class ProfileScreen extends StatelessWidget {
                                 label: strings.phoneLabel,
                                 value: profile.phone.orNA,
                               ),
-                              _InfoRow(
-                                label: strings.locationLabel,
-                                value: profile.location.orNA,
+                              _OnlineRow(
+                                label: strings.onlineLabel,
+                                online: profile.isOnline,
+                                onText: strings.onlineOn,
+                                offText: strings.onlineOff,
                               ),
+                              // Рабочее место показываем, только если студент в кампусе.
+                              if (profile.location != null)
+                                _InfoRow(
+                                  label: strings.locationLabel,
+                                  value: profile.location!,
+                                ),
                               _InfoRow(
                                 label: strings.levelLabel,
                                 value: cursus == null
@@ -157,6 +166,66 @@ class _LevelBar extends StatelessWidget {
           minHeight: 8,
           semanticsLabel: AppStrings.of(context).levelLabel,
           semanticsValue: formatPercent(fraction * 100),
+        ),
+      ),
+    );
+  }
+}
+
+/// Строка «Online»: лампочка и слово. Зелёная лампочка с лёгким свечением, если
+/// студент в кампусе, серая погашенная, если нет.
+class _OnlineRow extends StatelessWidget {
+  const _OnlineRow({
+    required this.label,
+    required this.online,
+    required this.onText,
+    required this.offText,
+  });
+
+  final String label;
+  final bool online;
+  final String onText;
+  final String offText;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = online ? onText : offText;
+    return Semantics(
+      label: '$label: $text',
+      excludeSemantics: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: TextStyle(color: Theme.of(context).colorScheme.outline),
+              ),
+            ),
+            Container(
+              key: const ValueKey('online-lamp'),
+              width: 14,
+              height: 14,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: online ? onlineGreen : offlineGray,
+                border: Border.all(color: leatherDeep, width: 1.5),
+                boxShadow: online
+                    ? [
+                        BoxShadow(
+                          color: onlineGreen.withValues(alpha: 0.6),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ]
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text)),
+          ],
         ),
       ),
     );

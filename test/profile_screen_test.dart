@@ -3,9 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/models/user_profile.dart';
 import 'package:swifty_companion/ui/profile_avatar.dart';
 import 'package:swifty_companion/ui/profile_screen.dart';
+import 'package:swifty_companion/ui/steampunk/steampunk_theme.dart';
 
 import 'fixtures.dart';
 import 'test_app.dart';
+
+/// Коэффициент контрастности WCAG (как в steampunk_test.dart).
+double contrast(Color a, Color b) {
+  final la = a.computeLuminance() + 0.05;
+  final lb = b.computeLuminance() + 0.05;
+  return la > lb ? la / lb : lb / la;
+}
 
 void main() {
   Future<void> pumpProfile(WidgetTester tester, Map<String, dynamic> json) {
@@ -42,20 +50,74 @@ void main() {
   testWidgets('скрытое и пустое выводится как N/A', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // Проекты свёрнуты, поэтому видны только телефон ("hidden") и место (null).
-    expect(find.text('N/A'), findsNWidgets(2));
+    // Проекты свёрнуты, поэтому виден только телефон ("hidden"). Место (null)
+    // не N/A: его строки нет, а в кампусе ли студент, говорит строка Online.
+    expect(find.text('N/A'), findsNWidgets(1));
 
     // Раскрыли группу: добавился итог проекта без оценки.
     await expandGroup(tester, 'Piscina · 1');
-    expect(find.text('N/A'), findsNWidgets(3));
+    expect(find.text('N/A'), findsNWidgets(2));
   });
 
   testWidgets('минимальный профиль не ломает экран', (tester) async {
     await pumpProfile(tester, {'login': 'x'});
 
-    // имя, email, телефон, место, уровень, кошелёк, очки
-    expect(find.text('N/A'), findsNWidgets(7));
+    // имя, email, телефон, уровень, кошелёк, очки (места нет: строка скрыта)
+    expect(find.text('N/A'), findsNWidgets(6));
     expect(tester.takeException(), isNull);
+  });
+
+  group('Online и рабочее место', () {
+    BoxDecoration lampOf(WidgetTester tester) => tester
+        .widget<Container>(find.byKey(const ValueKey('online-lamp')))
+        .decoration! as BoxDecoration;
+
+    testWidgets('нет места: серая лампочка, «Fuera del campus», строки места нет',
+        (tester) async {
+      await pumpProfile(tester, sampleUserJson()..remove('image'));
+
+      expect(find.text('Online'), findsOneWidget);
+      expect(find.text('Fuera del campus'), findsOneWidget);
+      expect(find.text('En el campus'), findsNothing);
+      expect(lampOf(tester).color, offlineGray);
+      expect(lampOf(tester).boxShadow, isNull); // погашена: свечения нет
+      expect(find.text('Puesto'), findsNothing);
+    });
+
+    testWidgets('есть место: зелёная светящаяся лампочка и само место ниже',
+        (tester) async {
+      final json = sampleUserJson()..remove('image');
+      json['location'] = 'c1r2s3';
+      await pumpProfile(tester, json);
+
+      expect(find.text('En el campus'), findsOneWidget);
+      expect(find.text('Fuera del campus'), findsNothing);
+      expect(lampOf(tester).color, onlineGreen);
+      expect(lampOf(tester).boxShadow, isNotEmpty); // свечение
+      expect(find.text('Puesto'), findsOneWidget);
+      expect(find.text('c1r2s3'), findsOneWidget);
+
+      // Место ниже строки Online.
+      expect(
+        tester.getTopLeft(find.text('c1r2s3')).dy,
+        greaterThan(tester.getTopLeft(find.text('Online')).dy),
+      );
+    });
+
+    testWidgets('для чтения с экрана статус одной фразой', (tester) async {
+      final handle = tester.ensureSemantics();
+      final json = sampleUserJson()..remove('image');
+      json['location'] = 'c1r2s3';
+      await pumpProfile(tester, json);
+
+      expect(find.bySemanticsLabel('Online: En el campus'), findsOneWidget);
+      handle.dispose();
+    });
+
+    test('лампочка различима на панели (не ниже 3:1 для значков)', () {
+      expect(contrast(onlineGreen, walnut), greaterThanOrEqualTo(3));
+      expect(contrast(offlineGray, walnut), greaterThanOrEqualTo(3));
+    });
   });
 
   testWidgets('скиллы: уровень и процент, сильные сверху', (tester) async {

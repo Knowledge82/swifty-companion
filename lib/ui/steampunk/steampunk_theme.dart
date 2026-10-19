@@ -24,6 +24,11 @@ const Color walnut = Color(0xFF2A1B12); // фон панелей
 const Color walnutLight = Color(0xFF3E291B); // заглушка фото
 const Color oxide = Color(0xFF3F9E80); // пятна окиси на металле
 
+/// Лампочка «в кампусе»: зелёная светится, серая погашена. Цвет не единственный
+/// признак: рядом всегда пишется слово («En el campus» / «Fuera del campus»).
+const Color onlineGreen = Color(0xFF55D17A);
+const Color offlineGray = Color(0xFF7D766C);
+
 /// Цвет названий разделов профиля («Habilidades», «Proyectos completados»).
 /// Сейчас это окись; если захочешь посветлее, подставь `verdigris`
 /// (`#6FB39C`, контраст на панели 6,8:1 вместо 5,1:1).

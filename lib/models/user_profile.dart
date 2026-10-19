@@ -54,6 +54,12 @@ class UserProfile {
   final String? email;
   final String? phone;
   final String? location;
+
+  /// В кампусе ли студент сейчас. API не даёт отдельного признака «онлайн»:
+  /// `location` это рабочее место, за которым студент залогинен (например,
+  /// `c1r2s3`), и `null`, когда его нет в кампусе. Поэтому онлайн = место есть.
+  /// Отличить «нет в кампусе» от «место скрыто» по ответу нельзя.
+  bool get isOnline => location != null;
   final int? wallet;
   final int? correctionPoints;
   final String? poolMonth;

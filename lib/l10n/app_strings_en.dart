@@ -42,7 +42,13 @@ class AppStringsEn extends AppStrings {
   @override
   String get phoneLabel => 'Phone';
   @override
-  String get locationLabel => 'Location';
+  String get locationLabel => 'Workstation';
+  @override
+  String get onlineLabel => 'Online';
+  @override
+  String get onlineOn => 'On campus';
+  @override
+  String get onlineOff => 'Off campus';
   @override
   String get levelLabel => 'Level';
   @override

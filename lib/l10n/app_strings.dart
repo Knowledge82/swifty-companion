@@ -68,6 +68,9 @@ abstract class AppStrings {
   String get emailLabel;
   String get phoneLabel;
   String get locationLabel;
+  String get onlineLabel;
+  String get onlineOn;
+  String get onlineOff;
   String get levelLabel;
   String get walletLabel;
   String get correctionPointsLabel;

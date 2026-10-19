@@ -124,6 +124,21 @@ void main() {
       expect(profile.phone, isNull);
       expect(profile.phone.orNA, 'N/A');
       expect(profile.location, isNull);
+      expect(profile.isOnline, isFalse); // нет места: не в кампусе
+    });
+
+    test('есть место: студент в кампусе', () {
+      final json = sampleUserJson()..['location'] = 'c1r2s3';
+      final profile = UserProfile.fromJson(json);
+      expect(profile.location, 'c1r2s3');
+      expect(profile.isOnline, isTrue);
+    });
+
+    test('пустая строка и пробелы вместо места: не в кампусе', () {
+      for (final value in ['', '   ']) {
+        final json = sampleUserJson()..['location'] = value;
+        expect(UserProfile.fromJson(json).isOnline, isFalse, reason: '"$value"');
+      }
     });
 
     test('обычные поля читаются', () {
