@@ -49,12 +49,26 @@ def load_core_slugs():
     return set(re.findall(r"'([^']+)'", block))
 
 
+def load_dart():
+    """Префиксы, шаблоны RegExp и список slug берём из dart: скрипт не расходится с приложением."""
+    with open(CATEGORY_DART, encoding='utf-8') as f:
+        text = f.read()
+    prefixes = re.findall(r"'([^']+)'", re.search(
+        r'slugPrefixes\s*=\s*\[(.*?)\];', text, re.S).group(1))
+    patterns = [re.compile(p) for p in re.findall(r"RegExp\(r'([^']+)'\)", text)]
+    return prefixes, patterns
+
+
 CORE = load_core_slugs()
+PREFIXES, PATTERNS = load_dart()
 
 
 def norm(slug):
     s = slug.strip().lower()
-    return s[len('42cursus-'):] if s.startswith('42cursus-') else s
+    for prefix in PREFIXES:
+        if s.startswith(prefix):
+            return s[len(prefix):]
+    return s
 
 
 def category(slug):
@@ -65,7 +79,7 @@ def category(slug):
         return 'Reloaded'
     if s.startswith('c-piscine') or s.startswith('piscine'):
         return 'Piscina'
-    if s in CORE or re.fullmatch(r'cpp-module-\d{2}', s) or re.fullmatch(r'exam-rank-\d{2}', s):
+    if s in CORE or any(p.search(s) for p in PATTERNS):
         return 'Common'
     return 'Outer'
 

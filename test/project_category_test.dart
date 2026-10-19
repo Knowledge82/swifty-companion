@@ -105,11 +105,76 @@ void main() {
       });
     });
 
+    test('новая программа Common Core: префикс 42next- и серии', () {
+      // Те же проекты, что и в старой программе, но с другим префиксом.
+      expect(of('42next-born2beroot'), ProjectCategory.commonCore);
+      expect(of('42next-push_swap'), ProjectCategory.commonCore);
+      expect(of('42NEXT-Push_Swap'), ProjectCategory.commonCore);
+      for (var i = 2; i <= 6; i++) {
+        expect(of('42next-exam-rank-0$i'), ProjectCategory.commonCore);
+      }
+      // Python-модули: две цифры, 00…10 (и запас на будущие номера).
+      for (var i = 0; i <= 10; i++) {
+        final n = i.toString().padLeft(2, '0');
+        expect(of('python-module-$n'), ProjectCategory.commonCore, reason: n);
+      }
+      // Префикс не должен «склеивать» разные вещи.
+      expect(of('42next-swifty-companion'), ProjectCategory.outerCore);
+      expect(of('42next-libft-extra'), ProjectCategory.outerCore);
+    });
+
+    test('настоящие slug студента новой программы (выгрузка из API)', () {
+      // Студент ещё не дошёл до Outer Core: ни один из его проектов
+      // не должен попасть в этот раздел. Piscine/Reloaded остаются как были.
+      const commonCore = [
+        '42cursus-ft_printf',
+        '42cursus-get_next_line',
+        '42cursus-libft',
+        'inception',
+        'netpractice',
+        '42next-born2beroot',
+        '42next-exam-rank-02',
+        '42next-exam-rank-03',
+        '42next-exam-rank-04',
+        '42next-exam-rank-05',
+        '42next-push_swap',
+        'a-maze-ing',
+        'agent-smith',
+        'call-me-maybe',
+        'codexion',
+        'exam-atonement',
+        'fly-in',
+        'pac-man',
+        'python-module-00',
+        'python-module-01',
+        'python-module-02',
+        'python-module-03',
+        'python-module-04',
+        'python-module-05',
+        'python-module-06',
+        'python-module-07',
+        'python-module-08',
+        'python-module-09',
+        'python-module-10',
+        'rag-against-the-machine',
+        'the-answer-protocol',
+      ];
+      for (final slug in commonCore) {
+        expect(of(slug), ProjectCategory.commonCore, reason: slug);
+      }
+      expect(of('c-piscine-bsq'), ProjectCategory.piscine);
+      expect(of('c-piscine-final-exam'), ProjectCategory.piscine);
+      expect(of('c-piscine-reloaded'), ProjectCategory.piscineReloaded);
+    });
+
     test('всё неизвестное, включая проект без slug, уходит в Outer Core', () {
       expect(of('swifty-companion'), ProjectCategory.outerCore);
       expect(of('mobile-0'), ProjectCategory.outerCore);
       expect(of('libft-extra'), ProjectCategory.outerCore); // не совпадает целиком
       expect(of('cpp-module-0'), ProjectCategory.outerCore); // нужно две цифры
+      expect(of('python-module-1'), ProjectCategory.outerCore); // и тут тоже
+      expect(of('python-module-00-extra'), ProjectCategory.outerCore);
+      expect(of('agent-smith-2'), ProjectCategory.outerCore); // только целиком
       expect(of(null), ProjectCategory.outerCore);
     });
   });

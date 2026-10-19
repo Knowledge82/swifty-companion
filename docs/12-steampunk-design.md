@@ -21,6 +21,11 @@
 14. [Итерация 2: изумруд, окись, потёртости, клёпки, пасхалки](#14-итерация-2-изумруд-окись-потёртости-клёпки-пасхалки)
 15. [Итерация 3: правки по скриншоту](#15-итерация-3-правки-по-скриншоту)
 16. [Итерация 4: движение, трубы и кабели, сворачиваемые проекты](#16-итерация-4-движение-трубы-и-кабели-сворачиваемые-проекты)
+17. Итерация 5: новая картинка заставки, сплошной фон, тайминги
+18. Итерация 5б: новая картинка, тёплая палитра, асимметричные шестерёнки
+19. Итерация 6: картинка целиком с градиентом, названия разделов, анимированный splash
+20. Итерация 7: строка «Estado» (статус) с лампочкой, новое название для рабочего места
+21. [Итерация 8: новая программа Common Core](#21-итерация-8-новая-программа-common-core)
 
 ## 1. Что сделано
 
@@ -149,13 +154,13 @@ lib/models/project_category.dart   ProjectCategory и categoryOf (правила
 
 ### Правила
 
-Функция `categoryOf(project)` смотрит на slug проекта (нормализованный: нижний регистр, без префикса `42cursus-`):
+Функция `categoryOf(project)` смотрит на slug проекта (нормализованный: нижний регистр, без префиксов `42cursus-` и `42next-`, см. §21):
 
 | Порядок проверки | Условие | Раздел |
 |---|---|---|
 | 1 | slug содержит `piscine` и `reloaded` | Piscina Reloaded (отдельный раздел) |
 | 2 | slug начинается с `c-piscine` или `piscine` | Piscina |
-| 3 | slug есть в `commonCoreSlugs`, либо `cpp-module-NN`, либо `exam-rank-NN` | Common Core |
+| 3 | slug есть в `commonCoreSlugs`, либо `cpp-module-NN`, `exam-rank-NN`, `python-module-NN` | Common Core |
 | 4 | всё остальное, включая проект без slug | Outer Core |
 
 Reloaded проверяется **раньше** Piscina, потому что его slug `c-piscine-reloaded` начинается так же, как у обычного бассейна, и иначе он попал бы туда. По твоему уточнению Reloaded это отдельный проект между Piscine и Common Core: он не входит ни в то, ни в другое, поэтому у него свой раздел, который показывается последним и только если в нём что-то есть.
@@ -185,53 +190,11 @@ Reloaded проверяется **раньше** Piscina, потому что е
 
 ```bash
 cd ~/Projects/swifty-companion
-cat > /tmp/dump_projects.py <<'PYEOF'
-import json, re, sys
-
-CORE = {
-    'libft', 'get_next_line', 'ft_printf', 'born2beroot', 'netwhat', 'push_swap',
-    'so_long', 'minitalk', 'pipex', 'fdf', 'fract-ol', 'fractol', 'philosophers',
-    'minishell', 'minirt', 'cub3d', 'netpractice', 'ft_irc', 'webserv', 'inception',
-    'ft_containers', 'ft_transcendence', '42_collaborative_resume',
-}
-
-def norm(s):
-    s = s.strip().lower()
-    return s[len('42cursus-'):] if s.startswith('42cursus-') else s
-
-def category(slug):
-    if slug is None:
-        return 'Outer'
-    s = norm(slug)
-    if 'piscine' in s and 'reloaded' in s:
-        return 'Reloaded'
-    if s.startswith('c-piscine') or s.startswith('piscine'):
-        return 'Piscina'
-    if s in CORE or re.fullmatch(r'cpp-module-\d{2}', s) or re.fullmatch(r'exam-rank-\d{2}', s):
-        return 'Common'
-    return 'Outer'
-
-data = json.load(sys.stdin)
-rows = []
-for pu in data.get('projects_users') or []:
-    if pu.get('status') != 'finished':
-        continue
-    p = pu.get('project') or {}
-    rows.append((category(p.get('slug')), p.get('slug'), p.get('name'),
-                 pu.get('cursus_ids'), pu.get('validated?'), pu.get('final_mark')))
-print('раздел | slug | name | cursus_ids | validated | mark')
-for r in sorted(rows, key=lambda r: (r[0], str(r[1]))):
-    print(' | '.join(str(x) for x in r))
-PYEOF
-
-set -a; source .env; set +a
-TOKEN=$(curl -s -X POST https://api.intra.42.fr/oauth/token \
-  -d grant_type=client_credentials -d client_id="$FT_UID" -d client_secret="$FT_SECRET" \
-  | python3 -c 'import sys, json; print(json.load(sys.stdin)["access_token"])')
-curl -s -H "Authorization: Bearer $TOKEN" https://api.intra.42.fr/v2/users/vdarsuye \
-  | python3 /tmp/dump_projects.py
-unset TOKEN
+python3 tool/dump_projects.py LOGIN            # живой запрос к API (нужен .env)
+python3 tool/dump_projects.py --file user.json # тот же разбор по сохранённому ответу
 ```
+
+(Первая версия этой инструкции была встроенным скриптом на `curl`; он устарел, потому что правила разрослись. Теперь есть `tool/dump_projects.py`: он читает правила **прямо из `lib/models/project_category.dart`**, поэтому не может разойтись с приложением, и печатает курсы студента и **все** проекты с любым статусом. Подробности и подводный камень с Cloudflare в §21.5.)
 
 Пришли вывод. Если какой-то проект лежит не там, поправим `commonCoreSlugs` или правила. Это одна константа и один тест.
 
@@ -930,3 +893,65 @@ Wrap(alignment: WrapAlignment.spaceBetween, spacing: 12, runSpacing: 2,
 ### 20.7. Название строки: Online → Estado (Status)
 
 Сначала строка называлась `Online`, потом по твоему замечанию `Estado` («Статус»). Выбор разумный по двум причинам: (1) «Online» обещает «в сети», а лампочка значит «в кампусе», и слово «Статус» не вводит в заблуждение; (2) для испаноязычного интерфейса `Estado` естественнее англицизма. Значения под лампочкой остались: «En el campus» / «Fuera del campus» (en: «On campus» / «Off campus»). Ключ локализации переименован `onlineLabel` → `statusLabel`, виджет `_OnlineRow` → `_StatusRow`; модель по-прежнему называется `isOnline`, потому что это именно «в кампусе ли сейчас». Если захочется другое слово (`Presencia`, `Ahora`, `En el campus` как заголовок), правится одна строка `statusLabel` в `app_strings_es.dart` и в `app_strings_en.dart`.
+
+## 21. Итерация 8: новая программа Common Core
+
+### 21.1. Что случилось
+
+В 42 сменилась программа Common Core. У нас было «старое» CC (libft, ft_printf, …, Inception, cpp-модули, ft_transcendence), а у студентов новой программы есть модули Python, The Answer Protocol, Agent Smith и другие проекты, которых у нас не было, и наоборот. Приложение устроено так, что всё, чего нет в белом списке Common Core, уходит по умолчанию в Outer Core (§9). Поэтому у Миши, который учится по новой программе и до Outer Core ещё не дошёл, почти все проекты оказались в Outer Core. Это не ошибка логики, а дыра в данных: список составлен по старой программе.
+
+### 21.2. Данные: что показала выгрузка
+
+Мишин профиль (`tool/dump_projects.py`, 51 проект любого статуса): курсы 9 (C Piscine), 21 (42cursus), 66 (Reloaded), уровень в 42cursus 6,85.
+
+| Что | Как записано в API | Как раньше раскладывалось |
+|---|---|---|
+| ft_printf, get_next_line, libft | `42cursus-…` | Common Core (верно) |
+| inception, netpractice | без префикса | Common Core (верно) |
+| Born2beroot, push_swap, Exam Rank 02…05 | **`42next-…`** | Outer Core (**ошибка**: префикс неизвестен) |
+| Python Module 00…10 | `python-module-NN` | Outer Core (**ошибка**) |
+| a-maze-ing, agent-smith, call-me-maybe, codexion, fly-in, pac-man, rag-against-the-machine, the-answer-protocol, exam-atonement | без префикса | Outer Core (**ошибка**) |
+| Piscine (курс 9), Reloaded (курс 66) | `c-piscine-…` | верно |
+
+Итого три разные причины, а не одна: новый префикс, новая серия и новые одиночные проекты.
+
+### 21.3. Что сделано
+
+- `slugPrefixes = ['42cursus-', '42next-']`: нормализация теперь отбрасывает любой из префиксов. Это сразу чинит `42next-born2beroot`, `42next-push_swap` и `42next-exam-rank-NN` без единой новой записи в списке: после обрезки они совпадают со старыми правилами.
+- Шаблон `python-module-NN` (две цифры), по аналогии с `cpp-module-NN`.
+- Девять новых одиночных slug в `commonCoreSlugs` (отдельным блоком с комментарием, откуда они взялись).
+- `tool/dump_projects.py` теперь читает префиксы, шаблоны и список slug **из Dart-файла**, а не держит копию.
+- Тесты: префикс `42next-` (в том числе заглавные), серия Python 00…10, **все реальные slug Миши** как регрессия, граничные случаи (`python-module-1`, `python-module-00-extra`, `agent-smith-2`, `42next-swifty-companion` остаются Outer Core).
+
+Проверка на данных: из 51 проекта Миши Outer Core теперь 0 (раньше 26), Common Core 31, Piscina 19, Reloaded 1.
+
+### 21.4. Допущения, риски, подводные камни
+
+1. **Главное допущение.** По API нельзя узнать, какой из беспрефиксных проектов относится к CC, а какой к Outer Core: у всех `cursus_ids = [21]`, а полей «раздел» в `projects_users` нет. Я положила в Common Core всё, что Миша уже прошёл, потому что Миша (по твоим словам) до Outer Core ещё не дошёл. Если среди девяти одиночных проектов есть реальный Outer Core (например, Миша взял его параллельно), он будет показан не в том разделе. Лечится удалением одной строки из `commonCoreSlugs`; чтобы быть уверенными, нужен профиль студента новой программы, который **уже** в Outer Core.
+2. **Outer Core новой программы мы не видели.** Его slug нам неизвестны, и по умолчанию они попадут в Outer Core, то есть куда нужно. Но если у них окажется `42next-` и имя, совпадающее со старым CC-проектом, они уйдут в Common Core. Вероятность низкая, цена ошибки низкая.
+3. **`exam-atonement`** сейчас в статусе поиска группы, то есть не завершён и на экране не виден; решение по нему проверится на живых данных, когда он завершится.
+4. **Программа может измениться ещё раз.** Белый список всегда будет догонять школу. Это цена выбранного подхода (см. §9).
+5. Префикс `42next-` я считаю признаком новой программы только для нормализации, но не для классификации: проекты Outer Core с таким префиксом, если они есть, должны остаться в Outer Core.
+
+### 21.5. Альтернативы, которые я рассматривала
+
+| Вариант | Плюсы | Минусы |
+|---|---|---|
+| **Расширить список slug и префиксы (выбран)** | минимум кода, всё тестируется, правится одной константой | список надо поддерживать |
+| Отдельный раздел «Новый Common Core» | честнее: это две разные программы | ещё одна категория, переводы, тесты; проверяющему это незачем |
+| По `cursus_ids` | без списка | у всех CC и Outer Core общий курс 21, не работает (подтверждено выгрузкой) |
+| Инвертировать правило: Outer Core по белому списку, остальное в «Другое» | устойчиво к смене программы | надо знать все slug Outer Core, а это растущий набор; ломает поведение для старых студентов |
+| Определять по дереву проектов (`/v2/projects/:id`, `parent`) | в теории «правильно» | лишние запросы (лимиты API), сложность, задание этого не требует |
+
+### 21.6. Подводный камень со скриптом: Cloudflare и User-Agent
+
+Первая версия `tool/dump_projects.py` падала с **403 на получение токена**. Причина не в ключах (при неверных ключах было бы 401), а в том, что Python-овский `urllib` представляется как `Python-urllib/3.x`, а 42 API стоит за Cloudflare, который такой UA режет. `curl` проходил, потому что у него другой UA. Лечение: свой заголовок `User-Agent`. Урок: «работает на моках» не значит «работает на проде»; ошибки теперь печатаются понятным текстом (код, операция, начало ответа), без секретов.
+
+### 21.7. Чек-лист
+
+| № | Что смотрим | Ожидаем |
+|---|---|---|
+| 1 | `flutter analyze` и `flutter test` | чисто, тесты проходят (новых: 2 группы в `project_category_test.dart`) |
+| 2 | Профиль Миши (mpeskov) в приложении | раздел «Common Core» с проектами новой программы, Outer Core пуст и скрыт |
+| 3 | Твой профиль (старая программа) | без изменений |
+| 4 | Профиль студента новой программы, уже в Outer Core | его Outer-проекты в Outer Core; если нет, пришли `dump_projects.py` для него |
