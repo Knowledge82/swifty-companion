@@ -31,6 +31,7 @@ void main() {
       ('«провален» на панели', steampunkColors.error, steampunkColors.surface, 4.5),
       ('текст кнопки', steampunkColors.onPrimary, steampunkColors.primary, 4.5),
       ('текст ошибки', steampunkColors.onErrorContainer, steampunkColors.errorContainer, 4.5),
+      ('названия разделов (окись) на панели', sectionTitleColor, steampunkColors.surface, 4.5),
       ('подпись поля ввода', mutedBrass, walnutDeep, 4.5),
       ('инициалы на заглушке фото (крупный текст)', mutedBrass, walnutLight, 3),
     ];

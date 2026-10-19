@@ -23,15 +23,18 @@ const double splashImageAspect = 1024 / 1536;
 /// фон не «перескакивает». К краям самой картинки он тоже близок.
 const Color splashBackgroundColor = leatherDeep;
 
-/// Какую часть картинки показывать, когда она шире экрана (телефон в
-/// портрете): `Alignment.center` центр, `Alignment(-1, 0)` левый край,
-/// `Alignment(1, 0)` правый. Эта картинка: лицо девушки чуть левее центра,
-/// ноутбук справа, поэтому небольшой сдвиг вправо оставляет в кадре и то, и другое.
-const Alignment splashImageAlignment = Alignment(0.2, 0);
+/// Какая доля высоты (или ширины) картинки у каждого края уходит в
+/// прозрачность. Через прозрачность виден фон [splashBackgroundColor], то есть
+/// край картинки плавно «тонет» в почти чёрном. Чем больше число, тем длиннее
+/// переход и тем больше краёв картинки теряется (допустимо 0.05-0.30).
+const double splashFeather = 0.12;
 
-/// Заставка внутри приложения: картинка вписана **по высоте экрана** на
-/// сплошном тёмном фоне, плавно проявляется (fade-in), держится и плавно
-/// гаснет (fade-out), после чего (или по касанию) сменяется экраном [next].
+/// Заставка внутри приложения: картинка **целиком** (вписана по ширине, на
+/// телефоне в портрете; на широком экране по высоте) на сплошном тёмном фоне.
+/// Свободные полосы сверху и снизу заполняет фон, а края картинки плавно
+/// растворяются в нём (градиент прозрачности, [splashFeather]). Картинка
+/// плавно проявляется (fade-in), держится и плавно гаснет (fade-out), после
+/// чего (или по касанию) сменяется экраном [next].
 ///
 /// **Часы заставки запускаются, когда картинка готова** (загружена и
 /// декодирована), а не в момент создания экрана. Иначе часть времени
@@ -222,27 +225,27 @@ class _Intro extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Картинка вписана по высоте экрана. OverflowBox даёт ей
-              // «нужную» ширину (высота × пропорции) независимо от ширины
-              // экрана, а ClipRect обрезает то, что вылезло за экран.
+              // Картинка вписана целиком («contain»): по ширине, если экран
+              // уже картинки (телефон в портрете), иначе по высоте. Края, у
+              // которых остаётся свободное место, растушёвываем в фон.
               LayoutBuilder(
                 builder: (context, box) {
-                  final height = box.maxHeight;
-                  final width = height * splashImageAspect;
-                  return ClipRect(
-                    child: OverflowBox(
-                      // Сдвиг нужен, только когда картинка шире экрана.
-                      alignment: width > box.maxWidth
-                          ? splashImageAlignment
-                          : Alignment.center,
-                      minWidth: width,
-                      maxWidth: width,
-                      minHeight: height,
-                      maxHeight: height,
+                  final fitWidth =
+                      box.maxWidth / box.maxHeight <= splashImageAspect;
+                  final width = fitWidth
+                      ? box.maxWidth
+                      : box.maxHeight * splashImageAspect;
+                  final height = width / splashImageAspect;
+                  return Center(
+                    child: SizedBox(
+                      width: width,
+                      height: height,
                       child: FeatheredEdges(
-                        // Растушёвка нужна, только если по бокам виден фон.
-                        horizontal: width < box.maxWidth,
-                        vertical: false,
+                        fade: splashFeather,
+                        // Полосы остаются сверху и снизу, если картинка
+                        // вписана по ширине, и по бокам, если по высоте.
+                        horizontal: !fitWidth && width < box.maxWidth - 1,
+                        vertical: fitWidth && height < box.maxHeight - 1,
                         child: Image(
                           image: image,
                           fit: BoxFit.cover,

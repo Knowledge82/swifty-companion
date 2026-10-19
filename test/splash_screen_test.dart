@@ -192,7 +192,7 @@ void main() {
     expect(scaffold.backgroundColor, splashBackgroundColor);
   });
 
-  testWidgets('телефон в портрете: картинка вписана по высоте и обрезана по бокам',
+  testWidgets('телефон в портрете: картинка целиком по ширине, сверху и снизу фон',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(400, 900);
@@ -201,20 +201,28 @@ void main() {
     await tester.pumpWidget(app());
 
     final size = tester.getSize(find.byType(Image));
-    expect(size.height, 900); // по высоте экрана
-    expect(size.width, closeTo(900 * splashImageAspect, 0.001)); // шире экрана
-    expect(size.width, greaterThan(400));
-    // Вылезающее за экран обрезается: полос по бокам нет, растушёвки тоже.
-    expect(
-      find.descendant(
-        of: find.byType(SplashScreen),
-        matching: find.byType(ShaderMask),
-      ),
-      findsNothing,
-    );
+    expect(size.width, 400); // по ширине экрана: бока не обрезаются
+    expect(size.height, closeTo(400 / splashImageAspect, 0.001)); // 600
+    expect(size.height, lessThan(900)); // сверху и снизу остаётся фон
+
+    // Картинка по центру по вертикали: полосы фона равны.
+    final rect = tester.getRect(find.byType(Image));
+    expect(rect.top, closeTo(900 - rect.bottom, 0.001));
+
+    // Растушёвка ровно одна, и это вертикальная: градиент идёт сверху вниз.
+    final masks = tester.widgetList<ShaderMask>(find.descendant(
+      of: find.byType(SplashScreen),
+      matching: find.byType(ShaderMask),
+    ));
+    expect(masks, hasLength(1));
+    expect(masks.single.blendMode, BlendMode.dstIn);
   });
 
-  testWidgets('широкий экран: по бокам тёмный фон и растушёванные края',
+  test('длина перехода в фон разумна: от 5 до 30 % размера картинки', () {
+    expect(splashFeather, inInclusiveRange(0.05, 0.30));
+  });
+
+  testWidgets('широкий экран: по высоте, по бокам тёмный фон и растушёванные края',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1200, 600);
@@ -233,6 +241,24 @@ void main() {
     ));
     expect(masks, hasLength(1)); // только по горизонтали
     expect(masks.single.blendMode, BlendMode.dstIn);
+  });
+
+  testWidgets('экран с теми же пропорциями, что у картинки: масок нет',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 600);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(app());
+
+    expect(tester.getSize(find.byType(Image)), const Size(400, 600));
+    expect(
+      find.descendant(
+        of: find.byType(SplashScreen),
+        matching: find.byType(ShaderMask),
+      ),
+      findsNothing,
+    );
   });
 
   group('FeatheredEdges', () {

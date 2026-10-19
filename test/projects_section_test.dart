@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/models/user_profile.dart';
 import 'package:swifty_companion/ui/projects_section.dart';
+import 'package:swifty_companion/ui/steampunk/steampunk_theme.dart';
 
 import 'fixtures.dart';
 import 'test_app.dart';
@@ -29,6 +30,14 @@ void main() {
     for (final name in ['push_swap', 'ft_printf', 'libft', 'c-piscine-shell-00']) {
       expect(find.text(name), findsNothing, reason: name);
     }
+  });
+
+  testWidgets('название раздела цвета окиси', (tester) async {
+    await pumpSection(tester);
+
+    final title = tester.widget<Text>(find.text('Proyectos completados'));
+    expect(title.style?.color, sectionTitleColor);
+    expect(sectionTitleColor, oxide);
   });
 
   testWidgets('тап по заголовку раскрывает группу, повторный сворачивает',

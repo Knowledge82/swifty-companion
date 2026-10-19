@@ -24,6 +24,11 @@ const Color walnut = Color(0xFF2A1B12); // фон панелей
 const Color walnutLight = Color(0xFF3E291B); // заглушка фото
 const Color oxide = Color(0xFF3F9E80); // пятна окиси на металле
 
+/// Цвет названий разделов профиля («Habilidades», «Proyectos completados»).
+/// Сейчас это окись; если захочешь посветлее, подставь `verdigris`
+/// (`#6FB39C`, контраст на панели 6,8:1 вместо 5,1:1).
+const Color sectionTitleColor = oxide;
+
 /// Тёмная цветовая схема. Контраст текста к фону проверяется тестом
 /// (`steampunk_test.dart`): основной текст не ниже 7:1, остальной не ниже 4.5:1.
 const ColorScheme steampunkColors = ColorScheme(
