@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:swifty_companion/ui/splash_screen.dart' show splashBackgroundColor;
 import 'package:swifty_companion/ui/steampunk/gear_motion.dart';
 import 'package:swifty_companion/ui/steampunk/gears.dart';
 import 'package:swifty_companion/ui/steampunk/pipes.dart';
@@ -41,6 +42,31 @@ void main() {
         expect(contrast(foreground, background), greaterThanOrEqualTo(minimum));
       });
     }
+
+    // Итерация 9: панель была темнее центра фона и сливалась с ним (1,13:1).
+    // Теперь она светлее фона во ВСЕХ точках радиального градиента, и
+    // выделяется оттенком, а не одной только рамкой.
+    test('панель светлее фона везде: и в центре, и по краям градиента', () {
+      for (final background in backdropColors) {
+        expect(
+          walnut.computeLuminance(),
+          greaterThan(background.computeLuminance()),
+          reason: '$background',
+        );
+      }
+      expect(contrast(walnut, backdropColors.first), greaterThanOrEqualTo(1.25));
+      expect(contrast(walnut, backdropColors.last), greaterThanOrEqualTo(1.3));
+    });
+
+    test('заглушка фото отличается от панели, поле ввода темнее панели', () {
+      expect(contrast(walnutLight, walnut), greaterThanOrEqualTo(1.2));
+      expect(walnutDeep.computeLuminance(), lessThan(walnut.computeLuminance()));
+    });
+
+    test('заставка и AppBar не изменились: общий край фона leatherDeep', () {
+      expect(backdropColors.last, leatherDeep);
+      expect(splashBackgroundColor, leatherDeep);
+    });
 
     test('тема собирается и тёмная', () {
       final theme = buildSteampunkTheme();

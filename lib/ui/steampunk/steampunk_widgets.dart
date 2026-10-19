@@ -91,6 +91,10 @@ class SteampunkBackdrop extends StatelessWidget {
   }
 }
 
+/// Насколько клёпки «золотые»: 1 это чистая латунь, 0 цвет панели. Приглушены,
+/// чтобы не спорить с прогресс-барами и акцентами за внимание.
+const double _rivetStrength = 0.72;
+
 /// Ореховая панель в латунной раме: потёртая рамка с пятнами окиси,
 /// медная вставка внутри и клёпки по всему периметру.
 /// Фон чуть прозрачный, чтобы шестерёнки позади угадывались.
@@ -114,12 +118,14 @@ class BrassPanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surface.withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.primary, width: 1.5),
+          // Рамка тонкая (1 px, было 1,5): панель отделяется от фона
+          // оттенком, объёмом и тенью, а не яркой обводкой.
+          border: Border.all(color: colors.primary, width: 1),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x99000000),
-              blurRadius: 8,
-              offset: Offset(0, 3),
+              color: Color(0xAA000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -127,7 +133,9 @@ class BrassPanel extends StatelessWidget {
           // painter рисует ПОД содержимым (износ), foregroundPainter ПОВЕРХ
           // (клёпки): износ не должен закрывать текст, а клёпки лежат в отступе.
           painter: const _WearPainter(),
-          foregroundPainter: _RivetPainter(brassColor: colors.primary),
+          foregroundPainter: _RivetPainter(
+            brassColor: Color.lerp(colors.surface, colors.primary, _rivetStrength)!,
+          ),
           child: Padding(padding: padding, child: child),
         ),
       ),
@@ -170,7 +178,27 @@ class _WearPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1
-        ..color = copper.withValues(alpha: 0.6),
+        ..color = copper.withValues(alpha: 0.3),
+    );
+
+    // Объём: светлый блик по внутренней кромке и чуть ярче по верхней, как у
+    // фаски на металлической пластине. Именно он «поднимает» панель над фоном.
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        (Offset.zero & size).deflate(1.5),
+        const Radius.circular(8.5),
+      ),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = parchment.withValues(alpha: 0.18),
+    );
+    canvas.drawLine(
+      const Offset(10, 2.5),
+      Offset(w - 10, 2.5),
+      Paint()
+        ..strokeWidth = 1
+        ..color = parchment.withValues(alpha: 0.27),
     );
 
     // Окись скапливается в углах.
@@ -258,14 +286,14 @@ class _RivetPainter extends CustomPainter {
       Offset(_inset, h - _inset),
       Offset(w - _inset, h - _inset),
     ]) {
-      drawRivet(canvas, p, 6, body: brassColor);
+      drawRivet(canvas, p, 4.2, body: brassColor);
     }
 
     void along(Offset from, Offset to) {
       final length = (to - from).distance;
       final gaps = math.max(1, (length / _spacing).round());
       for (var i = 1; i < gaps; i++) {
-        drawRivet(canvas, Offset.lerp(from, to, i / gaps)!, 3.6, body: brassColor);
+        drawRivet(canvas, Offset.lerp(from, to, i / gaps)!, 2.6, body: brassColor);
       }
     }
 

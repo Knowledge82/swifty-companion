@@ -37,7 +37,8 @@ void main() {
 
     final title = tester.widget<Text>(find.text('Proyectos completados'));
     expect(title.style?.color, sectionTitleColor);
-    expect(sectionTitleColor, oxide);
+    // Не «чистая» окись: на светлой панели ей не хватало контраста (docs/12 §22).
+    expect(sectionTitleColor, isNot(oxide));
   });
 
   testWidgets('тап по заголовку раскрывает группу, повторный сворачивает',
