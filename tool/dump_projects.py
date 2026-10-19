@@ -23,6 +23,10 @@ import urllib.parse
 import urllib.request
 
 API = 'https://api.intra.42.fr'
+# Cloudflare перед API режет дефолтный UA «Python-urllib/3.x» (403), поэтому
+# представляемся сами. curl проходит именно потому, что у него другой UA.
+HEADERS = {'User-Agent': 'swifty-companion-tool/1.0 (42 Barcelona student project)',
+           'Accept': 'application/json'}
 CATEGORY_DART = os.path.join('lib', 'models', 'project_category.dart')
 
 
@@ -73,13 +77,24 @@ def fetch(login):
         'client_id': env['FT_UID'],
         'client_secret': env['FT_SECRET'],
     }).encode()
-    with urllib.request.urlopen(urllib.request.Request(f'{API}/oauth/token', data=body)) as r:
-        token = json.load(r)['access_token']
-    req = urllib.request.Request(
+    token = http_json(urllib.request.Request(
+        f'{API}/oauth/token', data=body, headers=HEADERS), 'получение токена')['access_token']
+    return http_json(urllib.request.Request(
         f'{API}/v2/users/{urllib.parse.quote(login, safe="")}',
-        headers={'Authorization': f'Bearer {token}'})
-    with urllib.request.urlopen(req) as r:
-        return json.load(r)
+        headers={**HEADERS, 'Authorization': f'Bearer {token}'}), f'профиль {login}')
+
+
+def http_json(req, what):
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        # Тело ответа сервера секретов не содержит (мы их не эхо-печатаем),
+        # но обрезаем, чтобы не засорять вывод HTML-страницей Cloudflare.
+        body = e.read(400).decode('utf-8', 'replace').replace('\n', ' ')
+        sys.exit(f'Ошибка HTTP {e.code} при операции «{what}»: {body}')
+    except urllib.error.URLError as e:
+        sys.exit(f'Сеть недоступна при операции «{what}»: {e.reason}')
 
 
 def main():
