@@ -26,7 +26,7 @@
 ProfileScreen (SingleChildScrollView → ConstrainedBox 480 → Column)
 ├── фото / инициалы
 ├── имя
-├── Email, Teléfono, Online (лампочка), Puesto (только в кампусе; раньше Ubicación)
+├── Email, Teléfono, Estado (лампочка), Puesto (только в кампусе; раньше Ubicación)
 ├── Nivel 9.63 + полоса «сколько пройдено до следующего уровня» (0.63)
 ├── Monedero, Puntos de evaluación
 ├── SkillsSection        «Habilidades»: название, 9.63 · 48 %, полоса, пояснение формулы

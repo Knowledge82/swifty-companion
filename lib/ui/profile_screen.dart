@@ -95,8 +95,8 @@ class ProfileScreen extends StatelessWidget {
                                 label: strings.phoneLabel,
                                 value: profile.phone.orNA,
                               ),
-                              _OnlineRow(
-                                label: strings.onlineLabel,
+                              _StatusRow(
+                                label: strings.statusLabel,
                                 online: profile.isOnline,
                                 onText: strings.onlineOn,
                                 offText: strings.onlineOff,
@@ -172,10 +172,10 @@ class _LevelBar extends StatelessWidget {
   }
 }
 
-/// Строка «Online»: лампочка и слово. Зелёная лампочка с лёгким свечением, если
+/// Строка «Estado» (статус): лампочка и слово. Зелёная лампочка с лёгким свечением, если
 /// студент в кампусе, серая погашенная, если нет.
-class _OnlineRow extends StatelessWidget {
-  const _OnlineRow({
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({
     required this.label,
     required this.online,
     required this.onText,

@@ -44,7 +44,7 @@ class AppStringsEn extends AppStrings {
   @override
   String get locationLabel => 'Workstation';
   @override
-  String get onlineLabel => 'Online';
+  String get statusLabel => 'Status';
   @override
   String get onlineOn => 'On campus';
   @override

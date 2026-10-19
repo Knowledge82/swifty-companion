@@ -51,7 +51,7 @@ void main() {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     // Проекты свёрнуты, поэтому виден только телефон ("hidden"). Место (null)
-    // не N/A: его строки нет, а в кампусе ли студент, говорит строка Online.
+    // не N/A: его строки нет, а в кампусе ли студент, говорит строка «Estado».
     expect(find.text('N/A'), findsNWidgets(1));
 
     // Раскрыли группу: добавился итог проекта без оценки.
@@ -67,7 +67,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  group('Online и рабочее место', () {
+  group('Статус (лампочка) и рабочее место', () {
     BoxDecoration lampOf(WidgetTester tester) => tester
         .widget<Container>(find.byKey(const ValueKey('online-lamp')))
         .decoration! as BoxDecoration;
@@ -76,7 +76,7 @@ void main() {
         (tester) async {
       await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-      expect(find.text('Online'), findsOneWidget);
+      expect(find.text('Estado'), findsOneWidget);
       expect(find.text('Fuera del campus'), findsOneWidget);
       expect(find.text('En el campus'), findsNothing);
       expect(lampOf(tester).color, offlineGray);
@@ -97,10 +97,10 @@ void main() {
       expect(find.text('Puesto'), findsOneWidget);
       expect(find.text('c1r2s3'), findsOneWidget);
 
-      // Место ниже строки Online.
+      // Место ниже строки «Estado».
       expect(
         tester.getTopLeft(find.text('c1r2s3')).dy,
-        greaterThan(tester.getTopLeft(find.text('Online')).dy),
+        greaterThan(tester.getTopLeft(find.text('Estado')).dy),
       );
     });
 
@@ -110,7 +110,7 @@ void main() {
       json['location'] = 'c1r2s3';
       await pumpProfile(tester, json);
 
-      expect(find.bySemanticsLabel('Online: En el campus'), findsOneWidget);
+      expect(find.bySemanticsLabel('Estado: En el campus'), findsOneWidget);
       handle.dispose();
     });
 
