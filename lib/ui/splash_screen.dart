@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/app_strings.dart';
 import 'steampunk/gears.dart';
+import 'steampunk/steampunk_theme.dart';
 
 /// Выключатель экрана-заставки: `false` и приложение сразу открывает поиск
 /// (удобно при отладке, когда заставка мешает после каждого перезапуска).
@@ -18,8 +19,15 @@ const String splashImageAsset = 'assets/images/splash.jpg';
 const double splashImageAspect = 1024 / 1536;
 
 /// Фон заставки: сплошной очень тёмный тёплый цвет (не чисто чёрный).
-/// Он близок к краям самой картинки, поэтому стыка почти не видно.
-const Color splashBackgroundColor = Color(0xFF15100C);
+/// Это тот же `leatherDeep`, что и края фона экрана поиска: после заставки
+/// фон не «перескакивает». К краям самой картинки он тоже близок.
+const Color splashBackgroundColor = leatherDeep;
+
+/// Какую часть картинки показывать, когда она шире экрана (телефон в
+/// портрете): `Alignment.center` центр, `Alignment(-1, 0)` левый край,
+/// `Alignment(1, 0)` правый. Эта картинка: лицо девушки чуть левее центра,
+/// ноутбук справа, поэтому небольшой сдвиг вправо оставляет в кадре и то, и другое.
+const Alignment splashImageAlignment = Alignment(0.2, 0);
 
 /// Заставка внутри приложения: картинка вписана **по высоте экрана** на
 /// сплошном тёмном фоне, плавно проявляется (fade-in), держится и плавно
@@ -223,6 +231,10 @@ class _Intro extends StatelessWidget {
                   final width = height * splashImageAspect;
                   return ClipRect(
                     child: OverflowBox(
+                      // Сдвиг нужен, только когда картинка шире экрана.
+                      alignment: width > box.maxWidth
+                          ? splashImageAlignment
+                          : Alignment.center,
                       minWidth: width,
                       maxWidth: width,
                       minHeight: height,

@@ -51,6 +51,7 @@
 | Этап 7.2: иконка, экран запуска (системный и заставка с фото), логотип 42 из SVG | 🟡 `flutter analyze` чист, 223 из 223 тестов; **на телефоне не проверено** (нужна полная пересборка и удаление старого приложения) | [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) |
 | Этап 7.3 (итерация 4): заставка по высоте с fade-in/out, пять вращающихся сцепленных шестерён, угловая шестерня, гофротрубы и кабели, массивнее обод и клёпки, линия вместо узора, сворачиваемые проекты | 🟡 написано вместе с тестами, **ждёт `flutter analyze`, `flutter test` и взгляда на телефоне** | [docs/12](docs/12-steampunk-design.md#16-итерация-4-движение-трубы-и-кабели-сворачиваемые-проекты) |
 | Этап 7.4 (итерация 5): новая картинка заставки 1024 × 1536, сплошной очень тёмный фон, старт fade после готовности картинки, тайминги 0,7 / 1,7 / 0,6 с | 🟡 написано вместе с тестами, **ждёт `flutter analyze`, `flutter test` и взгляда на телефоне** | [docs/12](docs/12-steampunk-design.md#17-итерация-5-новая-картинка-заставки-сплошной-фон-тайминги) |
+| Этап 7.5 (итерация 5б): новая картинка заставки, тёплая (ореховая) палитра ближе к картинке, асимметричная цепочка из 7 шестерёнок 4 размеров, скрипт проверки раскладки `tool/emblem_layout.py` | 🟡 написано вместе с тестами, **ждёт `flutter analyze`, `flutter test` и взгляда на телефоне** | [docs/12](docs/12-steampunk-design.md#18-итерация-5б-новая-картинка-тёплая-палитра-асимметричные-шестерёнки) |
 | Этап 8: что осталось до защиты (сценарии ошибок, адаптивность, аудит секретов, релизная сборка, вопросы) | ⏳ чек-лист для тебя | [docs/14-remaining-work.md](docs/14-remaining-work.md) |
 | Справка: Flutter и React Native, плюсы и минусы обоих | ✅ написано | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) |
 
@@ -265,7 +266,7 @@ swifty-companion/
 │                              user_repository_test, http_helpers_test, profile_screen_test, logging_test, l10n_test, display_test, photo_loader_test, profile_avatar_test, project_category_test, projects_section_test, steampunk_test, easter_egg_test, splash_screen_test, logo42_test, test_app,
 │                              fake_api (поддельный сервер)
 ├── assets/images/             splash.jpg: фото для заставки
-├── tool/                      generate_icons.py: рисует иконку и картинку splash (Pillow); 42_logo.svg: знак школы (исходник)
+├── tool/                      generate_icons.py: рисует иконку и картинку splash (Pillow); emblem_layout.py: проверка и подбор раскладки шестерёнок эмблемы; 42_logo.svg: знак школы (исходник)
 ├── android/                   нативная Android-часть, собирается через Gradle (иконки и splash в res/)
 ├── pubspec.yaml               манифест: имя, версия, зависимости, ассеты
 ├── pubspec.lock               зафиксированные версии зависимостей (коммитим)

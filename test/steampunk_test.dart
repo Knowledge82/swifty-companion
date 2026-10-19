@@ -20,7 +20,7 @@ double contrast(Color a, Color b) {
 
 void main() {
   group('палитра', () {
-    // Фон панелей (изумруд) и экрана/AppBar (тёмная кожа). Текст и значки на них.
+    // Фон панелей (орех) и экрана/AppBar (тёмная кожа). Текст и значки на них.
     final pairs = <(String, Color, Color, double)>[
       ('основной текст на панели', steampunkColors.onSurface, steampunkColors.surface, 7),
       ('основной текст на фоне', steampunkColors.onSurface, leatherDeep, 7),
@@ -31,8 +31,8 @@ void main() {
       ('«провален» на панели', steampunkColors.error, steampunkColors.surface, 4.5),
       ('текст кнопки', steampunkColors.onPrimary, steampunkColors.primary, 4.5),
       ('текст ошибки', steampunkColors.onErrorContainer, steampunkColors.errorContainer, 4.5),
-      ('подпись поля ввода', mutedBrass, emeraldDeep, 4.5),
-      ('инициалы на заглушке фото (крупный текст)', mutedBrass, emeraldLight, 3),
+      ('подпись поля ввода', mutedBrass, walnutDeep, 4.5),
+      ('инициалы на заглушке фото (крупный текст)', mutedBrass, walnutLight, 3),
     ];
 
     for (final (name, foreground, background, minimum) in pairs) {
@@ -187,75 +187,145 @@ void main() {
     });
   });
 
-  group('эмблема из пяти шестерёнок', () {
+  group('эмблема: цепочка из семи шестерёнок четырёх размеров', () {
     final gears = placeEmblemGears();
 
-    test('их пять, большая первая', () {
-      expect(gears, hasLength(5));
+    test('их семь, большая первая и ведущая', () {
+      expect(gears, hasLength(7));
       expect(gears.first.isBig, isTrue);
+      expect(gears.first.parent, -1);
       expect(gears.skip(1).every((g) => !g.isBig), isTrue);
     });
 
-    test('все помещаются в квадрат эмблемы', () {
+    test('четыре разных размера: не «одна большая и четыре одинаковых»', () {
+      final radii = gears.map((g) => g.radius).toSet();
+      expect(radii, hasLength(4));
+      // Большая заметно крупнее остальных, самая малая заметно мельче.
+      expect(gears.first.radius, greaterThan(radii.reduce(math.max) - 1e-9));
+      expect(gears.first.radius / radii.reduce(math.min), greaterThan(2));
+    });
+
+    test('цепочка несимметрична: ветвление и глубина больше двух', () {
+      int depth(int i) => gears[i].parent < 0 ? 0 : 1 + depth(gears[i].parent);
+      expect(List.generate(gears.length, depth).reduce(math.max), greaterThanOrEqualTo(3));
+
+      // Ветвление: у кого-то из шестерёнок не меньше двух «детей»; и есть
+      // шестерёнка, у которой дети в цепочке свои (не звезда вокруг одной).
+      final children = <int, int>{};
+      for (final g in gears.skip(1)) {
+        children[g.parent] = (children[g.parent] ?? 0) + 1;
+      }
+      expect(children.values.reduce(math.max), greaterThanOrEqualTo(2));
+      expect(children.keys.where((i) => i != 0), isNotEmpty);
+    });
+
+    test('все помещаются в квадрат эмблемы с полем', () {
       for (final g in gears) {
-        expect(g.center.dx - g.radius, greaterThanOrEqualTo(0));
-        expect(g.center.dy - g.radius, greaterThanOrEqualTo(0));
-        expect(g.center.dx + g.radius, lessThanOrEqualTo(1));
-        expect(g.center.dy + g.radius, lessThanOrEqualTo(1));
+        expect(g.center.dx - g.radius, greaterThanOrEqualTo(0.02));
+        expect(g.center.dy - g.radius, greaterThanOrEqualTo(0.02));
+        expect(g.center.dx + g.radius, lessThanOrEqualTo(0.98));
+        expect(g.center.dy + g.radius, lessThanOrEqualTo(0.98));
       }
     });
 
-    test('малые зацеплены с большой: вершина зуба заходит во впадину, но не глубже', () {
-      final big = gears.first;
+    test('каждая зацеплена со своим родителем: вершина зуба заходит во впадину, но не глубже', () {
       for (final g in gears.skip(1)) {
-        final distance = (g.center - big.center).distance;
+        final p = gears[g.parent];
+        final distance = (g.center - p.center).distance;
         // Вершина зуба одной шестерёнки не заходит глубже впадины другой
         // (впадина на 0.8 радиуса) и всё же сцеплена: оси ближе, чем сумма радиусов.
-        expect(distance, greaterThanOrEqualTo(big.radius + 0.8 * g.radius - 1e-9));
-        expect(distance, greaterThanOrEqualTo(g.radius + 0.8 * big.radius - 1e-9));
-        expect(distance, lessThan(big.radius + g.radius));
+        expect(distance, greaterThanOrEqualTo(p.radius + 0.8 * g.radius - 1e-9));
+        expect(distance, greaterThanOrEqualTo(g.radius + 0.8 * p.radius - 1e-9));
+        expect(distance, lessThan(p.radius + g.radius));
       }
     });
 
-    test('малые шестерёнки не задевают друг друга', () {
-      final small = gears.skip(1).toList();
-      for (var i = 0; i < small.length; i++) {
-        for (var j = i + 1; j < small.length; j++) {
-          final distance = (small[i].center - small[j].center).distance;
-          expect(distance, greaterThan(small[i].radius + small[j].radius),
+    test('несцепленные шестерёнки не касаются друг друга', () {
+      for (var i = 0; i < gears.length; i++) {
+        for (var j = i + 1; j < gears.length; j++) {
+          if (gears[j].parent == i || gears[i].parent == j) {
+            continue; // сцепленная пара
+          }
+          final distance = (gears[i].center - gears[j].center).distance;
+          expect(distance, greaterThan(gears[i].radius + gears[j].radius + 0.02),
               reason: 'шестерёнки $i и $j');
         }
       }
     });
 
-    test('скорости обратно пропорциональны числу зубьев и направлены навстречу', () {
-      final big = gears.first;
+    test('шаг зубьев у всех близок: зубья помещаются во впадины соседей', () {
+      // Шаг = длина дуги по внешнему радиусу на один зуб.
+      final pitches = [
+        for (final g in gears) 2 * math.pi * g.radius / g.teeth,
+      ];
+      final lowest = pitches.reduce(math.min);
+      final highest = pitches.reduce(math.max);
+      expect(highest / lowest, lessThan(1.15));
+    });
+
+    test('скорости обратно пропорциональны числу зубьев, соседи крутятся навстречу', () {
+      expect(gears.first.ratio, 1);
       for (final g in gears.skip(1)) {
-        expect(g.ratio, lessThan(0));
+        final p = gears[g.parent];
+        expect(g.ratio.sign, -p.ratio.sign);
         // Линейная скорость на делительной окружности одинакова: ω₁·z₁ = -ω₂·z₂.
-        expect(g.ratio * g.teeth, closeTo(-emblemBigTeeth.toDouble(), 1e-9));
-        expect(big.ratio, 1);
+        expect(g.ratio * g.teeth, closeTo(-p.ratio * p.teeth, 1e-9));
+        // Для любой шестерёнки модуль скорости зависит только от числа зубьев.
+        expect(g.ratio.abs() * g.teeth, closeTo(emblemBigTeeth.toDouble(), 1e-9));
       }
     });
 
-    test('зубья входят во впадины в любой момент вращения', () {
-      // Условие сцепления: в точке касания «доля зуба» большой шестерёнки
-      // плюс «доля зуба» малой равна 0.5 (mod 1): зуб против впадины.
-      final big = gears.first;
+    test('зубья входят во впадины в любой момент вращения (для всей цепочки)', () {
+      // Условие сцепления: в точке касания «доля зуба» родителя плюс «доля
+      // зуба» ребёнка равна 0.5 (mod 1): зуб против впадины.
       final omega = 2 * math.pi / emblemRevolutionSeconds;
       for (final g in gears.skip(1)) {
+        final p = gears[g.parent];
         final alpha = math.atan2(
-          g.center.dy - big.center.dy,
-          g.center.dx - big.center.dx,
+          g.center.dy - p.center.dy,
+          g.center.dx - p.center.dx,
         );
         for (final t in [0.0, 1.7, 9.3, 36.0, 123.456]) {
-          final thetaBig = big.phase + big.ratio * omega * t;
-          final thetaSmall = g.phase + g.ratio * omega * t;
-          final fractionBig = (alpha - thetaBig) * big.teeth / (2 * math.pi);
-          final fractionSmall =
-              (alpha + math.pi - thetaSmall) * g.teeth / (2 * math.pi);
-          final sum = (fractionBig + fractionSmall) % 1;
-          expect(sum, closeTo(0.5, 1e-9), reason: 'шестерёнка ${g.teeth}, t=$t');
+          final thetaParent = p.phase + p.ratio * omega * t;
+          final thetaChild = g.phase + g.ratio * omega * t;
+          final fractionParent = (alpha - thetaParent) * p.teeth / (2 * math.pi);
+          final fractionChild =
+              (alpha + math.pi - thetaChild) * g.teeth / (2 * math.pi);
+          final sum = (fractionParent + fractionChild) % 1;
+          expect(sum, closeTo(0.5, 1e-9),
+              reason: 'шестерёнка на ${g.teeth} зубьев, t=$t');
+        }
+      }
+    });
+
+    test('геометрия: контуры сцепленных пар не пересекаются в любой момент', () {
+      // Самая надёжная проверка: берём настоящие контуры (gearPath) и считаем,
+      // не попадает ли точка внутрь обоих. Выборка точек сетки в области
+      // пересечения кругов пары.
+      const scale = 1000.0;
+      final omega = 2 * math.pi / emblemRevolutionSeconds;
+      for (final t in [0.0, 3.1, 11.0, 47.5]) {
+        Path pathOf(PlacedGear g) => gearPath(
+              center: g.center * scale,
+              radius: g.radius * scale,
+              teeth: g.teeth,
+              rotation: g.phase + g.ratio * omega * t,
+              holeRatio: 0,
+            );
+        for (final g in gears.skip(1)) {
+          final a = pathOf(gears[g.parent]);
+          final b = pathOf(g);
+          final mid = (g.center + gears[g.parent].center) * (scale / 2);
+          var bothInside = 0;
+          for (var dx = -90.0; dx <= 90; dx += 3) {
+            for (var dy = -90.0; dy <= 90; dy += 3) {
+              final point = mid + Offset(dx, dy);
+              if (a.contains(point) && b.contains(point)) {
+                bothInside++;
+              }
+            }
+          }
+          expect(bothInside, 0, reason: 'зубья «наехали», t=$t, зубьев: ${g.teeth}');
         }
       }
     });

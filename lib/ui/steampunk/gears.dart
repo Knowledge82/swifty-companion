@@ -157,6 +157,7 @@ class PlacedGear {
     required this.teeth,
     required this.phase,
     required this.ratio,
+    this.parent = -1,
   });
 
   /// Центр и радиус в долях стороны эмблемы (0..1).
@@ -167,45 +168,69 @@ class PlacedGear {
   /// Начальный поворот, при котором зубья входят во впадины соседа.
   final double phase;
 
-  /// Во сколько раз и в какую сторону крутится относительно большой
-  /// (у большой 1, у сцепленных с ней отрицательное: они крутятся навстречу).
+  /// Во сколько раз и в какую сторону крутится относительно большой.
+  /// У большой 1; каждая следующая в цепочке крутится **навстречу** своей
+  /// «родительской» (знак чередуется), а скорость обратно пропорциональна
+  /// числу зубьев (см. [placeEmblemGears]).
   final double ratio;
 
-  bool get isBig => ratio == 1;
+  /// Индекс шестерёнки, с которой эта сцеплена (в списке раскладки);
+  /// у большой, ведущей, -1.
+  final int parent;
+
+  bool get isBig => parent < 0;
 }
 
 /// Большая шестерёнка эмблемы (в долях стороны) и число её зубьев.
 @visibleForTesting
-const double emblemBigRadius = 0.30;
+const double emblemBigRadius = 0.26;
 @visibleForTesting
-const int emblemBigTeeth = 14;
+const int emblemBigTeeth = 13;
 @visibleForTesting
-const Offset emblemBigCenter = Offset(0.40, 0.50);
+const Offset emblemBigCenter = Offset(0.347, 0.585);
 
 /// Секунд на один оборот большой шестерёнки эмблемы.
 @visibleForTesting
 const double emblemRevolutionSeconds = 36;
 
-/// Раскладка пяти шестерёнок: большая в центре и четыре малых вокруг неё.
+/// Раскладка семи шестерёнок **четырёх размеров** (0.26, 0.19, 0.14, 0.10 от
+/// стороны эмблемы), собранных в несимметричную цепочку: большая слева внизу
+/// ведёт среднюю справа, та ведёт две поменьше, а дальше цепочка уходит
+/// вверх и влево к самой маленькой.
 ///
-/// Это не «примерно подогнано», а считается:
+/// Раскладка не «подогнана на глаз», а считается:
 /// - **расстояние между осями** такое, чтобы вершина зуба одной почти
 ///   касалась впадины другой: `max(R + 0.8·r, r + 0.8·R) + зазор`
 ///   (впадина у нас на 0.8 радиуса, см. [gearPath]);
 /// - **фаза**: чтобы в точке касания зуб одной приходился на впадину другой,
 ///   нужно, чтобы сумма «долей зубьев» с обеих сторон давала 0.5. Из этого
-///   условия выводится начальный поворот малой шестерёнки;
+///   условия выводится начальный поворот сцепленной шестерёнки. Теперь у
+///   «родителя» фаза не нулевая (он сам сцеплен со своим родителем), поэтому
+///   в формулу входит и его фаза;
 /// - **скорость**: у сцепленных шестерён скорость обратно пропорциональна
-///   числу зубьев и направлена в противоположную сторону. Тогда условие
-///   фазы выполняется в любой момент, и зубья не заходят друг на друга.
+///   числу зубьев и направлена в противоположную сторону. Для цепочки это
+///   значит `ratio = -ratio_родителя · зубьев_родителя / зубьев`. Тогда
+///   условие фазы выполняется в любой момент, и зубья не заходят друг на друга.
+///
+/// Числа зубьев подобраны так, чтобы шаг зубьев (длина дуги на зуб) у всех
+/// был близок (0.12-0.13): зубья одной шестерёнки должны помещаться во
+/// впадины другой, а при разном шаге они бы цеплялись.
+///
+/// Саму раскладку (углы и размеры) подбирал скрипт: случайный поиск с
+/// проверками «всё внутри квадрата с полем», «несцепленные шестерёнки не
+/// касаются (зазор не меньше 0.02)» и растровая проверка, что сцепленные
+/// пары не пересекаются ни в какой момент вращения. Тесты ниже повторяют эти
+/// проверки.
 @visibleForTesting
 List<PlacedGear> placeEmblemGears() {
-  const children = <(double, double, int)>[
-    // (угол от большой в градусах, радиус, число зубьев)
-    (-35.0, 0.16, 8),
-    (40.0, 0.15, 7),
-    (-125.0, 0.13, 6),
-    (125.0, 0.12, 6),
+  const children = <(int, double, double, int)>[
+    // (индекс родителя, угол от родителя в градусах, радиус, зубья)
+    (0, -15.6, 0.19, 9),
+    (1, 88.9, 0.14, 7),
+    (1, -78.9, 0.14, 7),
+    (3, 179.8, 0.14, 7),
+    (4, -170.6, 0.10, 5),
+    (0, 123.6, 0.10, 5),
   ];
   final result = <PlacedGear>[
     const PlacedGear(
@@ -216,22 +241,25 @@ List<PlacedGear> placeEmblemGears() {
       ratio: 1,
     ),
   ];
-  for (final (degrees, radius, teeth) in children) {
+  for (final (parentIndex, degrees, radius, teeth) in children) {
+    final parent = result[parentIndex];
     final alpha = degrees * math.pi / 180;
     final distance =
-        math.max(emblemBigRadius + 0.8 * radius, radius + 0.8 * emblemBigRadius) + 0.01;
-    final center = emblemBigCenter + Offset(math.cos(alpha), math.sin(alpha)) * distance;
-    // Доля зубьев большой шестерёнки в направлении на соседа (её фаза 0).
-    final toothFractionBig = alpha * emblemBigTeeth / (2 * math.pi);
+        math.max(parent.radius + 0.8 * radius, radius + 0.8 * parent.radius) + 0.01;
+    final center = parent.center + Offset(math.cos(alpha), math.sin(alpha)) * distance;
+    // Доля зубьев родителя в направлении на соседа (с учётом его фазы).
+    final toothFractionParent =
+        (alpha - parent.phase) * parent.teeth / (2 * math.pi);
     final phase =
-        alpha + math.pi - (0.5 - toothFractionBig) * 2 * math.pi / teeth;
+        alpha + math.pi - (0.5 - toothFractionParent) * 2 * math.pi / teeth;
     result.add(
       PlacedGear(
         center: center,
         radius: radius,
         teeth: teeth,
         phase: phase,
-        ratio: -emblemBigTeeth / teeth,
+        ratio: -parent.ratio * parent.teeth / teeth,
+        parent: parentIndex,
       ),
     );
   }
@@ -240,9 +268,10 @@ List<PlacedGear> placeEmblemGears() {
 
 final List<PlacedGear> _emblemGears = placeEmblemGears();
 
-/// Эмблема: пять сцепленных латунных шестерёнок с окисью и царапинами,
+/// Эмблема: семь сцепленных латунных шестерёнок четырёх размеров (цепочка
+/// без симметрии) с окисью и царапинами,
 /// **вращающихся** (если анимации не отключены, см. [GearClock]).
-/// На большой шестерёнке изумрудная ступица со знаком школы 42 (она
+/// На большой шестерёнке тёмная ступица со знаком школы 42 (она
 /// не вращается: знак всегда читается), в малых болты. Чисто декоративная.
 class GearEmblem extends StatelessWidget {
   const GearEmblem({super.key, this.size = 120, this.animate = true});
@@ -252,8 +281,8 @@ class GearEmblem extends StatelessWidget {
   /// `false`: шестерёнки стоят (например, на скриншоте или в тесте).
   final bool animate;
 
-  /// Секунд на один оборот большой шестерёнки. Малые крутятся быстрее
-  /// в соотношении чисел зубьев.
+  /// Секунд на один оборот большой шестерёнки. Остальные крутятся в
+  /// соотношении чисел зубьев (самые малые, на 5 зубьев, в 2,6 раза быстрее).
   static const double revolutionSeconds = emblemRevolutionSeconds;
 
   @override
@@ -360,7 +389,7 @@ class _EmblemPainter extends CustomPainter {
     // Ступица со знаком 42 не вращается.
     final center = emblemBigCenter * s;
     final hub = emblemBigRadius * s * 0.66;
-    canvas.drawCircle(center, hub, Paint()..color = emeraldDeep);
+    canvas.drawCircle(center, hub, Paint()..color = walnutDeep);
     canvas.drawCircle(
       center,
       hub,

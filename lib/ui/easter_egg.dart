@@ -30,7 +30,7 @@ class EasterEggBadge extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: emeraldDeep,
+        color: walnutDeep,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: colors.primary, width: 1.5),
       ),

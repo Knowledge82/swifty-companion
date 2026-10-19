@@ -138,7 +138,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Center(child: GearEmblem(size: 140)),
+                    const Center(child: GearEmblem(size: 160)),
                     const SizedBox(height: 20),
                     BrassPanel(
                       child: Column(
