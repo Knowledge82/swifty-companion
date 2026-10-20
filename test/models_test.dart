@@ -259,6 +259,79 @@ void main() {
       expect(names, isNot(contains('minishell')));
     });
 
+    group('экзамены в статусе in_progress (так их отдаёт API у старого набора)', () {
+      Map<String, dynamic> project(
+        String slug, {
+        String status = 'in_progress',
+        Object? validated,
+        Object? mark,
+      }) =>
+          {
+            'status': status,
+            'validated?': validated,
+            'final_mark': mark,
+            'marked_at': '2024-05-10T10:00:00.000Z',
+            'cursus_ids': [9],
+            'project': {'slug': slug, 'name': slug},
+          };
+
+      List<String?> shown(List<Map<String, dynamic>> list) {
+        final json = sampleUserJson()..['projects_users'] = list;
+        return UserProfile.fromJson(json).finishedProjects().map((p) => p.name).toList();
+      }
+
+      test('экзамен с итогом показывается, сданный и проваленный', () {
+        expect(
+          shown([
+            project('c-piscine-exam-00', validated: false, mark: 20),
+            project('c-piscine-exam-02', validated: true, mark: 60),
+            project('c-piscine-final-exam', validated: true, mark: 24),
+            project('42next-exam-rank-05', validated: true, mark: 100),
+          ]),
+          unorderedEquals([
+            'c-piscine-exam-00',
+            'c-piscine-exam-02',
+            'c-piscine-final-exam',
+            '42next-exam-rank-05',
+          ]),
+        );
+      });
+
+      test('экзамен без итога (ещё не сдавал, ищет группу) не показывается', () {
+        expect(
+          shown([
+            project('exam-atonement', status: 'searching_a_group'),
+            project('c-piscine-exam-01'),
+            project('c-piscine-exam-01', validated: true), // нет оценки
+            project('c-piscine-exam-01', mark: 10), // неизвестно, сдан ли
+          ]),
+          isEmpty,
+        );
+      });
+
+      test('обычный проект в процессе не показывается, даже с прошлой оценкой', () {
+        // Пересдача: статус in_progress, а в записи ещё старая оценка.
+        expect(shown([project('minishell', validated: false, mark: 40)]), isEmpty);
+        expect(shown([project('c-piscine-c-05', validated: true, mark: 80)]), isEmpty);
+      });
+
+      test('завершённые проекты и экзамены по-прежнему показываются как раньше', () {
+        expect(
+          shown([project('exam-rank-03', status: 'finished', validated: true, mark: 100)]),
+          ['exam-rank-03'],
+        );
+      });
+
+      test('isExam и hasResult', () {
+        expect(const ProjectResult(slug: 'c-piscine-final-exam').isExam, isTrue);
+        expect(const ProjectResult(slug: '42next-Exam-Rank-02').isExam, isTrue);
+        expect(const ProjectResult(slug: 'libft').isExam, isFalse);
+        expect(const ProjectResult().isExam, isFalse);
+        expect(const ProjectResult(validated: true, finalMark: 0).hasResult, isTrue);
+        expect(const ProjectResult(validated: true).hasResult, isFalse);
+      });
+    });
+
     test('finishedProjects с фильтром по курсу', () {
       final names = UserProfile.fromJson(sampleUserJson())
           .finishedProjects(cursusId: 21)

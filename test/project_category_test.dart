@@ -201,6 +201,34 @@ void main() {
       );
     });
 
+    test('экзамены бассейна в статусе in_progress попадают в Piscina', () {
+      // Реальные записи старого набора: статус in_progress, но итог есть.
+      final json = sampleUserJson();
+      (json['projects_users'] as List).addAll([
+        {
+          'status': 'in_progress',
+          'validated?': false,
+          'final_mark': 20,
+          'marked_at': '2024-05-03T10:00:00.000Z',
+          'cursus_ids': [9],
+          'project': {'slug': 'c-piscine-exam-00', 'name': 'C Piscine Exam 00'},
+        },
+        {
+          'status': 'in_progress',
+          'validated?': true,
+          'final_mark': 24,
+          'marked_at': '2024-05-17T10:00:00.000Z',
+          'cursus_ids': [9],
+          'project': {'slug': 'c-piscine-final-exam', 'name': 'C Piscine Final Exam'},
+        },
+      ]);
+      final grouped = UserProfile.fromJson(json).finishedProjectsByCategory();
+      expect(
+        grouped[ProjectCategory.piscine]!.map((p) => p.name),
+        ['C Piscine Final Exam', 'C Piscine Exam 00', 'c-piscine-shell-00'],
+      );
+    });
+
     test('незавершённые проекты не попадают ни в один раздел', () {
       final grouped =
           UserProfile.fromJson(sampleUserJson()).finishedProjectsByCategory();

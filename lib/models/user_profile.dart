@@ -80,11 +80,13 @@ class UserProfile {
 
   /// Завершённые проекты (сданные и проваленные), новые сверху.
   /// С [cursusId] оставляет только проекты этого курса.
+  /// Экзамены с итогом считаются завершёнными и в статусе `in_progress`
+  /// (см. [ProjectResult.isCompleted]).
   List<ProjectResult> finishedProjects({int? cursusId}) {
     final result = projects
         .where(
           (p) =>
-              p.isFinished &&
+              p.isCompleted &&
               (cursusId == null || p.cursusIds.contains(cursusId)),
         )
         .toList();

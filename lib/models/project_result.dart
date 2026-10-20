@@ -51,8 +51,25 @@ class ProjectResult {
   final DateTime? date;
   final List<int> cursusIds;
 
-  /// «Завершён» определяем только по статусу (см. docs/03, раздел 8.3).
+  /// Сырой статус `finished` (см. docs/03, раздел 8.3).
   bool get isFinished => status == 'finished';
+
+  /// Это экзамен: в slug есть `exam` (`c-piscine-exam-00`, `c-piscine-final-exam`,
+  /// `exam-rank-03`, `42next-exam-rank-02`). У каждого экзамена своя логика статуса.
+  bool get isExam => slug?.toLowerCase().contains('exam') ?? false;
+
+  /// Есть итог: известно и сдан ли проект, и оценка.
+  bool get hasResult => validated != null && finalMark != null;
+
+  /// Попадает ли запись в «завершённые проекты».
+  ///
+  /// Обычный проект: только `status == finished`. Экзамен: ещё и `in_progress`,
+  /// если у него уже есть итог. В API экзамены бассейна у студентов старого
+  /// набора навсегда остаются `in_progress` (экзамен можно пересдавать каждую
+  /// неделю, поэтому запись не закрывается), хотя оценка и `validated?` в ней
+  /// стоят. Для обычных проектов такого правила нет: у проекта в процессе
+  /// (в том числе на пересдаче) прошлая оценка не должна выглядеть итогом.
+  bool get isCompleted => isFinished || (isExam && hasResult);
 
   ProjectOutcome get outcome {
     if (validated == true) {
