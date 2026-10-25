@@ -322,6 +322,7 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 | [docs/13-icon-and-splash.md](docs/13-icon-and-splash.md) | Этап 7.2: иконки Android (плотности, адаптивная иконка, безопасная зона), экран запуска до и после Android 12, генератор рисунков, заставка с фото и растушёвкой краёв (`ShaderMask`), подводные камни, альтернативы |
 | [docs/14-remaining-work.md](docs/14-remaining-work.md) | Этап 8: что осталось, статусы «телефон / тесты», сценарии ошибок, адаптивность, бонус, аудит секретов, релиз, чистый клон, вопросы на защиту |
 | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) | Flutter и React Native: устройство, сравнение по темам, цифры рынка с оговорками, плюсы и минусы, когда что выбирать |
+| [docs/16-code-walkthrough.md](docs/16-code-walkthrough.md) | Разбор кода для защиты: структура проекта, точка входа и запуск, импорты в Dart, `json_reader`, `display`, строки и руны, ленивые конвейеры, `config`, `api_constants`, `api_exception` |
 
 Документация обновляется после каждого этапа или по запросу.
 
