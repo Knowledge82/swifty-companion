@@ -1,8 +1,10 @@
 /// Все ошибки работы с API 42 в одном закрытом (sealed) семействе.
-///
-/// `sealed` значит: подклассы объявлены только в этом файле, поэтому
+
+/// `sealed` значит: это абстрактный класс, и его прямые наследники объявлены только в этом файле.
 /// компилятор знает полный список и требует учесть каждый случай в `switch`.
 /// Забыть обработать новый вид ошибки не получится.
+
+// Родитель:
 sealed class ApiException implements Exception {
   const ApiException(this.message);
 
@@ -11,11 +13,18 @@ sealed class ApiException implements Exception {
   /// ошибки совпадает с языком интерфейса.
   final String message;
 
+  // $ подставляет значение в строку. runtimeType это настоящий тип объекта во время работы, 
+  // поэтому получится, например, NetworkException: Нет соединения....
   @override
   String toString() => '$runtimeType: $message';
 }
 
-/// Нет сети, DNS не отвечает или сервер не ответил за отведённое время.
+// Наследники:
+
+//1. Нет сети, DNS не отвечает или сервер не ответил за отведённое время.
+
+// final class - «меня нельзя наследовать и реализовывать за пределами этого файла». 
+// Так семейство остаётся закрытым, и никто снаружи не добавит свою «ошибку сети».
 final class NetworkException extends ApiException {
   const NetworkException()
       : isTimeout = false,
@@ -30,18 +39,18 @@ final class NetworkException extends ApiException {
   final bool isTimeout;
 }
 
-/// Приложение не смогло авторизоваться: неверные ключи или отклонённый токен.
+//2. Приложение не смогло авторизоваться: неверные ключи или отклонённый токен.
 final class AuthException extends ApiException {
   const AuthException()
       : super('Не удалось авторизоваться в API 42. Проверьте ключи в .env.');
 }
 
-/// Логин не найден (HTTP 404). Используется с этапа 4.
+//3. Логин не найден (HTTP 404). Используется с этапа 4.
 final class NotFoundException extends ApiException {
   const NotFoundException() : super('Пользователь с таким логином не найден.');
 }
 
-/// Превышен лимит запросов (HTTP 429).
+//4. Превышен лимит запросов (HTTP 429).
 final class RateLimitException extends ApiException {
   const RateLimitException({this.retryAfter})
       : super('Слишком много запросов. Подождите немного и повторите.');
@@ -50,14 +59,13 @@ final class RateLimitException extends ApiException {
   final Duration? retryAfter;
 }
 
-/// Сервер API недоступен или сломан (HTTP 5xx).
+//5. Сервер API недоступен или сломан (HTTP 5xx).
 final class ServerException extends ApiException {
   const ServerException()
       : super('Сервер API 42 сейчас недоступен. Повторите позже.');
 }
 
-/// Ответ пришёл, но он не такой, как ожидалось: не JSON, нет нужных полей,
-/// неожиданный код.
+//6. Ответ пришёл, но он не такой, как ожидалось: не JSON, нет нужных полей, неожиданный код.
 final class UnexpectedResponseException extends ApiException {
   const UnexpectedResponseException()
       : super('Получен неожиданный ответ от сервера.');

@@ -5,7 +5,7 @@
 // несовпадении возвращают `null` (или пустой список), вместо того чтобы
 // падать. Поэтому одно «кривое» поле не роняет весь профиль.
 
-/// Строка, которой интра помечает скрытые данные (например, `phone`).
+/// Строка, которой интра помечает скрытые данные (например, `phone`). Константа верхнего уровня.
 const String hiddenMarker = 'hidden';
 
 /// Текст или `null`. Для приложения «нет данных» это три разных случая
@@ -24,7 +24,7 @@ String? readString(Object? value) {
   return text;
 }
 
-/// Число с плавающей точкой. JSON может отдать и `0`, и `0.0`; оба станут `double`.
+// JSON может отдать и `0`, и `0.0`; оба станут `double`.
 double? readDouble(Object? value) {
   if (value is num && value.isFinite) {
     return value.toDouble();
@@ -32,7 +32,7 @@ double? readDouble(Object? value) {
   return null;
 }
 
-/// Целое число. Дробное значение округляется.
+// Дробное значение округляется.
 int? readInt(Object? value) {
   if (value is int) {
     return value;
@@ -43,9 +43,10 @@ int? readInt(Object? value) {
   return null;
 }
 
+// Bool
 bool? readBool(Object? value) => value is bool ? value : null;
 
-/// Объект JSON или `null`.
+// Объект JSON или `null`.
 Map<String, dynamic>? readMap(Object? value) {
   if (value is Map<String, dynamic>) {
     return value;
@@ -56,7 +57,7 @@ Map<String, dynamic>? readMap(Object? value) {
   return null;
 }
 
-/// Список JSON. Если там не список, возвращается пустой.
+// Список JSON. Если там не список, возвращается пустой.
 List<Object?> readList(Object? value) {
   if (value is List) {
     return value;
@@ -64,7 +65,7 @@ List<Object?> readList(Object? value) {
   return const <Object?>[];
 }
 
-/// Дата в формате ISO 8601 или `null`.
+// Дата в формате ISO 8601 или `null`.
 DateTime? readDate(Object? value) {
   final text = readString(value);
   if (text == null) {
@@ -73,8 +74,8 @@ DateTime? readDate(Object? value) {
   return DateTime.tryParse(text);
 }
 
-/// Превращает список объектов JSON в список моделей.
-/// Элементы, которые не являются объектами, пропускаются.
+// Превращает список объектов JSON в список моделей.
+// Элементы, которые не являются объектами, пропускаются.
 List<T> readObjects<T>(
   Object? value,
   T Function(Map<String, dynamic> json) parse,

@@ -2,7 +2,6 @@
 class ConfigException implements Exception {
   const ConfigException(this.message, {this.missing = const []});
 
-  /// Описание для разработчика. Экран ошибки показывает перевод.
   final String message;
 
   /// Имена переменных, которых не хватает.
