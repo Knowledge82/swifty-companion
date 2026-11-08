@@ -1,4 +1,5 @@
 import '../core/api_client.dart';
+import '../core/api_constants.dart';
 import '../core/api_exception.dart';
 import '../core/login.dart';
 import '../models/user_profile.dart';
@@ -19,7 +20,7 @@ class UserRepository {
     }
     final login = normalizeLogin(rawLogin);
 
-    final json = await _api.getJson(['v2', 'users', login]);
+    final json = await _api.getJson([apiVersion, 'users', login]);
     try {
       return UserProfile.fromJson(json);
     } on FormatException {
