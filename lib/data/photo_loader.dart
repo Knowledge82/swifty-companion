@@ -7,19 +7,20 @@ import '../core/api_exception.dart';
 import '../core/http_helpers.dart';
 import '../core/token_service.dart';
 
-/// Функция, которая по адресу возвращает байты картинки. Экран получает именно
-/// её, а не весь [PhotoLoader]: так в тестах подставляется любая заглушка.
+/// A function that returns the image bytes for an address. The screen gets
+/// exactly this and not the whole [PhotoLoader], so tests can plug in any stub.
 typedef PhotoFetcher = Future<Uint8List> Function(String url);
 
-/// Загружает фото профиля с CDN интры.
+/// Loads the profile photo from the intra CDN.
 ///
-/// Зачем отдельный класс: CDN отдаёт картинки только с токеном (`Authorization:
-/// Bearer`), как и API. Обычный `Image.network` токен не добавляет и получает
-/// `403`. Поэтому мы скачиваем байты сами и показываем их через `Image.memory`.
+/// Why a separate class: the CDN serves images only with a token
+/// (`Authorization: Bearer`), just like the API. A plain `Image.network` does
+/// not add the token and gets `403`. So we download the bytes ourselves and
+/// show them through `Image.memory`.
 ///
-/// Безопасность: токен уходит **только** на хосты из [photoHosts] и только
-/// по https. Адрес фото берётся из ответа сервера, и без проверки чужой адрес
-/// мог бы утащить наш токен.
+/// Security: the token goes **only** to hosts from [photoHosts] and only over
+/// https. The photo address is taken from the server response, and without a
+/// check a foreign address could steal our token.
 class PhotoLoader {
   PhotoLoader({
     required this._tokenService,
@@ -37,11 +38,12 @@ class PhotoLoader {
   final int _maxCached;
   final void Function(String message)? _onLog;
 
-  /// Уже скачанные фото. `Map` в Dart помнит порядок вставки, поэтому первый
-  /// ключ это самая старая запись и её можно выбросить при переполнении.
+  /// Photos that are already downloaded. A `Map` in Dart remembers insertion
+  /// order, so the first key is the oldest entry and it can be dropped on
+  /// overflow.
   final Map<String, Uint8List> _cache = {};
 
-  /// Возвращает байты картинки. Бросает [ApiException], если не получилось.
+  /// Returns the image bytes. Throws [ApiException] if it did not work.
   Future<Uint8List> load(String url) async {
     final uri = _checkedUri(url);
     final cached = _cache[url];
@@ -74,9 +76,10 @@ class PhotoLoader {
     return bytes;
   }
 
-  /// Пропускает только https на разрешённые хосты со стандартным портом.
-  /// `Uri.parse` сам разбирает хитрости вроде `https://cdn.intra.42.fr@evil.com/`
-  /// (хостом там окажется `evil.com`, и проверка его отклонит).
+  /// Lets through only https to the allowed hosts with the standard port.
+  /// `Uri.parse` itself deals with tricks like
+  /// `https://cdn.intra.42.fr@evil.com/` (the host there will be `evil.com`,
+  /// and the check rejects it).
   Uri _checkedUri(String url) {
     final uri = Uri.tryParse(url);
     final allowed = uri != null &&
@@ -99,9 +102,9 @@ class PhotoLoader {
       }
       return bytes;
     }
-    // Повторять с новым токеном не пытаемся: 403 от CDN может быть и
-    // настоящим отказом, а лишние запросы токена нам запрещены правилом
-    // «не создавать токен на каждый запрос». Фото не критично.
+    // We do not try again with a new token: a 403 from the CDN may be a real
+    // refusal, and extra token requests are forbidden by the rule "do not
+    // create a token for every request". The photo is not critical.
     if (status == 401 || status == 403) {
       throw const AuthException();
     }

@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:swifty_companion/l10n/app_strings.dart';
 import 'package:swifty_companion/ui/steampunk/steampunk_theme.dart';
 
-/// Обёртка для тестов виджетов: тот же набор языков и делегатов, что в
-/// приложении. Язык задаём явно, иначе тестовая среда выберет английский
-/// и тексты в проверках зависели бы от настроек машины.
+/// A wrapper for widget tests: the same set of languages and delegates as in
+/// the app. The language is set explicitly, otherwise the test environment
+/// would pick English and the texts in the checks would depend on the machine's
+/// settings.
 ///
-/// [textScale] имитирует крупный системный шрифт.
+/// [textScale] imitates a large system font.
 ///
-/// [disableAnimations] по умолчанию `true` (как «убрать анимации» в системе):
-/// вращающиеся шестерёнки стоят, и `pumpAndSettle` не зависает на вечной
-/// анимации. Тесты, которым нужно движение, передают `false`.
+/// [disableAnimations] is `true` by default (like "remove animations" in the
+/// system): the rotating gears stand still, and `pumpAndSettle` does not hang
+/// on an endless animation. Tests that need motion pass `false`.
 Widget testApp(
   Widget home, {
   Locale locale = const Locale('es'),
@@ -18,7 +19,7 @@ Widget testApp(
   bool disableAnimations = true,
 }) {
   return MaterialApp(
-    // Настоящая тема приложения: тесты видят то же оформление, что и пользователь.
+    // The real app theme: tests see the same look as the user.
     theme: buildSteampunkTheme(),
     locale: locale,
     localizationsDelegates: AppStrings.localizationsDelegates,

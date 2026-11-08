@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import '../core/api_exception.dart';
 import '../l10n/app_strings.dart';
 
-/// Блок с сообщением об ошибке запроса: значок по виду ошибки + текст.
+/// A block with a request error message: an icon by kind of error + text.
 class ErrorBanner extends StatelessWidget {
   const ErrorBanner({super.key, required this.error});
 
   final ApiException error;
 
-  /// `switch` по sealed-классу обязан охватить все виды ошибок: добавишь
-  /// новый вид в api_exception.dart — и пока не добавишь его сюда,
-  /// проект не скомпилируется.
+  /// A `switch` over a sealed class must cover all kinds of errors: if you add
+  /// a new kind in api_exception.dart, the project will not compile until you
+  /// add it here too.
   IconData get _icon => switch (error) {
         NetworkException() => Icons.wifi_off,
         AuthException() => Icons.lock_outline,

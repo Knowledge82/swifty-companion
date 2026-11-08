@@ -1,19 +1,20 @@
-/// Допустимые символы логина 42. Это наше допущение: логины в интре
-/// состоят из латинских букв, цифр и дефиса. Если окажется шире,
-/// сервер всё равно ответит 404, а мы просто покажем «не найден».
+/// Characters allowed in a 42 login. This is our assumption: logins in the
+/// intra consist of Latin letters, digits and hyphens. If the real set turns
+/// out to be wider, the server still answers 404 and we simply show "not
+/// found".
 final RegExp _loginPattern = RegExp(r'^[a-z0-9_-]+$');
 
-/// Приводит ввод к виду, в котором логин уходит в запрос:
-/// без пробелов по краям и в нижнем регистре.
+/// Brings the input to the form in which the login goes into the request:
+/// no spaces at the edges and in lower case.
 String normalizeLogin(String raw) => raw.trim().toLowerCase();
 
-/// Что не так с введённым логином. Тексты для пользователя здесь не хранятся:
-/// их выбирает интерфейс по языку (`AppStrings.loginProblemText`).
+/// What is wrong with the entered login. No user-facing texts are stored here:
+/// the interface chooses them by language (`AppStrings.loginProblemText`).
 enum LoginProblem { empty, invalidChars }
 
-/// Возвращает проблему или `null`, если логин годится для запроса.
-/// Проверка нужна, чтобы не тратить сетевой запрос на заведомый мусор
-/// и не подставлять в адрес запроса произвольные символы (`/`, `?`, `..`).
+/// Returns the problem, or `null` if the login is fit for a request. The check
+/// exists so that we do not spend a network request on obvious junk and do not
+/// put arbitrary characters (`/`, `?`, `..`) into the request address.
 LoginProblem? validateLogin(String raw) {
   final login = normalizeLogin(raw);
   if (login.isEmpty) {

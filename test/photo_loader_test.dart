@@ -72,7 +72,7 @@ void main() {
         onPhoto: (request, attempt) async => jsonResponse({}, status),
       );
       await expectLater(fake.photos.load(_url), throwsA(isA<T>()));
-      // Лишних запросов токена нет, повторов нет.
+      // No extra token requests, no retries.
       expect(fake.tokenCalls, 1);
       expect(fake.photoRequests, hasLength(1));
     }

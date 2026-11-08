@@ -11,8 +11,9 @@ import 'fixtures.dart';
 
 const testConfig = AppConfig(clientId: 'test-uid', clientSecret: 'test-secret');
 
-/// JSON-ответ в UTF-8 (как у настоящего сервера). Тело отдаём байтами:
-/// конструктор `Response(String)` кодирует в latin1 и упал бы на кириллице.
+/// A JSON response in UTF-8 (like the real server). The body is given as bytes:
+/// the `Response(String)` constructor encodes to latin1 and would fail on
+/// Cyrillic.
 http.Response jsonResponse(
   Object body, [
   int status = 200,
@@ -25,7 +26,7 @@ http.Response jsonResponse(
   );
 }
 
-/// Минимальный настоящий PNG 1x1 (чтобы декодер при желании мог его разобрать).
+/// A minimal real 1x1 PNG (so that the decoder can parse it if it wants to).
 final List<int> tinyPng = base64Decode(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
 );
@@ -47,29 +48,29 @@ Future<http.Response> _okPhoto(http.Request request, int attempt) async {
   );
 }
 
-/// Поддельный сервер API 42: отвечает на запрос токена и на запросы профиля.
-/// Считает, сколько раз его спросили, и запоминает запросы к профилю.
+/// A fake 42 API server: answers the token request and the profile requests.
+/// It counts how many times it was asked and remembers the profile requests.
 ///
-/// Токены выдаёт по порядку: `tok-1`, `tok-2`, ...
+/// It issues tokens in order: `tok-1`, `tok-2`, ...
 class FakeApi {
   FakeApi({UserHandler? onUser, UserHandler? onPhoto, this.tokenStatus = 200})
       : onUser = onUser ?? _okUser,
         onPhoto = onPhoto ?? _okPhoto;
 
-  /// Как отвечать на запросы профиля; `attempt` — номер запроса с единицы.
+  /// How to answer profile requests; `attempt` is the request number, from one.
   final UserHandler onUser;
 
-  /// Как отвечать на запросы фото (CDN); по умолчанию 200 и крошечный PNG.
+  /// How to answer photo requests (CDN); by default 200 and a tiny PNG.
   final UserHandler onPhoto;
 
-  /// Код ответа токен-эндпоинта (200 — выдать токен).
+  /// The status code of the token endpoint (200 means issue a token).
   final int tokenStatus;
 
   int tokenCalls = 0;
   final List<http.Request> userRequests = [];
   final List<http.Request> photoRequests = [];
 
-  /// Всё, что токен-сервис и клиент написали в свой отладочный журнал.
+  /// Everything the token service and the client wrote to their debug log.
   final List<String> logs = [];
 
   late final MockClient client = MockClient(_handle);

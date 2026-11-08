@@ -59,7 +59,8 @@ void main() {
 
     test('тело читается как UTF-8, даже если Content-Type не указан', () async {
       final fake = FakeApi(
-        // Без заголовка Content-Type: `response.body` читал бы это как latin1.
+        // Without a Content-Type header: `response.body` would read this as
+        // latin1.
         onUser: (request, attempt) async => http.Response.bytes(
           utf8.encode(jsonEncode({'login': 'jdoe', 'displayname': 'José Ñandú'})),
           200,

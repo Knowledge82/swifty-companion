@@ -8,24 +8,25 @@ import '../models/project_category.dart';
 import 'app_strings_en.dart';
 import 'app_strings_es.dart';
 
-/// Все тексты интерфейса. Это абстрактный «словарь»: у него есть по одному
-/// геттеру на каждую фразу, а сами фразы лежат в двух наследниках
-/// (`AppStringsEs`, `AppStringsEn`).
+/// All interface texts. This is an abstract "dictionary": it has one getter per
+/// phrase, and the phrases themselves live in two subclasses (`AppStringsEs`,
+/// `AppStringsEn`).
 ///
-/// Если добавить фразу сюда и забыть перевести на один из языков,
-/// проект не соберётся: компилятор требует реализовать все геттеры.
+/// If you add a phrase here and forget to translate it into one of the
+/// languages, the project will not build: the compiler requires all getters to
+/// be implemented.
 abstract class AppStrings {
   const AppStrings();
 
-  /// Первый язык в списке это язык по умолчанию: если язык телефона
-  /// не испанский и не английский, Flutter выберет испанский.
+  /// The first language in the list is the default one: if the phone language
+  /// is neither Spanish nor English, Flutter picks Spanish.
   static const List<Locale> supportedLocales = [Locale('es'), Locale('en')];
 
   static const LocalizationsDelegate<AppStrings> delegate =
       _AppStringsDelegate();
 
-  /// Наш словарь + встроенные переводы самого Flutter (подсказка «Назад»,
-  /// названия месяцев, контекстное меню копирования и т. п.).
+  /// Our dictionary + Flutter's own built-in translations (the "Back" tooltip,
+  /// month names, the copy context menu, etc.).
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
     delegate,
     GlobalMaterialLocalizations.delegate,
@@ -45,16 +46,16 @@ abstract class AppStrings {
   static AppStrings forLocale(Locale locale) =>
       locale.languageCode == 'en' ? const AppStringsEn() : const AppStringsEs();
 
-  // Общее
+  // General
   String get appTitle;
 
-  // Экран поиска
+  // Search screen
   String get loginLabel;
   String get searchButton;
   String get loginEmptyError;
   String get loginInvalidError;
 
-  // Ошибки запроса
+  // Request errors
   String get networkError;
   String get timeoutError;
   String get authError;
@@ -64,7 +65,7 @@ abstract class AppStrings {
   String get serverError;
   String get unexpectedError;
 
-  // Экран профиля
+  // Profile screen
   String get emailLabel;
   String get phoneLabel;
   String get locationLabel;
@@ -75,7 +76,7 @@ abstract class AppStrings {
   String get walletLabel;
   String get correctionPointsLabel;
 
-  // Скиллы и проекты
+  // Skills and projects
   String get skillsTitle;
   String get skillsEmpty;
   String skillsFormulaNote(int maxLevel);
@@ -90,13 +91,13 @@ abstract class AppStrings {
   String get projectUnknown;
   String get unnamed;
 
-  // Экран ошибки конфигурации
+  // Configuration error screen
   String get configErrorTitle;
   String configMissing(List<String> keys);
   String get configUnreadable;
   String get configHint;
 
-  /// Название раздела проектов. `switch` по enum исчерпывающий.
+  /// Name of a projects section. The `switch` over the enum is exhaustive.
   String projectCategoryTitle(ProjectCategory category) => switch (category) {
         ProjectCategory.outerCore => projectsOuterCore,
         ProjectCategory.commonCore => projectsCommonCore,
@@ -104,14 +105,14 @@ abstract class AppStrings {
         ProjectCategory.piscineReloaded => projectsPiscineReloaded,
       };
 
-  /// Текст проблемы с логином. `switch` по enum исчерпывающий.
+  /// Text of a login problem. The `switch` over the enum is exhaustive.
   String loginProblemText(LoginProblem problem) => switch (problem) {
         LoginProblem.empty => loginEmptyError,
         LoginProblem.invalidChars => loginInvalidError,
       };
 
-  /// Текст ошибки запроса. `switch` по sealed-классу исчерпывающий:
-  /// новый вид ошибки без перевода не соберётся.
+  /// Text of a request error. The `switch` over the sealed class is exhaustive:
+  /// a new kind of error without a translation will not compile.
   String errorText(ApiException error) => switch (error) {
         NetworkException(isTimeout: true) => timeoutError,
         NetworkException() => networkError,
@@ -132,8 +133,8 @@ class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
   bool isSupported(Locale locale) =>
       locale.languageCode == 'es' || locale.languageCode == 'en';
 
-  /// `SynchronousFuture`: тексты у нас в коде, ждать нечего, и первый кадр
-  /// рисуется сразу, без мигания.
+  /// `SynchronousFuture`: our texts are in the code, there is nothing to wait
+  /// for, and the first frame is drawn at once, without flicker.
   @override
   Future<AppStrings> load(Locale locale) =>
       SynchronousFuture<AppStrings>(AppStrings.forLocale(locale));

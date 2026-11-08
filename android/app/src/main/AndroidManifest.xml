@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Доступ в сеть для запросов к API 42. В debug/profile манифестах он уже есть,
-         но в release-сборке без этой строки сети не будет. -->
+    <!-- Network access for requests to the 42 API. The debug/profile manifests already have it,
+         but a release build has no network without this line. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application

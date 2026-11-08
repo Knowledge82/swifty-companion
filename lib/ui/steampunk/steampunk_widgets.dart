@@ -7,19 +7,19 @@ import 'pipes.dart';
 import 'steampunk_theme.dart';
 import 'wear.dart';
 
-/// Толщина латунного кольца вокруг фото по умолчанию.
+/// Default thickness of the brass ring around the photo.
 const double brassRingThickness = 13;
 
-/// Цвета фона по умолчанию: тёмная кожа.
+/// Default background colors: dark leather.
 const List<Color> backdropColors = [leather, leatherDeep];
 
-/// Фон экрана: тёмная кожа с лёгким светом в центре, слабым узором шестерёнок,
-/// трубами и кабелями по краям и большой медленно вращающейся шестерней,
-/// которая на четверть выглядывает из правого нижнего угла.
+/// The screen background: dark leather with a soft light in the center, a faint
+/// pattern of gears, pipes and cables along the edges and a big slowly rotating
+/// gear, a quarter of which peeks out of the bottom right corner.
 ///
-/// Узор, трубы и кабели рисуются один раз и закрыты `RepaintBoundary`, поэтому
-/// прокрутка содержимого их не перерисовывает. Вращается только угловая
-/// шестерня (и она не вращается при включённом «убрать анимации»).
+/// The pattern, pipes and cables are drawn once and wrapped in a
+/// `RepaintBoundary`, so scrolling the content does not repaint them. Only the
+/// corner gear rotates (and it does not rotate when "remove animations" is on).
 class SteampunkBackdrop extends StatelessWidget {
   const SteampunkBackdrop({
     super.key,
@@ -29,14 +29,14 @@ class SteampunkBackdrop extends StatelessWidget {
 
   final Widget child;
 
-  /// Два цвета радиального градиента: в центре и по краям.
+  /// The two colors of the radial gradient: in the center and at the edges.
   final List<Color> colors;
 
   @override
   Widget build(BuildContext context) {
     final primary = Theme.of(context).colorScheme.primary;
     return Stack(
-      // expand: содержимое получает весь экран, а не «сколько ему нужно».
+      // expand: the content gets the whole screen, not "as much as it needs".
       fit: StackFit.expand,
       children: [
         Positioned.fill(
@@ -69,10 +69,11 @@ class SteampunkBackdrop extends StatelessWidget {
               if (!shortest.isFinite) {
                 return const SizedBox.shrink();
               }
-              // Радиус зависит от экрана, но в разумных пределах.
+              // The radius depends on the screen, but within reasonable limits.
               final radius = (shortest * 0.46).clamp(100.0, 260.0).toDouble();
               return Stack(
-                // Всё, что вылезает за экран, обрезается: нужна только четверть.
+                // Everything that sticks out past the screen is clipped: only a
+                // quarter is needed.
                 clipBehavior: Clip.hardEdge,
                 children: [
                   Positioned(
@@ -91,15 +92,15 @@ class SteampunkBackdrop extends StatelessWidget {
   }
 }
 
-/// Насколько клёпки «золотые»: 1 это чистая латунь, 0 цвет панели. Приглушены,
-/// чтобы не спорить с прогресс-барами и акцентами за внимание.
+/// How "golden" the rivets are: 1 is pure brass, 0 is the panel color. They are
+/// muted so as not to compete with progress bars and accents for attention.
 const double _rivetStrength = 0.72;
 
-/// Ореховая панель в латунной раме: потёртая рамка с пятнами окиси,
-/// медная вставка внутри и клёпки по всему периметру.
-/// Фон чуть прозрачный, чтобы шестерёнки позади угадывались.
-/// `RepaintBoundary` хранит нарисованную панель готовой картинкой, поэтому
-/// при прокрутке клёпки и пятна не перерисовываются.
+/// A walnut panel in a brass frame: a worn border with oxide stains, a copper
+/// inlay inside and rivets all around the perimeter.
+/// The background is slightly transparent so that the gears behind can be made
+/// out. `RepaintBoundary` keeps the drawn panel as a ready picture, so when
+/// scrolling the rivets and stains are not repainted.
 class BrassPanel extends StatelessWidget {
   const BrassPanel({
     super.key,
@@ -118,8 +119,8 @@ class BrassPanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surface.withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(10),
-          // Рамка тонкая (1 px, было 1,5): панель отделяется от фона
-          // оттенком, объёмом и тенью, а не яркой обводкой.
+          // The border is thin (1 px, was 1.5): the panel is separated from the
+          // background by tone, volume and shadow, not by a bright outline.
           border: Border.all(color: colors.primary, width: 1),
           boxShadow: const [
             BoxShadow(
@@ -130,8 +131,9 @@ class BrassPanel extends StatelessWidget {
           ],
         ),
         child: CustomPaint(
-          // painter рисует ПОД содержимым (износ), foregroundPainter ПОВЕРХ
-          // (клёпки): износ не должен закрывать текст, а клёпки лежат в отступе.
+          // painter draws UNDER the content (wear), foregroundPainter ON TOP of
+          // it (rivets): the wear must not cover the text, and the rivets lie
+          // in the padding.
           painter: const _WearPainter(),
           foregroundPainter: _RivetPainter(
             brassColor: Color.lerp(colors.surface, colors.primary, _rivetStrength)!,
@@ -143,9 +145,10 @@ class BrassPanel extends StatelessWidget {
   }
 }
 
-/// Износ панели: медная вставка, пятна окиси в углах и вдоль краёв, царапины.
-/// Случайность детерминирована размером панели: у панели одного размера
-/// узор всегда один и тот же, и он не «дрожит» при перерисовке.
+/// Panel wear: a copper inlay, oxide stains in the corners and along the edges,
+/// scratches. The randomness is determined by the panel size: for a panel of
+/// one size the pattern is always the same, and it does not "jitter" on
+/// repaint.
 class _WearPainter extends CustomPainter {
   const _WearPainter();
 
@@ -158,9 +161,9 @@ class _WearPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Всё, что рисуется ниже, обрезается по скруглённому контуру панели
-    // (чуть внутрь от рамки): у пятен размытый край, и без обрезки он
-    // «светился» бы за рамкой.
+    // Everything drawn below is clipped to the rounded outline of the panel (a
+    // bit inside the border): the stains have a blurred edge, and without
+    // clipping it would "glow" beyond the border.
     canvas.save();
     canvas.clipRRect(
       RRect.fromRectAndRadius(
@@ -169,7 +172,7 @@ class _WearPainter extends CustomPainter {
       ),
     );
 
-    // Медная вставка: тонкая линия внутри рамки.
+    // The copper inlay: a thin line inside the border.
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         (Offset.zero & size).deflate(5),
@@ -181,8 +184,9 @@ class _WearPainter extends CustomPainter {
         ..color = copper.withValues(alpha: 0.3),
     );
 
-    // Объём: светлый блик по внутренней кромке и чуть ярче по верхней, как у
-    // фаски на металлической пластине. Именно он «поднимает» панель над фоном.
+    // Volume: a light highlight along the inner edge and a bit brighter along
+    // the top one, like the bevel on a metal plate. It is what "lifts" the
+    // panel above the background.
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         (Offset.zero & size).deflate(1.5),
@@ -201,7 +205,7 @@ class _WearPainter extends CustomPainter {
         ..color = parchment.withValues(alpha: 0.27),
     );
 
-    // Окись скапливается в углах.
+    // Oxide gathers in the corners.
     final corners = <(double, double, double, double)>[
       (0, 0, 1, 1),
       (w, 0, -1, 1),
@@ -219,7 +223,7 @@ class _WearPainter extends CustomPainter {
       }
     }
 
-    // И немного вдоль краёв, как подтёки.
+    // And a little along the edges, like streaks.
     for (var i = 0; i < 5; i++) {
       final x = 30 + random.nextDouble() * (w - 60);
       drawBlotch(
@@ -236,7 +240,7 @@ class _WearPainter extends CustomPainter {
       );
     }
 
-    // Царапины вдоль рамки: светлые короткие штрихи.
+    // Scratches along the border: light short strokes.
     for (var i = 0; i < 16; i++) {
       final side = random.nextInt(4);
       final along = random.nextDouble();
@@ -262,8 +266,8 @@ class _WearPainter extends CustomPainter {
   bool shouldRepaint(_WearPainter oldDelegate) => false;
 }
 
-/// Клёпки: крупные в углах, средние через каждые ~44 пикселя по периметру.
-/// Все латунные: окись на клёпках не рисуется.
+/// Rivets: large in the corners, medium every ~44 pixels along the perimeter.
+/// All of them are brass: no oxide is drawn on the rivets.
 class _RivetPainter extends CustomPainter {
   const _RivetPainter({required this.brassColor});
 
@@ -308,8 +312,9 @@ class _RivetPainter extends CustomPainter {
       oldDelegate.brassColor != brassColor;
 }
 
-/// Латунное кольцо вокруг круглого фото: градиент латуни в медь, тень и
-/// клёпки по кругу (через каждые ~40 пикселей). Полный размер = размер фото + 2 × [thickness].
+/// A brass ring around a round photo: a gradient from brass to copper, a shadow
+/// and rivets around the circle (every ~40 pixels). Full size = photo size +
+/// 2 × [thickness].
 class BrassRing extends StatelessWidget {
   const BrassRing({
     super.key,
@@ -375,9 +380,9 @@ class _RingRivetPainter extends CustomPainter {
       oldDelegate.thickness != thickness;
 }
 
-/// Простая латунная линия под AppBar (подставляется в `AppBar.bottom`):
-/// полоса латуни со светлой верхней кромкой, медной нижней и мягкой тенью.
-/// Ни клёпок, ни узора: узор мы пока заменили простой линией.
+/// A simple brass line under the AppBar (plugged into `AppBar.bottom`): a brass
+/// strip with a light top edge, a copper bottom one and a soft shadow.
+/// No rivets, no pattern: for now we replaced the pattern with a simple line.
 class BrassLine extends StatelessWidget implements PreferredSizeWidget {
   const BrassLine({super.key});
 

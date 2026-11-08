@@ -6,13 +6,14 @@ import '../models/project_category.dart';
 import '../models/project_result.dart';
 import 'section_title.dart';
 
-/// Раздел «Проекты»: завершённые проекты (сданные и проваленные), разложенные
-/// по группам Outer Core, Common Core, Piscina. Пустые группы не показываются.
+/// The "Projects" section: completed projects (passed and failed), laid out in
+/// the groups Outer Core, Common Core, Piscina. Empty groups are not shown.
 ///
-/// Каждая группа **свёрнута** и раскрывается по касанию на заголовок: список
-/// из 40 проектов целиком забил бы экран. Какие группы раскрыты, помнит
-/// состояние этого виджета (пока открыт профиль).
-/// Результат передаётся значком, цветом **и** словом, чтобы не зависеть от цвета.
+/// Every group is **collapsed** and expands on a tap on the header: a list of
+/// 40 projects at once would fill the whole screen. Which groups are expanded
+/// is remembered by the state of this widget (while the profile is open). The
+/// result is conveyed by an icon, a color **and** a word, so it does not depend
+/// on color alone.
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key, required this.groups});
 
@@ -70,8 +71,8 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   }
 }
 
-/// Заголовок группы: нажимается целиком, справа стрелка, которая
-/// поворачивается при раскрытии.
+/// Group header: the whole thing is tappable, with an arrow on the right that
+/// rotates when it expands.
 class _GroupHeading extends StatelessWidget {
   const _GroupHeading({
     required this.title,
@@ -88,9 +89,9 @@ class _GroupHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    // Material с прозрачным типом нужен, чтобы волна от касания рисовалась
-    // ПОВЕРХ панели: иначе она рисовалась бы на Material экрана, под панелью,
-    // и была бы не видна.
+    // A Material with the transparency type is needed so that the ripple of the
+    // tap is drawn ON TOP of the panel: otherwise it would be drawn on the
+    // screen's Material, under the panel, and would not be visible.
     return Material(
       type: MaterialType.transparency,
       child: Semantics(
@@ -101,7 +102,7 @@ class _GroupHeading extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(6),
           child: ConstrainedBox(
-            // 48 пикселей: минимальный удобный размер для пальца.
+            // 48 pixels: the minimum comfortable size for a finger.
             constraints: const BoxConstraints(minHeight: 48),
             child: Row(
               children: [
@@ -129,8 +130,8 @@ class _GroupHeading extends StatelessWidget {
   }
 }
 
-/// Плавно раскрывающийся блок. Пока блок полностью свёрнут, содержимое
-/// **не строится** в дереве виджетов (ни одной строки списка).
+/// A smoothly expanding block. While the block is fully collapsed, the content
+/// is **not built** in the widget tree (not a single list row).
 class _Collapsible extends StatefulWidget {
   const _Collapsible({required this.expanded, required this.child});
 

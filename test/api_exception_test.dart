@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/core/api_exception.dart';
 
-/// Если добавить новый подкласс `ApiException` и не добавить его сюда,
-/// этот файл перестанет компилироваться: `switch` по sealed-классу
-/// обязан быть исчерпывающим.
+/// If you add a new `ApiException` subclass and do not add it here, this file
+/// will stop compiling: a `switch` over a sealed class must be exhaustive.
 String kind(ApiException e) => switch (e) {
       NetworkException() => 'network',
       AuthException() => 'auth',

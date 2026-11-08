@@ -5,11 +5,11 @@ import 'api_exception.dart';
 import 'http_helpers.dart';
 import 'token_service.dart';
 
-/// HTTP-клиент для API 42: подставляет токен, повторяет запрос после 401
-/// и переводит коды ответа в [ApiException].
+/// HTTP client for the 42 API: adds the token, retries the request after a 401
+/// and turns response codes into [ApiException].
 ///
-/// Знает только про «адрес → JSON-объект». Что за JSON и во что его превращать,
-/// решает слой выше (репозиторий).
+/// It only knows "address -> JSON object". What that JSON is and what to turn
+/// it into is decided by the layer above (the repository).
 class ApiClient {
   ApiClient({
     required this._tokenService,
@@ -22,14 +22,16 @@ class ApiClient {
   final http.Client _client;
   final Duration _requestTimeout;
 
-  /// Куда писать отладочные сообщения (или `null` — молчать).
-  /// Пишем только адрес, код, размер и время; токен не попадает никогда.
+  /// Where to write debug messages (or `null` to stay silent). Only the
+  /// address, status code, size and time are logged; the token never is.
   final void Function(String message)? _onLog;
 
-  /// GET `https://api.intra.42.fr/<segments>` с токеном. Возвращает JSON-объект.
+  /// GET `https://api.intra.42.fr/<segments>` with the token. Returns a JSON
+  /// object.
   ///
-  /// Части пути передаются **списком**: `Uri` сам кодирует каждую часть
-  /// (пробел, `?`, `/` внутри части не изменят структуру адреса).
+  /// Path parts are passed as a **list**: `Uri` encodes each part itself (a
+  /// space, `?` or `/` inside a part cannot change the structure of the
+  /// address).
   Future<Map<String, dynamic>> getJson(List<String> pathSegments) async {
     final uri = Uri(scheme: 'https', host: apiHost, pathSegments: pathSegments);
 
@@ -37,8 +39,8 @@ class ApiClient {
     var response = await _get(uri, token);
 
     if (response.statusCode == 401) {
-      // Токен отвергнут раньше срока: забываем именно его, берём новый
-      // и повторяем запрос РОВНО один раз.
+      // The token was rejected before its expiry: forget exactly that one, get
+      // a new one and repeat the request EXACTLY once.
       _tokenService.invalidate(token);
       token = await _tokenService.getToken();
       response = await _get(uri, token);
@@ -71,7 +73,7 @@ class ApiClient {
       return decodeJsonObject(response);
     }
     if (status == 401) {
-      // Второй 401 подряд: дело не в просроченном токене.
+      // A second 401 in a row: the cause is not an expired token.
       throw const AuthException();
     }
     if (status == 404) {
@@ -83,7 +85,7 @@ class ApiClient {
     if (status >= 500) {
       throw const ServerException();
     }
-    // Остальное, в том числе 403: нельзя утверждать, что виноваты ключи.
+    // Everything else, including 403: we cannot claim the keys are to blame.
     throw const UnexpectedResponseException();
   }
 }

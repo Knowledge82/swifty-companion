@@ -6,50 +6,55 @@ import '../l10n/app_strings.dart';
 import 'steampunk/gears.dart';
 import 'steampunk/steampunk_theme.dart';
 
-/// Выключатель экрана-заставки: `false` и приложение сразу открывает поиск
-/// (удобно при отладке, когда заставка мешает после каждого перезапуска).
+/// The switch for the splash screen: with `false` the app opens the search
+/// screen at once (handy when debugging, when the splash gets in the way after
+/// every restart).
 const bool introEnabled = true;
 
-/// Файл с картинкой заставки (объявлен в `pubspec.yaml`, раздел assets).
+/// The file with the splash image (declared in `pubspec.yaml`, the assets
+/// section).
 const String splashImageAsset = 'assets/images/splash.jpg';
 
-/// Пропорции картинки (ширина / высота): 1024 × 1536 пикселей (2:3).
-/// Если заменишь файл на другой с теми же пропорциями (например, больше
-/// по размеру), менять ничего не надо; с другими пропорциями поправь число.
+/// Image proportions (width / height): 1024 x 1536 pixels (2:3). If you replace
+/// the file with another one of the same proportions (for example, larger in
+/// size), nothing needs to change; with different proportions, fix the number.
 const double splashImageAspect = 1024 / 1536;
 
-/// Фон заставки: сплошной очень тёмный тёплый цвет (не чисто чёрный).
-/// Это тот же `leatherDeep`, что и края фона экрана поиска: после заставки
-/// фон не «перескакивает». К краям самой картинки он тоже близок.
+/// Splash background: a solid very dark warm color (not pure black). It is the
+/// same `leatherDeep` as the edges of the search screen background: after the
+/// splash the background does not "jump". It is also close to the edges of the
+/// image itself.
 const Color splashBackgroundColor = leatherDeep;
 
-/// Какая доля высоты (или ширины) картинки у каждого края уходит в
-/// прозрачность. Через прозрачность виден фон [splashBackgroundColor], то есть
-/// край картинки плавно «тонет» в почти чёрном. Чем больше число, тем длиннее
-/// переход и тем больше краёв картинки теряется (допустимо 0.05-0.30).
+/// What share of the image height (or width) at each edge goes into
+/// transparency. Through the transparency the [splashBackgroundColor]
+/// background shows, i.e. the edge of the image smoothly "sinks" into almost
+/// black. The larger the number, the longer the transition and the more of the
+/// image edges is lost (acceptable 0.05-0.30).
 const double splashFeather = 0.12;
 
-/// Заставка внутри приложения: картинка **целиком** (вписана по ширине, на
-/// телефоне в портрете; на широком экране по высоте) на сплошном тёмном фоне.
-/// Свободные полосы сверху и снизу заполняет фон, а края картинки плавно
-/// растворяются в нём (градиент прозрачности, [splashFeather]). Картинка
-/// плавно проявляется (fade-in), держится и плавно гаснет (fade-out), после
-/// чего (или по касанию) сменяется экраном [next].
+/// The in-app splash: the **whole** image (fitted by width, on a phone in
+/// portrait; by height on a wide screen) on a solid dark background. The free
+/// strips at the top and bottom are filled by the background, and the edges of
+/// the image smoothly dissolve into it (a transparency gradient,
+/// [splashFeather]). The image fades in smoothly, holds, and fades out, after
+/// which (or on a tap) it is replaced by the [next] screen.
 ///
-/// **Часы заставки запускаются, когда картинка готова** (загружена и
-/// декодирована), а не в момент создания экрана. Иначе часть времени
-/// проявления уходила бы на загрузку файла, и картинка «выпрыгивала» бы
-/// рывком посреди плавного появления. Если картинка не готова за
-/// [imageWait], часы стартуют всё равно (чтобы заставка не зависла).
+/// **The splash clock starts when the image is ready** (loaded and decoded),
+/// not at the moment the screen is created. Otherwise part of the fade-in time
+/// would go into loading the file, and the image would "jump out" abruptly in
+/// the middle of the smooth appearance. If the image is not ready within
+/// [imageWait], the clock starts anyway (so the splash does not hang).
 ///
-/// Если экран шире картинки (планшет, ландшафт), по бокам остаётся тёмный
-/// фон, а края картинки растушёваны. Если уже (обычный телефон в портрете),
-/// картинка обрезается по бокам: смотрим на центр.
+/// If the screen is wider than the image (tablet, landscape), dark background
+/// remains on the sides and the image edges are feathered. If it is narrower
+/// (an ordinary phone in portrait), the image is cropped at the sides: we look
+/// at the center.
 ///
-/// Зачем она нужна, если есть системный splash: на Android 12+ система
-/// показывает только маленький значок по центру, а целую картинку не
-/// разрешает (docs/13). Поэтому системный splash у нас короткий, с эмблемой,
-/// а картинка показывается сразу следом, уже средствами Flutter.
+/// Why it is needed when there is a system splash: on Android 12+ the system
+/// shows only a small icon in the center and does not allow a whole image
+/// (docs/13). So our system splash is short, with the emblem, and the image is
+/// shown right after it, already by Flutter's means.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({
     super.key,
@@ -62,27 +67,27 @@ class SplashScreen extends StatefulWidget {
     this.image = const AssetImage(splashImageAsset),
   });
 
-  /// Экран, который открывается после заставки.
+  /// The screen that opens after the splash.
   final Widget next;
 
-  /// Полная длительность заставки (вместе с появлением и угасанием),
-  /// если пользователь не коснулся экрана.
+  /// The full duration of the splash (including fade-in and fade-out) if the
+  /// user does not touch the screen.
   final Duration duration;
 
-  /// Сколько картинка проявляется в начале.
+  /// How long the image takes to fade in at the start.
   final Duration fadeIn;
 
-  /// Сколько картинка гаснет в конце.
+  /// How long the image takes to fade out at the end.
   final Duration fadeOut;
 
-  /// Сколько максимум ждать загрузки картинки до старта часов.
+  /// The maximum time to wait for the image to load before starting the clock.
   final Duration imageWait;
 
-  /// `false`: не ждать картинку, стартовать сразу (нужно тестам: в тестовой
-  /// среде декодирование картинок идёт не в «тестовых» часах).
+  /// `false`: do not wait for the image, start at once (needed by tests: in the
+  /// test environment image decoding does not run on the "test" clock).
   final bool waitForImage;
 
-  /// Картинка (в тестах подставляется своя, без файла).
+  /// The image (tests substitute their own, without a file).
   final ImageProvider image;
 
   @override
@@ -104,8 +109,9 @@ class _SplashScreenState extends State<SplashScreen>
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration,
-      // preserve: не ускорять 20-кратно при включённом «убрать анимации»,
-      // иначе заставка мелькнёт и пропадёт; плавность мы отключаем сами ниже.
+      // preserve: do not speed up 20x when "remove animations" is on, otherwise
+      // the splash would flash and vanish; we turn the smoothness off ourselves
+      // below.
       animationBehavior: AnimationBehavior.preserve,
     )..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
@@ -113,8 +119,8 @@ class _SplashScreenState extends State<SplashScreen>
         }
       });
 
-    // Кривая прозрачности: 0 → 1 (появление), 1 (держим), 1 → 0 (угасание).
-    // Вес участка = его длительность в миллисекундах.
+    // Opacity curve: 0 -> 1 (fade-in), 1 (hold), 1 -> 0 (fade-out).
+    // The weight of a segment = its duration in milliseconds.
     int ms(Duration d) => d.inMilliseconds < 1 ? 1 : d.inMilliseconds;
     final hold = widget.duration - widget.fadeIn - widget.fadeOut;
     _opacity = TweenSequence<double>([
@@ -145,15 +151,16 @@ class _SplashScreenState extends State<SplashScreen>
       _start();
       return;
     }
-    // Страховка: если картинка не загрузилась вовремя, заставка стартует всё равно.
+    // Safety net: if the image did not load in time, the splash starts anyway.
     _fallback = Timer(widget.imageWait, _start);
-    // Прогрев: картинка загружается и декодируется заранее; часы стартуют,
-    // когда она готова. Ошибку загрузки глотаем: вместо картинки покажется
-    // эмблема, а часы всё равно стартуют (Future завершается и при ошибке).
+    // Warm-up: the image is loaded and decoded in advance; the clock starts
+    // when it is ready. A load error is swallowed: the emblem will show instead
+    // of the image, and the clock starts anyway (the Future completes on an
+    // error too).
     precacheImage(widget.image, context, onError: (_, _) {}).then((_) => _start());
   }
 
-  /// Запускает часы заставки (один раз).
+  /// Starts the splash clock (once).
   void _start() {
     if (_started || !mounted) {
       return;
@@ -166,8 +173,9 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _fallback?.cancel();
-    // Контроллер надо освободить: иначе он продолжил бы звать _finish()
-    // у уничтоженного состояния (а в тестах это ещё и «висящий таймер»).
+    // The controller must be released: otherwise it would keep calling
+    // _finish() on a destroyed state (and in tests that is also a "pending
+    // timer").
     _controller.dispose();
     super.dispose();
   }
@@ -181,7 +189,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // «Убрать анимации» в системе: без плавного появления, картинка сразу.
+    // "Remove animations" in the system: no smooth fade-in, the image at once.
     final opacity = MediaQuery.disableAnimationsOf(context)
         ? const AlwaysStoppedAnimation<double>(1)
         : _opacity;
@@ -225,9 +233,10 @@ class _Intro extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // Картинка вписана целиком («contain»): по ширине, если экран
-              // уже картинки (телефон в портрете), иначе по высоте. Края, у
-              // которых остаётся свободное место, растушёвываем в фон.
+              // The image is fitted whole ("contain"): by width if the screen
+              // is narrower than the image (a phone in portrait), otherwise by
+              // height. The edges that have free space left are feathered into
+              // the background.
               LayoutBuilder(
                 builder: (context, box) {
                   final fitWidth =
@@ -242,14 +251,16 @@ class _Intro extends StatelessWidget {
                       height: height,
                       child: FeatheredEdges(
                         fade: splashFeather,
-                        // Полосы остаются сверху и снизу, если картинка
-                        // вписана по ширине, и по бокам, если по высоте.
+                        // Strips remain at the top and bottom if the image is
+                        // fitted by width, and at the sides if it is fitted by
+                        // height.
                         horizontal: !fitWidth && width < box.maxWidth - 1,
                         vertical: fitWidth && height < box.maxHeight - 1,
                         child: Image(
                           image: image,
                           fit: BoxFit.cover,
-                          // Нет файла или он битый: эмблема вместо картинки.
+                          // No file or it is broken: the emblem instead of the
+                          // image.
                           errorBuilder: (_, _, _) =>
                               const Center(child: GearEmblem()),
                         ),
@@ -290,12 +301,13 @@ class _Intro extends StatelessWidget {
   }
 }
 
-/// Растушёвка краёв: прозрачность плавно растёт от краёв к центру.
+/// Feathering of the edges: opacity grows smoothly from the edges to the
+/// center.
 ///
-/// Это маска по альфа-каналу: `ShaderMask` с режимом `BlendMode.dstIn`
-/// умножает прозрачность каждого пикселя ребёнка на альфу градиента.
-/// Если включены обе оси, маски вложены друг в друга, и их действия
-/// перемножаются, поэтому углы затухают сильнее сторон.
+/// This is an alpha-channel mask: `ShaderMask` with `BlendMode.dstIn`
+/// multiplies the opacity of every pixel of the child by the alpha of the
+/// gradient. If both axes are on, the masks are nested and their effects
+/// multiply, so the corners fade more strongly than the sides.
 class FeatheredEdges extends StatelessWidget {
   const FeatheredEdges({
     super.key,
@@ -307,13 +319,13 @@ class FeatheredEdges extends StatelessWidget {
 
   final Widget child;
 
-  /// Какая доля размера с каждой стороны уходит в прозрачность (0..0.5).
+  /// What share of the size on each side goes into transparency (0..0.5).
   final double fade;
 
-  /// Растушёвать левый и правый края.
+  /// Feather the left and right edges.
   final bool horizontal;
 
-  /// Растушёвать верхний и нижний края.
+  /// Feather the top and bottom edges.
   final bool vertical;
 
   Widget _mask(Alignment begin, Alignment end, Widget child) {

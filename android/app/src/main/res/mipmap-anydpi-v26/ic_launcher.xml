@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Адаптивная иконка (Android 8.0+): фон-цвет и эмблема поверх.
-     Лаунчер сам обрезает её по форме (круг, «капля» и т. д.). -->
+<!-- Adaptive icon (Android 8.0+): a background color with the emblem on top.
+     The launcher itself crops it to its shape (circle, "teardrop", etc.). -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
     <foreground android:drawable="@mipmap/ic_launcher_foreground" />

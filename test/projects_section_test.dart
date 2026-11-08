@@ -37,7 +37,8 @@ void main() {
 
     final title = tester.widget<Text>(find.text('Proyectos completados'));
     expect(title.style?.color, sectionTitleColor);
-    // Не «чистая» окись: на светлой панели ей не хватало контраста (docs/12 §22).
+    // Not the "pure" oxide: on the light panel it lacked contrast (docs/12
+    // §22).
     expect(sectionTitleColor, isNot(oxide));
   });
 
@@ -63,7 +64,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('c-piscine-shell-00'), findsOneWidget);
-    expect(find.text('push_swap'), findsNothing); // Common Core остался свёрнут
+    expect(find.text('push_swap'), findsNothing); // Common Core stayed collapsed
   });
 
   testWidgets('проваленные проекты видны после раскрытия', (tester) async {

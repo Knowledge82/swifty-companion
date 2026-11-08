@@ -3,9 +3,9 @@ import 'cursus_progress.dart';
 import 'project_category.dart';
 import 'project_result.dart';
 
-/// Профиль студента: только то, что приложение показывает.
-/// Служебные и чувствительные поля ответа (`anonymize_date`, `data_erasure_date`
-/// и т. п.) сознательно не разбираются.
+/// A student's profile: only what the app shows.
+/// Service and sensitive fields of the response (`anonymize_date`,
+/// `data_erasure_date`, etc.) are deliberately not parsed.
 class UserProfile {
   const UserProfile({
     this.id,
@@ -23,8 +23,8 @@ class UserProfile {
     this.projects = const [],
   });
 
-  /// Бросает [FormatException], если в ответе нет `login`: без него это
-  /// не профиль, а мусор. Остальное необязательно.
+  /// Throws [FormatException] if the response has no `login`: without it this
+  /// is not a profile but junk. Everything else is optional.
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     final login = readString(json['login']);
     if (login == null) {
@@ -38,7 +38,7 @@ class UserProfile {
       phone: readString(json['phone']),
       location: readString(json['location']),
       wallet: readInt(json['wallet']),
-      // В API поле называется в единственном числе.
+      // In the API the field is named in the singular.
       correctionPoints: readInt(json['correction_point']),
       poolMonth: readString(json['pool_month']),
       poolYear: readString(json['pool_year']),
@@ -55,22 +55,23 @@ class UserProfile {
   final String? phone;
   final String? location;
 
-  /// В кампусе ли студент сейчас. API не даёт отдельного признака «онлайн»:
-  /// `location` это рабочее место, за которым студент залогинен (например,
-  /// `c1r2s3`), и `null`, когда его нет в кампусе. Поэтому онлайн = место есть.
-  /// Отличить «нет в кампусе» от «место скрыто» по ответу нельзя.
+  /// Whether the student is on campus now. The API has no separate "online"
+  /// flag: `location` is the workstation the student is logged into (for
+  /// example, `c1r2s3`), and `null` when they are not on campus. So online = a
+  /// place exists. "Not on campus" cannot be told apart from "place hidden" by
+  /// the response.
   bool get isOnline => location != null;
   final int? wallet;
   final int? correctionPoints;
   final String? poolMonth;
   final String? poolYear;
 
-  /// Адреса фото в порядке предпочтения (без повторов, только https).
-  /// Их несколько на случай, если какая-то версия картинки на CDN не отдаётся:
-  /// экран пробует их по очереди.
+  /// Photo addresses in order of preference (no repeats, https only).
+  /// There are several in case some version of the image is not served by the
+  /// CDN: the screen tries them one by one.
   final List<String> imageUrls;
 
-  /// Самое предпочтительное фото или `null`, если подходящих адресов нет.
+  /// The most preferred photo, or `null` if there are no suitable addresses.
   String? get imageUrl => imageUrls.isEmpty ? null : imageUrls.first;
 
   final List<CursusProgress> cursuses;
@@ -78,10 +79,10 @@ class UserProfile {
 
   CursusProgress? get mainCursus => pickMainCursus(cursuses);
 
-  /// Завершённые проекты (сданные и проваленные), новые сверху.
-  /// С [cursusId] оставляет только проекты этого курса.
-  /// Экзамены с итогом считаются завершёнными и в статусе `in_progress`
-  /// (см. [ProjectResult.isCompleted]).
+  /// Completed projects (passed and failed), newest first.
+  /// With [cursusId] keeps only the projects of that cursus.
+  /// Exams with a result count as completed even with status `in_progress`
+  /// (see [ProjectResult.isCompleted]).
   List<ProjectResult> finishedProjects({int? cursusId}) {
     final result = projects
         .where(
@@ -107,9 +108,10 @@ class UserProfile {
     return result;
   }
 
-  /// Завершённые проекты по разделам (Outer Core, Common Core, Piscina).
-  /// В карте всегда все три раздела, в порядке [ProjectCategory.values];
-  /// внутри раздела порядок тот же, что в [finishedProjects]: новые сверху.
+  /// Completed projects by section (Outer Core, Common Core, Piscina). The map
+  /// always has all three sections, in the order of [ProjectCategory.values];
+  /// inside a section the order is the same as in [finishedProjects]: newest
+  /// first.
   Map<ProjectCategory, List<ProjectResult>> finishedProjectsByCategory() {
     final grouped = <ProjectCategory, List<ProjectResult>>{
       for (final category in ProjectCategory.values) category: <ProjectResult>[],
@@ -121,17 +123,17 @@ class UserProfile {
   }
 }
 
-/// Сколько адресов фото хранить: основной и один запасной.
-/// Запасной нужен на случай, если CDN не отдаёт первую версию. Остальные
-/// версии (`small`, `micro`) не нужны: на крупном фото они выглядели бы
-/// размытой кашей, а заглушка с инициалами лучше. Лишние адреса не грузятся
-/// (экран пробует следующий, только если предыдущий не загрузился), но так
-/// меньше шансов впустую потратить лимит запросов к API.
+/// How many photo addresses to keep: the main one and one spare. The spare is
+/// needed in case the CDN does not serve the first version. The other versions
+/// (`small`, `micro`) are not needed: on a large photo they would look like a
+/// blurry mush, and a placeholder with initials is better. The extra addresses
+/// are not loaded (the screen tries the next one only if the previous one
+/// failed), but this way there is less chance of wasting the API request limit.
 const int maxPhotoUrls = 2;
 
-/// Фото: `medium`, `link`, `large` в таком порядке, не больше [maxPhotoUrls].
-/// Берём только https, потому что Android по умолчанию блокирует http-трафик.
-/// Повторяющиеся адреса отбрасываем.
+/// Photo: `medium`, `link`, `large` in this order, at most [maxPhotoUrls].
+/// We take only https, because Android blocks http traffic by default.
+/// Repeated addresses are dropped.
 List<String> _pickImageUrls(Map<String, dynamic>? image) {
   final versions = readMap(image?['versions']);
   final candidates = <Object?>[

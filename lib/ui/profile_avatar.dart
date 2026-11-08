@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../data/photo_loader.dart';
 
-/// Круглое фото профиля.
+/// A round profile photo.
 ///
-/// Получает несколько адресов в порядке предпочтения и пробует их по очереди:
-/// если первый не загрузился, берётся следующий. Если не загрузился ни один
-/// или адресов нет, показывается заглушка с инициалами (или значком человечка),
-/// а не падение. Пока идёт загрузка, виден индикатор.
+/// It gets several addresses in order of preference and tries them one by one:
+/// if the first did not load, the next is taken. If none loaded or there are no
+/// addresses, a placeholder with initials (or a little person icon) is shown
+/// instead of a crash. While loading, an indicator is visible.
 class ProfileAvatar extends StatefulWidget {
   const ProfileAvatar({
     super.key,
@@ -20,10 +20,11 @@ class ProfileAvatar extends StatefulWidget {
 
   final List<String> urls;
 
-  /// Как скачать байты картинки по адресу (в приложении это `PhotoLoader.load`).
+  /// How to download the image bytes by address (in the app this is
+  /// `PhotoLoader.load`).
   final PhotoFetcher loadPhoto;
 
-  /// Буквы для заглушки; пусто — значок человечка.
+  /// Letters for the placeholder; empty means the little person icon.
   final String initials;
   final double size;
 
@@ -32,7 +33,7 @@ class ProfileAvatar extends StatefulWidget {
 }
 
 class _ProfileAvatarState extends State<ProfileAvatar> {
-  /// Результат загрузки; `null`, если адресов нет (грузить нечего).
+  /// The loading result; `null` if there are no addresses (nothing to load).
   Future<Uint8List?>? _photo;
 
   @override
@@ -57,8 +58,8 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
       try {
         return await widget.loadPhoto(urls[i]);
       } catch (e) {
-        // Причина видна только в отладке. Любая неудача (сеть, 403, мусор)
-        // означает «пробуем следующий адрес», а в итоге «показываем заглушку».
+        // The reason is visible only in debug. Any failure (network, 403, junk)
+        // means "try the next address", and in the end "show the placeholder".
         if (kDebugMode) {
           debugPrint('Фото не загрузилось (${i + 1} из ${urls.length}) (${urls[i]}): $e');
         }
@@ -105,7 +106,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
           return Image.memory(
             bytes,
             fit: BoxFit.cover,
-            // Если байты не картинка, остаёмся с заглушкой.
+            // If the bytes are not an image, we stay with the placeholder.
             errorBuilder: (_, _, _) => placeholder,
           );
         },

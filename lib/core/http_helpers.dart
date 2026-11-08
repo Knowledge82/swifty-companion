@@ -7,9 +7,9 @@ import 'package:http/http.dart' as http;
 import 'api_exception.dart';
 import 'json_reader.dart';
 
-/// Выполняет запрос с ограничением по времени и переводит сетевые сбои
-/// в [NetworkException]. Запрос передаётся функцией, чтобы исключение,
-/// брошенное при самом создании запроса, тоже попало под перехват.
+/// Runs a request with a time limit and turns network failures into
+/// [NetworkException]. The request is passed as a function so that an exception
+/// thrown while the request is being created is caught as well.
 Future<http.Response> guardedRequest(
   Future<http.Response> Function() send,
   Duration timeout,
@@ -25,8 +25,8 @@ Future<http.Response> guardedRequest(
   }
 }
 
-/// Читает заголовок `Retry-After` в секундах. Если его нет или он не число,
-/// возвращает `null`. (Вариант заголовка с датой не поддерживаем.)
+/// Reads the `Retry-After` header in seconds. If it is missing or not a number,
+/// returns `null`. (The date form of the header is not supported.)
 Duration? parseRetryAfter(Map<String, String> headers) {
   final seconds = int.tryParse(headers['retry-after'] ?? '');
   if (seconds == null || seconds < 0) {
@@ -35,12 +35,13 @@ Duration? parseRetryAfter(Map<String, String> headers) {
   return Duration(seconds: seconds);
 }
 
-/// Разбирает тело ответа как JSON-объект.
+/// Parses the response body as a JSON object.
 ///
-/// Тело декодируется как **UTF-8 явно** (`bodyBytes`), а не через `response.body`:
-/// `body` берёт кодировку из заголовка `Content-Type`, а если там нет `charset`,
-/// подставляет latin1, и имена вроде «José» превращаются в кракозябры.
-/// Любая неожиданность (не UTF-8, не JSON, не объект) даёт [UnexpectedResponseException].
+/// The body is decoded as **UTF-8 explicitly** (`bodyBytes`), not through
+/// `response.body`: `body` takes the encoding from the `Content-Type` header,
+/// and if there is no `charset` there it falls back to latin1, so names like
+/// "José" turn into garbage. Anything unexpected (not UTF-8, not JSON, not an
+/// object) results in [UnexpectedResponseException].
 Map<String, dynamic> decodeJsonObject(http.Response response) {
   final Object? decoded;
   try {

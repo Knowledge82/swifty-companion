@@ -51,7 +51,7 @@ void main() {
       expect(of('c-piscine-reloaded'), ProjectCategory.piscineReloaded);
       expect(of('42cursus-c-piscine-reloaded'), ProjectCategory.piscineReloaded);
       expect(of('C-Piscine-Reloaded'), ProjectCategory.piscineReloaded);
-      // а обычный бассейн по-прежнему бассейн
+      // and the ordinary piscine is still a piscine
       expect(of('c-piscine-c-00'), ProjectCategory.piscine);
     });
 
@@ -77,8 +77,9 @@ void main() {
     });
 
     test('настоящие slug из интры (вывод скрипта проверки): разложены верно', () {
-      // Так они записаны в API у реального студента: часть с префиксом
-      // 42cursus-, часть без; бассейн и «перезагрузка» с курсом 66.
+      // This is how they are recorded in the API for a real student: some with
+      // the 42cursus- prefix, some without; the piscine and the "reload" with
+      // cursus 66.
       const expected = {
         '42cursus-ft_printf': ProjectCategory.commonCore,
         '42cursus-get_next_line': ProjectCategory.commonCore,
@@ -106,26 +107,26 @@ void main() {
     });
 
     test('новая программа Common Core: префикс 42next- и серии', () {
-      // Те же проекты, что и в старой программе, но с другим префиксом.
+      // The same projects as in the old program, but with a different prefix.
       expect(of('42next-born2beroot'), ProjectCategory.commonCore);
       expect(of('42next-push_swap'), ProjectCategory.commonCore);
       expect(of('42NEXT-Push_Swap'), ProjectCategory.commonCore);
       for (var i = 2; i <= 6; i++) {
         expect(of('42next-exam-rank-0$i'), ProjectCategory.commonCore);
       }
-      // Python-модули: две цифры, 00…10 (и запас на будущие номера).
+      // Python modules: two digits, 00...10 (and a reserve for future numbers).
       for (var i = 0; i <= 10; i++) {
         final n = i.toString().padLeft(2, '0');
         expect(of('python-module-$n'), ProjectCategory.commonCore, reason: n);
       }
-      // Префикс не должен «склеивать» разные вещи.
+      // The prefix must not "glue together" different things.
       expect(of('42next-swifty-companion'), ProjectCategory.outerCore);
       expect(of('42next-libft-extra'), ProjectCategory.outerCore);
     });
 
     test('настоящие slug студента новой программы (выгрузка из API)', () {
-      // Студент ещё не дошёл до Outer Core: ни один из его проектов
-      // не должен попасть в этот раздел. Piscine/Reloaded остаются как были.
+      // The student has not reached Outer Core yet: none of his projects must
+      // end up in that section. Piscine/Reloaded stay as they were.
       const commonCore = [
         '42cursus-ft_printf',
         '42cursus-get_next_line',
@@ -170,11 +171,11 @@ void main() {
     test('всё неизвестное, включая проект без slug, уходит в Outer Core', () {
       expect(of('swifty-companion'), ProjectCategory.outerCore);
       expect(of('mobile-0'), ProjectCategory.outerCore);
-      expect(of('libft-extra'), ProjectCategory.outerCore); // не совпадает целиком
-      expect(of('cpp-module-0'), ProjectCategory.outerCore); // нужно две цифры
-      expect(of('python-module-1'), ProjectCategory.outerCore); // и тут тоже
+      expect(of('libft-extra'), ProjectCategory.outerCore); // does not match as a whole
+      expect(of('cpp-module-0'), ProjectCategory.outerCore); // two digits are needed
+      expect(of('python-module-1'), ProjectCategory.outerCore); // same here
       expect(of('python-module-00-extra'), ProjectCategory.outerCore);
-      expect(of('agent-smith-2'), ProjectCategory.outerCore); // только целиком
+      expect(of('agent-smith-2'), ProjectCategory.outerCore); // only as a whole
       expect(of(null), ProjectCategory.outerCore);
     });
   });
@@ -202,7 +203,8 @@ void main() {
     });
 
     test('экзамены бассейна в статусе in_progress попадают в Piscina', () {
-      // Реальные записи старого набора: статус in_progress, но итог есть.
+      // Real records of the old intake: status in_progress, but a result
+      // exists.
       final json = sampleUserJson();
       (json['projects_users'] as List).addAll([
         {

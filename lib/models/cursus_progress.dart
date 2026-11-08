@@ -1,10 +1,10 @@
 import '../core/json_reader.dart';
 import 'skill.dart';
 
-/// Идентификатор основного курса в поле `cursus.slug`.
+/// Identifier of the main cursus in the `cursus.slug` field.
 const String mainCursusSlug = '42cursus';
 
-/// Прогресс студента в одном курсе (элемент `cursus_users`).
+/// A student's progress in one cursus (an element of `cursus_users`).
 class CursusProgress {
   const CursusProgress({
     this.cursusId,
@@ -33,15 +33,16 @@ class CursusProgress {
   final String? name;
   final String? slug;
 
-  /// Общий уровень курса, округлённый до двух знаков (12.44).
+  /// Overall level of the cursus, rounded to two decimals (12.44).
   final double level;
   final DateTime? beginAt;
   final DateTime? endAt;
   final List<Skill> skills;
 }
 
-/// Выбирает основной курс: сначала `42cursus` по slug, иначе курс с самым
-/// высоким уровнем (например, у студента только бассейн). Пустой список даёт `null`.
+/// Picks the main cursus: first `42cursus` by slug, otherwise the cursus with
+/// the highest level (for example, when the student has only the piscine).
+/// An empty list gives `null`.
 CursusProgress? pickMainCursus(List<CursusProgress> cursuses) {
   if (cursuses.isEmpty) {
     return null;

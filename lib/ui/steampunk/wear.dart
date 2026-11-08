@@ -2,15 +2,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-// Мелкие приёмы «состаривания»: клёпки, болты, пятна окиси, царапины.
-// Все функции только рисуют на готовом холсте и ничего не хранят.
+// Small "aging" tricks: rivets, bolts, oxide stains, scratches.
+// All the functions only draw on a ready canvas and store nothing.
 
 const Color _shadow = Color(0x99000000);
 const Color _rim = Color(0x66000000);
 const Color _shine = Color(0x77FFFFFF);
 const Color _slot = Color(0xCC1A110B);
 
-/// Клёпка: тень, шляпка цвета [body], тёмный ободок и блик.
+/// A rivet: a shadow, a head of color [body], a dark rim and a highlight.
 void drawRivet(
   Canvas canvas,
   Offset center,
@@ -38,7 +38,7 @@ void drawRivet(
   );
 }
 
-/// Болт со шлицем: клёпка и косая прорезь.
+/// A slotted bolt: a rivet and a slanted slot.
 void drawBolt(
   Canvas canvas,
   Offset center,
@@ -57,7 +57,8 @@ void drawBolt(
   );
 }
 
-/// Мягкое пятно (окись): круг с размытым краем. Прозрачность задаёт [color].
+/// A soft stain (oxide): a circle with a blurred edge. The opacity is set by
+/// [color].
 void drawBlotch(Canvas canvas, Offset center, double radius, Color color) {
   canvas.drawCircle(
     center,
@@ -68,10 +69,9 @@ void drawBlotch(Canvas canvas, Offset center, double radius, Color color) {
   );
 }
 
-/// Мягкое пятно **без размытия**: радиальный градиент от [color] к
-/// прозрачному. Выглядит как [drawBlotch], но не использует `MaskFilter.blur`,
-/// поэтому дёшево и годится для вращающихся деталей, которые перерисовываются
-/// на каждом кадре.
+/// A soft stain **without blur**: a radial gradient from [color] to
+/// transparent. It looks like [drawBlotch] but does not use `MaskFilter.blur`,
+/// so it is cheap and suits rotating parts that are repainted on every frame.
 void drawSoftSpot(Canvas canvas, Offset center, double radius, Color color) {
   canvas.drawCircle(
     center,
@@ -83,7 +83,7 @@ void drawSoftSpot(Canvas canvas, Offset center, double radius, Color color) {
   );
 }
 
-/// Царапина: тонкая светлая линия длиной [length] под углом [angle].
+/// A scratch: a thin light line of length [length] at angle [angle].
 void drawScratch(
   Canvas canvas,
   Offset start,

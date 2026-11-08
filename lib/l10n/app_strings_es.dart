@@ -1,6 +1,6 @@
 import 'app_strings.dart';
 
-/// Испанский (Испания). Язык интерфейса по умолчанию.
+/// Spanish (Spain). The default interface language.
 class AppStringsEs extends AppStrings {
   const AppStringsEs();
 

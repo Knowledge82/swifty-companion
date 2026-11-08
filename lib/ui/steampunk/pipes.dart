@@ -5,18 +5,19 @@ import 'package:flutter/material.dart';
 import 'steampunk_theme.dart';
 import 'wear.dart';
 
-/// Трубы и кабели вдоль краёв экрана, на самом заднем плане.
+/// Pipes and cables along the screen edges, on the very back layer.
 ///
-/// - **Гофрированные трубы** идут по левому краю (две, со сгибами) и
-///   выходят из-за края экрана. Гофра рисуется как частые поперечные
-///   штрихи вдоль контура трубы: тёмная канавка и светлый блик рядом.
-///   Фланцы с болтами стоят на стыках.
-/// - **Кабели** свисают справа: тёмная оплётка, цветная жила и штекер
-///   на конце. Три цвета (окисленная медь, ржавчина, латунь).
+/// - **Corrugated pipes** run along the left edge (two, with bends) and come
+///   out from behind the screen edge. The corrugation is drawn as frequent
+///   transverse strokes along the pipe outline: a dark groove and a light
+///   highlight next to it. Flanges with bolts sit at the joints.
+/// - **Cables** hang on the right: a dark braid, a colored core and a plug at
+///   the end. Three colors (oxidized copper, rust, brass).
 ///
-/// Всё статичное, рисуется один раз и закрыто `RepaintBoundary` в
-/// `SteampunkBackdrop`. Весь слой полупрозрачный (через `saveLayer`),
-/// чтобы не спорить с содержимым. Положения заданы долями размера экрана.
+/// Everything is static, drawn once and wrapped in a `RepaintBoundary` in
+/// `SteampunkBackdrop`. The whole layer is semi-transparent (via `saveLayer`),
+/// so as not to compete with the content. Positions are given as fractions of
+/// the screen size.
 class PipesPainter extends CustomPainter {
   const PipesPainter();
 
@@ -28,7 +29,8 @@ class PipesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
-    // На совсем маленьком окне (например, разделённый экран) трубы только мешали бы.
+    // On a really small window (for example, split screen) the pipes would only
+    // get in the way.
     if (w < 200 || h < 300) {
       return;
     }
@@ -38,7 +40,8 @@ class PipesPainter extends CustomPainter {
       Paint()..color = Colors.white.withValues(alpha: _layerOpacity),
     );
 
-    // Верхняя труба: из-за левого края, вниз вдоль края, обратно за край.
+    // The upper pipe: from behind the left edge, down along the edge, back
+    // behind the edge.
     final y0 = h * 0.14;
     final y1 = h * 0.50;
     final upper = Path()
@@ -52,7 +55,7 @@ class PipesPainter extends CustomPainter {
     _flange(canvas, upper, 20, 12);
     _flange(canvas, upper, upper.computeMetrics().first.length - 20, 12);
 
-    // Нижняя труба: вниз вдоль края и вправо по нижнему краю.
+    // The lower pipe: down along the edge and right along the bottom edge.
     final y2 = h * 0.70;
     final bottomY = h - 20;
     final lower = Path()
@@ -66,7 +69,7 @@ class PipesPainter extends CustomPainter {
     _flange(canvas, lower, 20, 12);
     _flange(canvas, lower, lower.computeMetrics().first.length - 24, 12);
 
-    // Кабели справа: свисают сверху и заканчиваются штекерами.
+    // Cables on the right: they hang from the top and end with plugs.
     _cable(
       canvas,
       Path()
@@ -98,7 +101,7 @@ class PipesPainter extends CustomPainter {
     ..strokeJoin = StrokeJoin.round
     ..color = color;
 
-  /// Гофрированная труба шириной [width] по контуру [path].
+  /// A corrugated pipe of width [width] along the outline [path].
   void _corrugated(Canvas canvas, Path path, double width) {
     canvas.drawPath(path, _stroke(width + 3, leatherDeep.withValues(alpha: 0.85)));
     canvas.drawPath(path, _stroke(width, _pipeBody));
@@ -122,7 +125,8 @@ class PipesPainter extends CustomPainter {
     }
   }
 
-  /// Фланец (кольцо с болтами) на расстоянии [distance] от начала трубы.
+  /// A flange (a ring with bolts) at distance [distance] from the start of the
+  /// pipe.
   void _flange(Canvas canvas, Path path, double distance, double pipeWidth) {
     final metric = path.computeMetrics().first;
     final tangent = metric.getTangentForOffset(
@@ -146,7 +150,7 @@ class PipesPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// Кабель: тёмная оплётка, цветная жила, два хомута и штекер на конце.
+  /// A cable: a dark braid, a colored core, two clamps and a plug at the end.
   void _cable(Canvas canvas, Path path, Color core) {
     canvas.drawPath(path, _stroke(5.2, leatherDeep.withValues(alpha: 0.9)));
     canvas.drawPath(path, _stroke(3.2, core.withValues(alpha: 0.85)));
@@ -171,7 +175,7 @@ class PipesPainter extends CustomPainter {
       canvas.restore();
     }
 
-    // Штекер на конце: латунный корпус и два штифта.
+    // The plug at the end: a brass body and two pins.
     final end = metric.getTangentForOffset(metric.length);
     if (end == null) {
       return;

@@ -124,7 +124,7 @@ void main() {
       expect(profile.phone, isNull);
       expect(profile.phone.orNA, 'N/A');
       expect(profile.location, isNull);
-      expect(profile.isOnline, isFalse); // нет места: не в кампусе
+      expect(profile.isOnline, isFalse); // no place: not on campus
     });
 
     test('есть место: студент в кампусе', () {
@@ -192,7 +192,7 @@ void main() {
     });
 
     test('фото: основной и один запасной адрес, без повторов', () {
-      // В образце пять версий, но хранятся только medium и link.
+      // The sample has five versions, but only medium and link are kept.
       expect(UserProfile.fromJson(sampleUserJson()).imageUrls, [
         'https://example.com/medium.jpg',
         'https://example.com/link.jpg',
@@ -222,7 +222,7 @@ void main() {
             },
           },
         }).imageUrls,
-        ['https://example.com/l.jpg'], // small и micro не используются
+        ['https://example.com/l.jpg'], // small and micro are not used
       );
     });
 
@@ -302,15 +302,16 @@ void main() {
           shown([
             project('exam-atonement', status: 'searching_a_group'),
             project('c-piscine-exam-01'),
-            project('c-piscine-exam-01', validated: true), // нет оценки
-            project('c-piscine-exam-01', mark: 10), // неизвестно, сдан ли
+            project('c-piscine-exam-01', validated: true), // no mark
+            project('c-piscine-exam-01', mark: 10), // unknown whether passed
           ]),
           isEmpty,
         );
       });
 
       test('обычный проект в процессе не показывается, даже с прошлой оценкой', () {
-        // Пересдача: статус in_progress, а в записи ещё старая оценка.
+        // A retake: the status is in_progress, and the record still has the old
+        // mark.
         expect(shown([project('minishell', validated: false, mark: 40)]), isEmpty);
         expect(shown([project('c-piscine-c-05', validated: true, mark: 80)]), isEmpty);
       });

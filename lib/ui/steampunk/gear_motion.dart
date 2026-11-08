@@ -2,29 +2,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-/// Строитель, которому отдают «часы» вращения: число секунд с момента старта.
+/// A builder that is given the rotation "clock": the number of seconds since
+/// the start.
 typedef GearClockBuilder = Widget Function(
   BuildContext context,
   ValueListenable<double> seconds,
 );
 
-/// Часы для вращающихся шестерёнок.
+/// A clock for rotating gears.
 ///
-/// Внутри обычный `Ticker`: он вызывается на каждом кадре и обновляет число
-/// секунд. Рисующий код (`CustomPainter(repaint: seconds)`) подписан на это
-/// число и перерисовывается **сам**, без пересборки дерева виджетов: это
-/// дёшево.
+/// Inside is an ordinary `Ticker`: it is called on every frame and updates the
+/// number of seconds. The painting code (`CustomPainter(repaint: seconds)`) is
+/// subscribed to this number and repaints **by itself**, without rebuilding the
+/// widget tree: this is cheap.
 ///
-/// Часы **не идут** (и шестерёнки стоят), если:
+/// The clock **does not run** (and the gears stand still) if:
 /// - `enabled == false`;
-/// - в системе включено «убрать анимации» (`MediaQuery.disableAnimations`):
-///   это настройка доступности для людей, которых движение тошнит или
-///   отвлекает, и уважать её правильно;
-/// - экран закрыт другим экраном или приложение свёрнуто: `Ticker`
-///   автоматически замолкает через `TickerMode`, батарея не тратится.
+/// - the system has "remove animations" on (`MediaQuery.disableAnimations`):
+///   this is an accessibility setting for people who get nauseous or distracted
+///   by motion, and respecting it is the right thing;
+/// - the screen is covered by another screen or the app is minimized: the
+///   `Ticker` goes silent automatically through `TickerMode`, no battery is
+///   wasted.
 ///
-/// В тестах `testApp` включает `disableAnimations`, поэтому `pumpAndSettle`
-/// не зависает на вечной анимации (иначе кадры никогда бы не кончились).
+/// In tests `testApp` turns on `disableAnimations`, so `pumpAndSettle` does not
+/// hang on an endless animation (otherwise the frames would never end).
 class GearClock extends StatefulWidget {
   const GearClock({super.key, required this.builder, this.enabled = true});
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Тёмная кожа: цвет экрана запуска и фона окна (leatherDeep в приложении) -->
+    <!-- Dark leather: the launch screen and window background color (leatherDeep in the app) -->
     <color name="splash_background">#170E09</color>
-    <!-- Орех: фон адаптивной иконки (walnut в приложении; раньше был изумруд #0F2B21) -->
+    <!-- Walnut: the adaptive icon background (walnut in the app; it used to be emerald #0F2B21) -->
     <color name="ic_launcher_background">#2A1B12</color>
 </resources>

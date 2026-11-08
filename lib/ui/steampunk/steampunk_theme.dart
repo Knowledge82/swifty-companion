@@ -1,45 +1,50 @@
 import 'package:flutter/material.dart';
 
-// Палитра «стимпанк»: латунь, медь, тёмная кожа, тёмный орех, пергамент, патина.
-// Итерация 5: тона сближены с картинкой заставки (тёплые коричневые, медь,
-// янтарь): зелёные панели стали ореховыми, зелень осталась только в мелких
-// акцентах (окись на металле, значок «сдан»).
-// Все цвета собраны здесь, чтобы весь вид приложения менялся в одном месте.
+// The "steampunk" palette: brass, copper, dark leather, dark walnut,
+// parchment, patina.
+// Iteration 5: the tones were brought closer to the splash image (warm browns,
+// copper, amber): the green panels became walnut, and green stayed only in
+// small accents (oxide on metal, the "passed" icon).
+// All colors are collected here so that the whole look of the app changes in
+// one place.
 
 const Color brass = Color(0xFFC8A04A);
 const Color copper = Color(0xFFB87333);
-// Итерация 9: панели были ТЕМНЕЕ центра фона (#3A2316) и светлее краёв, из-за
-// чего сливались с ним (контраст 1,13:1). Теперь фон везде темнее панелей:
-// в центре #24160E, по краям `leatherDeep`.
-const Color leather = Color(0xFF24160E); // свет в центре фона
-const Color leatherDeep = Color(0xFF170E09); // края фона, AppBar и фон заставки
+// Iteration 9: the panels were DARKER than the center of the background
+// (#3A2316) and lighter than its edges, so they merged with it (contrast
+// 1.13:1). Now the background is darker than the panels everywhere: #24160E in
+// the center, `leatherDeep` at the edges.
+const Color leather = Color(0xFF24160E); // light in the center of the background
+const Color leatherDeep = Color(0xFF170E09); // background edges, AppBar and the splash background
 const Color parchment = Color(0xFFEADFC4);
 const Color verdigris = Color(0xFF6FB39C);
-const Color rust = Color(0xFFE67B61); // был #E0745A: на светлой панели не хватало до 4,5:1
+const Color rust = Color(0xFFE67B61); // was #E0745A: on a light panel it fell short of 4.5:1
 const Color mutedBrass = Color(0xFFA8946F);
 
-// Орех: панели. Раньше здесь был изумруд (emerald `#0F2B21`, emeraldDeep
-// `#0A1F17`, emeraldLight `#17402F`): если захочешь вернуть зелёные панели,
-// подставь эти значения обратно, больше ничего менять не надо.
-// Окись (патина) на латуни и меди остаётся зелёной.
-const Color walnutDeep = Color(0xFF1B110B); // поле ввода, самые тёмные места
-const Color walnut = Color(0xFF3B291C); // фон панелей (был #2A1B12); светлее фона везде
-const Color walnutLight = Color(0xFF4E3724); // заглушка фото: отличается от панели
-const Color oxide = Color(0xFF3F9E80); // пятна окиси на металле
+// Walnut: the panels. Here used to be emerald (emerald `#0F2B21`, emeraldDeep
+// `#0A1F17`, emeraldLight `#17402F`): if you want green panels back, put these
+// values back, nothing else needs to change.
+// The oxide (patina) on brass and copper stays green.
+const Color walnutDeep = Color(0xFF1B110B); // input field, the darkest places
+const Color walnut = Color(0xFF3B291C); // panel background (was #2A1B12); lighter than the background everywhere
+const Color walnutLight = Color(0xFF4E3724); // photo placeholder: differs from the panel
+const Color oxide = Color(0xFF3F9E80); // oxide stains on metal
 
-/// Лампочка «в кампусе»: зелёная светится, серая погашена. Цвет не единственный
-/// признак: рядом всегда пишется слово («En el campus» / «Fuera del campus»).
+/// The "on campus" lamp: green glows, grey is extinguished. The color is not
+/// the only sign: a word is always written next to it ("En el campus" / "Fuera
+/// del campus").
 const Color onlineGreen = Color(0xFF55D17A);
 const Color offlineGray = Color(0xFF868075);
 
-/// Цвет названий разделов профиля («Habilidades», «Proyectos completados»).
-/// Это осветлённая окись: обычная `oxide` (`#3F9E80`) на новой, более светлой
-/// панели даёт только 4,22:1 и не проходит порог 4,5:1. Здесь 5,1:1; если
-/// захочешь ещё светлее, подставь `verdigris` (`#6FB39C`, 5,7:1).
+/// The color of the profile section titles ("Habilidades", "Proyectos
+/// completados"). It is a lightened oxide: the plain `oxide` (`#3F9E80`) on the
+/// new, lighter panel gives only 4.22:1 and fails the 4.5:1 threshold. This one
+/// is 5.1:1; if you want it even lighter, use `verdigris` (`#6FB39C`, 5.7:1).
 const Color sectionTitleColor = Color(0xFF4DAE8D);
 
-/// Тёмная цветовая схема. Контраст текста к фону проверяется тестом
-/// (`steampunk_test.dart`): основной текст не ниже 7:1, остальной не ниже 4.5:1.
+/// The dark color scheme. The text contrast against the background is checked
+/// by a test (`steampunk_test.dart`): the main text is at least 7:1, the rest
+/// at least 4.5:1.
 const ColorScheme steampunkColors = ColorScheme(
   brightness: Brightness.dark,
   primary: brass,
@@ -60,16 +65,16 @@ const ColorScheme steampunkColors = ColorScheme(
   surfaceContainerHighest: walnutLight,
 );
 
-/// Шрифт с засечками, который есть в системе Android (`serif`), чтобы не
-/// добавлять в проект файлы шрифтов и сетевую загрузку.
+/// A serif font that exists in the Android system (`serif`), so as not to add
+/// font files and network loading to the project.
 const String _serif = 'serif';
 
-/// Тема приложения. Собирается одним вызовом конструктора `ThemeData`
-/// (не `copyWith`): так меньше шансов споткнуться об изменения типов
-/// компонентных тем между версиями Flutter.
+/// The app theme. It is built by a single call of the `ThemeData` constructor
+/// (not `copyWith`): this way there is less chance of tripping over changes of
+/// the component theme types between Flutter versions.
 ///
-/// Оформление поля ввода сюда намеренно не входит: оно задаётся прямо
-/// у поля через [steampunkInputDecoration].
+/// The input field styling is intentionally not included here: it is set right
+/// at the field through [steampunkInputDecoration].
 ThemeData buildSteampunkTheme() {
   return ThemeData(
     useMaterial3: true,
@@ -122,7 +127,7 @@ ThemeData buildSteampunkTheme() {
   );
 }
 
-/// Оформление поля ввода: латунная рамка на тёмной коже.
+/// Input field styling: a brass border on dark leather.
 InputDecoration steampunkInputDecoration({
   required String label,
   String? errorText,

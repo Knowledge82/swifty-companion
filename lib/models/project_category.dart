@@ -1,28 +1,29 @@
 import 'project_result.dart';
 
-/// Раздел, в который попадает завершённый проект на экране профиля.
-/// Порядок значений = порядок показа на экране.
+/// The section a completed project goes into on the profile screen. The order
+/// of the values = the order of display on the screen.
 ///
-/// [piscineReloaded] это отдельный проект «C Piscine Reloaded»: он идёт после
-/// Piscine и до Common Core и не входит ни в то, ни в другое, поэтому у него
-/// свой раздел (пустой раздел на экране не показывается).
+/// [piscineReloaded] is a separate project, "C Piscine Reloaded": it comes
+/// after the Piscine and before Common Core and belongs to neither, so it has
+/// its own section (an empty section is not shown on the screen).
 enum ProjectCategory { outerCore, commonCore, piscine, piscineReloaded }
 
-/// Префиксы slug, которые отбрасываются перед сравнением.
+/// Slug prefixes that are dropped before comparing.
 ///
-/// `42cursus-` у проектов основного курса; `42next-` у проектов новой
-/// программы Common Core (например `42next-born2beroot`, `42next-push_swap`,
-/// `42next-exam-rank-02`). Список читает и `tool/dump_projects.py`, поэтому
-/// каждый префикс должен быть отдельным строковым литералом в одинарных кавычках.
+/// `42cursus-` for projects of the main cursus; `42next-` for projects of the
+/// new Common Core program (for example `42next-born2beroot`,
+/// `42next-push_swap`, `42next-exam-rank-02`). The list is also read by
+/// `tool/dump_projects.py`, so every prefix must be a separate string literal
+/// in single quotes.
 const List<String> slugPrefixes = ['42cursus-', '42next-'];
 
-/// Проекты Common Core (по slug, без префиксов из [slugPrefixes]).
+/// Common Core projects (by slug, without the prefixes from [slugPrefixes]).
 ///
-/// Список составлен по программе школы и по реальным выгрузкам из API
-/// и может не совпасть с реальными slug: именно поэтому он вынесен в одну
-/// константу, чтобы поправить его в одном месте (см. docs/12, разделы 9 и 21).
-/// Серии `cpp-module-NN`, `exam-rank-NN` и `python-module-NN` ловятся
-/// шаблонами ниже.
+/// The list was compiled from the school program and from real API dumps and
+/// may not match the real slugs: that is exactly why it is kept in one
+/// constant, so it can be fixed in one place (see docs/12, sections 9 and 21).
+/// The series `cpp-module-NN`, `exam-rank-NN` and `python-module-NN` are caught
+/// by the patterns below.
 const Set<String> commonCoreSlugs = {
   'libft',
   'get_next_line',
@@ -46,12 +47,12 @@ const Set<String> commonCoreSlugs = {
   'inception',
   'ft_containers',
   'ft_transcendence',
-  // Коллективное резюме: на том же последнем круге, что и ft_transcendence.
+  // Collective resume: on the same last circle as ft_transcendence.
   '42_collaborative_resume',
-  // Новая программа Common Core (с модулями Python). Список по выгрузке
-  // профиля студента, который ещё не дошёл до Outer Core: все эти проекты
-  // он прошёл внутри Common Core. Если у кого-то окажется, что один из них
-  // на самом деле Outer Core, достаточно убрать его отсюда.
+  // The new Common Core program (with Python modules). The list comes from the
+  // profile dump of a student who has not reached Outer Core yet: he passed all
+  // these projects inside Common Core. If it turns out that one of them is
+  // really Outer Core, it is enough to remove it from here.
   'a-maze-ing',
   'agent-smith',
   'call-me-maybe',
@@ -67,8 +68,9 @@ final RegExp _cppModule = RegExp(r'^cpp-module-\d{2}$');
 final RegExp _examRank = RegExp(r'^exam-rank-\d{2}$');
 final RegExp _pythonModule = RegExp(r'^python-module-\d{2}$');
 
-/// Приводит slug к сравнимому виду: нижний регистр, без префикса из
-/// [slugPrefixes] (в API проекты бывают записаны и с префиксом, и без).
+/// Brings a slug to a comparable form: lower case, without the prefix from
+/// [slugPrefixes] (in the API projects appear both with and without the
+/// prefix).
 String normalizeSlug(String slug) {
   final lower = slug.trim().toLowerCase();
   for (final prefix in slugPrefixes) {
@@ -79,19 +81,20 @@ String normalizeSlug(String slug) {
   return lower;
 }
 
-/// В какой раздел попадает проект.
+/// Which section a project goes into.
 ///
-/// 1. slug содержит `piscine` и `reloaded` -> отдельный раздел Reloaded;
-/// 2. slug начинается с `c-piscine` или `piscine` -> Piscina;
-/// 3. slug в [commonCoreSlugs] или подходит под `cpp-module-NN`/`exam-rank-NN`/
-///    `python-module-NN` -> Common Core;
-/// 4. всё остальное (включая проект без slug) -> Outer Core.
+/// 1. the slug contains `piscine` and `reloaded` -> the separate Reloaded
+///    section;
+/// 2. the slug starts with `c-piscine` or `piscine` -> Piscina;
+/// 3. the slug is in [commonCoreSlugs] or matches
+///    `cpp-module-NN`/`exam-rank-NN`/ `python-module-NN` -> Common Core;
+/// 4. everything else (including a project without a slug) -> Outer Core.
 ///
-/// Reloaded проверяется раньше Piscina: его slug (`c-piscine-reloaded`)
-/// начинается так же, как у бассейна, и иначе он попал бы туда.
+/// Reloaded is checked before Piscina: its slug (`c-piscine-reloaded`) starts
+/// the same way as the piscine's, and otherwise it would end up there.
 ///
-/// Так новый, ещё не известный проект по умолчанию окажется в Outer Core,
-/// а не потеряется.
+/// This way a new, not yet known project lands in Outer Core by default instead
+/// of getting lost.
 ProjectCategory categoryOf(ProjectResult project) {
   final raw = project.slug;
   if (raw == null) {

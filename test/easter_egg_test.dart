@@ -26,8 +26,8 @@ void main() {
     });
 
     test('выключатель включён по умолчанию', () {
-      // Если поставишь false перед защитой, этот тест напомнит поправить
-      // и остальные проверки пасхалок.
+      // If you set false before the defense, this test reminds you to fix the
+      // other easter egg checks too.
       expect(easterEggsEnabled, isTrue);
     });
   });
@@ -53,7 +53,7 @@ void main() {
 
       expect(find.text('EL PUTO AMO'), findsOneWidget);
       expect(find.text('ЙЕБАНИСТА'), findsNothing);
-      // Именно ПОД именем и над панелью с данными.
+      // Exactly UNDER the name and above the data panel.
       expect(
         tester.getTopLeft(find.text('EL PUTO AMO')).dy,
         greaterThan(tester.getTopLeft(find.text('Jane Doe')).dy),

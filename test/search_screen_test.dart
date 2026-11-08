@@ -12,8 +12,9 @@ import 'fake_api.dart';
 import 'fixtures.dart';
 import 'test_app.dart';
 
-/// Профиль без фото: в тестах виджетов `Image.network` не ходит в сеть,
-/// и нам незачем проверять его здесь (заглушка проверяется в profile_screen_test).
+/// A profile without a photo: in widget tests `Image.network` does not go to
+/// the network, and there is no need to check it here (the placeholder is
+/// checked in profile_screen_test).
 Map<String, dynamic> _userWithoutImage() => sampleUserJson()..remove('image');
 
 void main() {
@@ -74,8 +75,8 @@ void main() {
     expect(fake.userRequests.single.url.path, '/v2/users/jdoe');
     expect(find.text('Jane Doe'), findsOneWidget);
 
-    // Не `tester.pageBack()`: он ищет подсказку 'Back', а при испанском
-    // языке подсказка называется 'Atrás'.
+    // Not `tester.pageBack()`: it looks for the 'Back' tooltip, and in Spanish
+    // the tooltip is called 'Atrás'.
     await tester.tap(find.byTooltip('Atrás'));
     await tester.pumpAndSettle();
 
@@ -159,7 +160,7 @@ void main() {
     expect(tester.widget<FilledButton>(find.byType(FilledButton)).onPressed, isNull);
     expect(tester.widget<TextField>(find.byType(TextField)).enabled, isFalse);
 
-    // Повторное нажатие во время загрузки ничего не отправляет.
+    // A repeated tap during loading sends nothing.
     await tester.tap(find.byType(FilledButton), warnIfMissed: false);
     await tester.pump();
 

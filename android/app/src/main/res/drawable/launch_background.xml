@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Экран запуска для Android до 12: тёмный фон и эмблема по центру.
-     На Android 12+ система показывает свой splash (см. values-v31/styles.xml). -->
+<!-- Launch screen for Android before 12: a dark background and the emblem in the center.
+     On Android 12+ the system shows its own splash (see values-v31/styles.xml). -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/splash_background" />
     <item>

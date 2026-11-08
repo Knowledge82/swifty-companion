@@ -12,7 +12,7 @@ import 'package:swifty_companion/ui/steampunk/steampunk_widgets.dart';
 
 import 'test_app.dart';
 
-/// Коэффициент контрастности WCAG: (светлый + 0.05) / (тёмный + 0.05).
+/// The WCAG contrast ratio: (light + 0.05) / (dark + 0.05).
 double contrast(Color a, Color b) {
   final la = a.computeLuminance() + 0.05;
   final lb = b.computeLuminance() + 0.05;
@@ -21,7 +21,8 @@ double contrast(Color a, Color b) {
 
 void main() {
   group('палитра', () {
-    // Фон панелей (орех) и экрана/AppBar (тёмная кожа). Текст и значки на них.
+    // The panel background (walnut) and the screen/AppBar (dark leather). Text
+    // and icons on them.
     final pairs = <(String, Color, Color, double)>[
       ('основной текст на панели', steampunkColors.onSurface, steampunkColors.surface, 7),
       ('основной текст на фоне', steampunkColors.onSurface, leatherDeep, 7),
@@ -43,9 +44,10 @@ void main() {
       });
     }
 
-    // Итерация 9: панель была темнее центра фона и сливалась с ним (1,13:1).
-    // Теперь она светлее фона во ВСЕХ точках радиального градиента, и
-    // выделяется оттенком, а не одной только рамкой.
+    // Iteration 9: the panel was darker than the center of the background and
+    // merged with it (1.13:1). Now it is lighter than the background at ALL
+    // points of the radial gradient, and stands out by tone, not by the border
+    // alone.
     test('панель светлее фона везде: и в центре, и по краям градиента', () {
       for (final background in backdropColors) {
         expect(
@@ -87,9 +89,9 @@ void main() {
       expect(bounds.top, greaterThanOrEqualTo(49.9));
       expect(bounds.bottom, lessThanOrEqualTo(150.1));
 
-      expect(path.contains(center), isFalse); // отверстие
-      expect(path.contains(center + const Offset(25, 0)), isTrue); // тело
-      expect(path.contains(center + const Offset(60, 0)), isFalse); // снаружи
+      expect(path.contains(center), isFalse); // hole
+      expect(path.contains(center + const Offset(25, 0)), isTrue); // body
+      expect(path.contains(center + const Offset(60, 0)), isFalse); // outside
     });
   });
 
@@ -126,7 +128,7 @@ void main() {
           ),
         ),
       );
-      // Если бы узор анимировался бесконечно, pumpAndSettle не вернулся бы.
+      // If the pattern animated endlessly, pumpAndSettle would not return.
       await tester.pumpAndSettle();
 
       expect(find.text('hola'), findsOneWidget);
@@ -145,7 +147,7 @@ void main() {
       );
 
       expect(find.byType(GearEmblem), findsOneWidget);
-      // 100 (эмблема) + 2 * 13 (кольцо по умолчанию)
+      // 100 (emblem) + 2 * 13 (the default ring)
       expect(tester.getSize(find.byType(BrassRing)), const Size(126, 126));
     });
 
@@ -207,9 +209,10 @@ void main() {
 
       final gear = find.byType(CornerGear);
       expect(gear, findsOneWidget);
-      // Центр шестерни ровно в углу экрана 400 × 800.
+      // The center of the gear is exactly in the corner of a 400 x 800 screen.
       expect(tester.getCenter(gear), const Offset(400, 800));
-      // Радиус: 46 % короткой стороны, но не меньше 100 и не больше 260.
+      // Radius: 46 % of the short side, but not less than 100 and not more than
+      // 260.
       expect(tester.getSize(gear), const Size(2 * 184, 2 * 184));
     });
   });
@@ -227,7 +230,8 @@ void main() {
     test('четыре разных размера: не «одна большая и четыре одинаковых»', () {
       final radii = gears.map((g) => g.radius).toSet();
       expect(radii, hasLength(4));
-      // Большая заметно крупнее остальных, самая малая заметно мельче.
+      // The big one is clearly larger than the others, the smallest clearly
+      // smaller.
       expect(gears.first.radius, greaterThan(radii.reduce(math.max) - 1e-9));
       expect(gears.first.radius / radii.reduce(math.min), greaterThan(2));
     });
@@ -236,8 +240,9 @@ void main() {
       int depth(int i) => gears[i].parent < 0 ? 0 : 1 + depth(gears[i].parent);
       expect(List.generate(gears.length, depth).reduce(math.max), greaterThanOrEqualTo(3));
 
-      // Ветвление: у кого-то из шестерёнок не меньше двух «детей»; и есть
-      // шестерёнка, у которой дети в цепочке свои (не звезда вокруг одной).
+      // Branching: some gear has at least two "children"; and there is a gear
+      // whose children have children of their own in the chain (not a star
+      // around one).
       final children = <int, int>{};
       for (final g in gears.skip(1)) {
         children[g.parent] = (children[g.parent] ?? 0) + 1;
@@ -259,8 +264,9 @@ void main() {
       for (final g in gears.skip(1)) {
         final p = gears[g.parent];
         final distance = (g.center - p.center).distance;
-        // Вершина зуба одной шестерёнки не заходит глубже впадины другой
-        // (впадина на 0.8 радиуса) и всё же сцеплена: оси ближе, чем сумма радиусов.
+        // The tooth tip of one gear does not go deeper than the gap of the
+        // other (the gap is at 0.8 of the radius) and yet they are meshed: the
+        // axes are closer than the sum of the radii.
         expect(distance, greaterThanOrEqualTo(p.radius + 0.8 * g.radius - 1e-9));
         expect(distance, greaterThanOrEqualTo(g.radius + 0.8 * p.radius - 1e-9));
         expect(distance, lessThan(p.radius + g.radius));
@@ -271,7 +277,7 @@ void main() {
       for (var i = 0; i < gears.length; i++) {
         for (var j = i + 1; j < gears.length; j++) {
           if (gears[j].parent == i || gears[i].parent == j) {
-            continue; // сцепленная пара
+            continue; // a meshed pair
           }
           final distance = (gears[i].center - gears[j].center).distance;
           expect(distance, greaterThan(gears[i].radius + gears[j].radius + 0.02),
@@ -281,7 +287,7 @@ void main() {
     });
 
     test('шаг зубьев у всех близок: зубья помещаются во впадины соседей', () {
-      // Шаг = длина дуги по внешнему радиусу на один зуб.
+      // Pitch = the arc length at the outer radius per tooth.
       final pitches = [
         for (final g in gears) 2 * math.pi * g.radius / g.teeth,
       ];
@@ -295,16 +301,17 @@ void main() {
       for (final g in gears.skip(1)) {
         final p = gears[g.parent];
         expect(g.ratio.sign, -p.ratio.sign);
-        // Линейная скорость на делительной окружности одинакова: ω₁·z₁ = -ω₂·z₂.
+        // The linear speed on the pitch circle is the same: ω₁·z₁ = -ω₂·z₂.
         expect(g.ratio * g.teeth, closeTo(-p.ratio * p.teeth, 1e-9));
-        // Для любой шестерёнки модуль скорости зависит только от числа зубьев.
+        // For any gear the speed magnitude depends only on the tooth count.
         expect(g.ratio.abs() * g.teeth, closeTo(emblemBigTeeth.toDouble(), 1e-9));
       }
     });
 
     test('зубья входят во впадины в любой момент вращения (для всей цепочки)', () {
-      // Условие сцепления: в точке касания «доля зуба» родителя плюс «доля
-      // зуба» ребёнка равна 0.5 (mod 1): зуб против впадины.
+      // The meshing condition: at the contact point the parent's "tooth
+      // fraction" plus the child's "tooth fraction" equals 0.5 (mod 1): a tooth
+      // against a gap.
       final omega = 2 * math.pi / emblemRevolutionSeconds;
       for (final g in gears.skip(1)) {
         final p = gears[g.parent];
@@ -326,9 +333,9 @@ void main() {
     });
 
     test('геометрия: контуры сцепленных пар не пересекаются в любой момент', () {
-      // Самая надёжная проверка: берём настоящие контуры (gearPath) и считаем,
-      // не попадает ли точка внутрь обоих. Выборка точек сетки в области
-      // пересечения кругов пары.
+      // The most reliable check: we take the real outlines (gearPath) and count
+      // whether a point falls inside both. A sample of grid points in the area
+      // where the pair's circles intersect.
       const scale = 1000.0;
       final omega = 2 * math.pi / emblemRevolutionSeconds;
       for (final t in [0.0, 3.1, 11.0, 47.5]) {
@@ -379,7 +386,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(tester.binding.transientCallbackCount, 0);
-      await tester.pumpAndSettle(); // не зависает
+      await tester.pumpAndSettle(); // does not hang
     });
 
     testWidgets('animate: false останавливает вращение', (tester) async {

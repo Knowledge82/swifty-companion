@@ -1,9 +1,9 @@
 import '../core/json_reader.dart';
 
-/// Итог проекта по полю `validated?`.
+/// Outcome of a project by the `validated?` field.
 enum ProjectOutcome { passed, failed, unknown }
 
-/// Запись о проекте студента (элемент `projects_users`).
+/// A record about a student's project (an element of `projects_users`).
 class ProjectResult {
   const ProjectResult({
     this.id,
@@ -24,7 +24,8 @@ class ProjectResult {
       name: readString(project?['name']) ?? slug,
       slug: slug,
       status: readString(json['status']),
-      // Ключ в JSON действительно называется «validated?» с вопросом.
+      // The key in the JSON really is called "validated?", with a question
+      // mark.
       validated: readBool(json['validated?']),
       finalMark: readInt(json['final_mark']),
       date: readDate(json['marked_at']) ??
@@ -36,39 +37,44 @@ class ProjectResult {
   }
 
   final int? id;
-  /// Название проекта, иначе slug, иначе `null` (интерфейс подставит свой текст).
+  /// Project name, otherwise the slug, otherwise `null` (the interface
+  /// substitutes its own text).
   final String? name;
   final String? slug;
 
-  /// Сырой статус: `finished`, `in_progress` и другие.
+  /// Raw status: `finished`, `in_progress` and others.
   final String? status;
 
-  /// `true` сдан, `false` провален, `null` неизвестно.
+  /// `true` passed, `false` failed, `null` unknown.
   final bool? validated;
   final int? finalMark;
 
-  /// Дата для сортировки: `marked_at`, иначе `updated_at`, иначе `created_at`.
+  /// Date for sorting: `marked_at`, otherwise `updated_at`, otherwise
+  /// `created_at`.
   final DateTime? date;
   final List<int> cursusIds;
 
-  /// Сырой статус `finished` (см. docs/03, раздел 8.3).
+  /// Raw status `finished` (see docs/03, section 8.3).
   bool get isFinished => status == 'finished';
 
-  /// Это экзамен: в slug есть `exam` (`c-piscine-exam-00`, `c-piscine-final-exam`,
-  /// `exam-rank-03`, `42next-exam-rank-02`). У каждого экзамена своя логика статуса.
+  /// This is an exam: the slug contains `exam` (`c-piscine-exam-00`,
+  /// `c-piscine-final-exam`, `exam-rank-03`, `42next-exam-rank-02`). Every exam
+  /// has its own status logic.
   bool get isExam => slug?.toLowerCase().contains('exam') ?? false;
 
-  /// Есть итог: известно и сдан ли проект, и оценка.
+  /// There is a result: both whether the project is passed and the mark are
+  /// known.
   bool get hasResult => validated != null && finalMark != null;
 
-  /// Попадает ли запись в «завершённые проекты».
+  /// Whether the record counts as a "completed project".
   ///
-  /// Обычный проект: только `status == finished`. Экзамен: ещё и `in_progress`,
-  /// если у него уже есть итог. В API экзамены бассейна у студентов старого
-  /// набора навсегда остаются `in_progress` (экзамен можно пересдавать каждую
-  /// неделю, поэтому запись не закрывается), хотя оценка и `validated?` в ней
-  /// стоят. Для обычных проектов такого правила нет: у проекта в процессе
-  /// (в том числе на пересдаче) прошлая оценка не должна выглядеть итогом.
+  /// An ordinary project: only `status == finished`. An exam: also
+  /// `in_progress` if it already has a result. In the API, piscine exams of
+  /// students from the old intake stay `in_progress` forever (an exam can be
+  /// retaken every week, so the record is never closed), although the mark and
+  /// `validated?` are set in it. There is no such rule for ordinary projects:
+  /// for a project in progress (including one being retaken) the previous mark
+  /// must not look like a result.
   bool get isCompleted => isFinished || (isExam && hasResult);
 
   ProjectOutcome get outcome {

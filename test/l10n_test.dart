@@ -86,7 +86,8 @@ void main() {
       await tester.pumpWidget(
         const ConfigErrorApp(missingKeys: ['FT_UID', 'FT_SECRET']),
       );
-      // Имена переменных одинаковы в обоих языках, поэтому от языка не зависим.
+      // The variable names are the same in both languages, so we do not depend
+      // on the language.
       expect(find.textContaining('FT_UID, FT_SECRET'), findsOneWidget);
     });
 

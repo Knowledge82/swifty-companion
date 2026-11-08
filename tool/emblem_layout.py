@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Проверка и подбор раскладки шестерёнок эмблемы (`placeEmblemGears` в gears.dart).
+"""Check and search for the layout of the emblem gears (`placeEmblemGears` in gears.dart).
 
-Запуск:
-    python3 tool/emblem_layout.py            # проверить текущую раскладку и нарисовать tool/emblem_preview.png
-    python3 tool/emblem_layout.py search N   # перебрать N случайных раскладок и вывести лучшие
+Run:
+    python3 tool/emblem_layout.py            # check the current layout and draw tool/emblem_preview.png
+    python3 tool/emblem_layout.py search N   # try N random layouts and print the best ones
 
-Нужны Pillow и numpy (pip install pillow numpy).
+Needs Pillow and numpy (pip install pillow numpy).
 
-Что проверяется (то же самое, что делают тесты во Flutter, плюс растровая проверка):
-  - все шестерёнки внутри квадрата 1x1 с полем 0.02;
-  - несцепленные пары не касаются (зазор не меньше 0.02);
-  - у каждой сцепленной пары зубья в любой момент вращения не пересекаются
-    (контуры рисуются в растр, считаются общие пиксели).
-Формулы те же, что в gears.dart: расстояние между осями, фаза из условия
-«доля зуба родителя + доля зуба ребёнка = 0.5», скорость = -скорость родителя * зубья родителя / зубья.
+What is checked (the same as the Flutter tests do, plus a raster check):
+  - all gears are inside the 1x1 square with a 0.02 margin;
+  - unmeshed pairs do not touch (a gap of at least 0.02);
+  - for every meshed pair the teeth do not intersect at any moment of the
+    rotation (the outlines are drawn into a raster, shared pixels are counted).
+The formulas are the same as in gears.dart: the distance between axes, the phase from the condition
+"parent tooth fraction + child tooth fraction = 0.5", speed = -parent speed * parent teeth / teeth.
 """
 import math
 import random
@@ -22,8 +22,8 @@ import sys
 import numpy as np
 from PIL import Image, ImageDraw
 
-BIG = (0.347, 0.585, 0.26, 13)  # центр x, y, радиус, зубья (как в gears.dart)
-# (индекс родителя, угол от родителя в градусах, радиус, зубья): как в gears.dart
+BIG = (0.347, 0.585, 0.26, 13)  # center x, y, radius, teeth (as in gears.dart)
+# (parent index, angle from the parent in degrees, radius, teeth): as in gears.dart
 CHILDREN = [
     (0, -15.6, 0.19, 9),
     (1, 88.9, 0.14, 7),
@@ -32,11 +32,11 @@ CHILDREN = [
     (4, -170.6, 0.10, 5),
     (0, 123.6, 0.10, 5),
 ]
-OMEGA = 2 * math.pi / 36  # оборот большой за 36 секунд
+OMEGA = 2 * math.pi / 36  # the big one makes a revolution in 36 seconds
 
 
 def mesh_distance(R, r):
-    """Расстояние между осями: вершина зуба почти касается впадины (впадина на 0.8 радиуса)."""
+    """Distance between axes: the tooth tip almost touches the gap (the gap is at 0.8 of the radius)."""
     return max(R + 0.8 * r, r + 0.8 * R) + 0.01
 
 
@@ -115,7 +115,7 @@ def preview(gears, path):
 
 
 def search(trials, sizes=((0.19, 9), (0.14, 7), (0.10, 5))):
-    """Случайный поиск: добавляем шестерёнки к случайным родителям под случайным углом."""
+    """Random search: we add gears to random parents at a random angle."""
     best = []
     for seed in range(trials):
         rnd = random.Random(seed)

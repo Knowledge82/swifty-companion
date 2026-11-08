@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'steampunk/steampunk_theme.dart';
 
-/// Пасхалки: у некоторых логинов под именем появляется своя надпись.
+/// Easter eggs: some logins get their own caption under the name.
 ///
-/// Выключатель: поставь [easterEggsEnabled] в `false`, и они исчезнут
-/// (например, перед защитой проекта). Надписи не переводятся: это шутка,
-/// а не часть интерфейса.
+/// The switch: set [easterEggsEnabled] to `false` and they disappear (for
+/// example, before defending the project). The captions are not translated:
+/// this is a joke, not part of the interface.
 const bool easterEggsEnabled = true;
 
 const Map<String, String> _banners = {
@@ -14,12 +14,12 @@ const Map<String, String> _banners = {
   'pdoltu': 'ЙЕБАНИСТА',
 };
 
-/// Надпись для логина или `null`. Логины в API в нижнем регистре,
-/// но сравниваем без учёта регистра и пробелов, на всякий случай.
+/// The caption for a login, or `null`. Logins in the API are lower case, but we
+/// compare ignoring case and spaces, just in case.
 String? easterEggFor(String login) =>
     easterEggsEnabled ? _banners[login.trim().toLowerCase()] : null;
 
-/// Латунная «табличка» с шестерёнками по бокам.
+/// A brass "plate" with gears on the sides.
 class EasterEggBadge extends StatelessWidget {
   const EasterEggBadge({super.key, required this.text});
 
@@ -41,8 +41,8 @@ class EasterEggBadge extends StatelessWidget {
           children: [
             Icon(Icons.settings, size: 18, color: colors.tertiary),
             const SizedBox(width: 8),
-            // FittedBox уменьшает надпись, если она не помещается
-            // (узкий экран, крупный системный шрифт).
+            // FittedBox shrinks the caption if it does not fit
+            // (narrow screen, large system font).
             Flexible(
               child: FittedBox(
                 fit: BoxFit.scaleDown,

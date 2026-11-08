@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/ui/steampunk/logo42.dart';
 
-/// Читает многоугольники из SVG-файла: атрибуты `points="x,y x,y ..."`.
+/// Reads the polygons from the SVG file: the attributes `points="x,y x,y ..."`.
 List<List<Offset>> polygonsFromSvg(String svg) {
   final number = RegExp(r'-?\d+(?:\.\d+)?');
   return [

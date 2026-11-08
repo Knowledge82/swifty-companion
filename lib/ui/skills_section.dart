@@ -5,7 +5,7 @@ import '../l10n/app_strings.dart';
 import '../models/skill.dart';
 import 'section_title.dart';
 
-/// Раздел «Скиллы»: название, уровень, процент и полоса прогресса.
+/// The "Skills" section: name, level, percentage and a progress bar.
 class SkillsSection extends StatelessWidget {
   const SkillsSection({super.key, required this.skills});
 
@@ -14,7 +14,7 @@ class SkillsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    // Сильные скиллы сверху; при равных уровнях порядок по названию.
+    // Strong skills on top; for equal levels the order is by name.
     final sorted = [...skills]..sort((a, b) {
         final byLevel = b.level.compareTo(a.level);
         return byLevel != 0 ? byLevel : (a.name ?? '').compareTo(b.name ?? '');
@@ -56,8 +56,9 @@ class _SkillRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Wrap вместо Row: при крупном шрифте или длинном названии уровень
-          // переходит на следующую строку, а не вылезает за край экрана.
+          // Wrap instead of Row: with a large font or a long name the level
+          // moves to the next line instead of sticking out past the edge of the
+          // screen.
           Wrap(
             alignment: WrapAlignment.spaceBetween,
             spacing: 12,

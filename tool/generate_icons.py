@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
-"""Рисует иконку приложения и картинку для splash screen в нашем стимпанк-стиле.
+"""Draws the app icon and the splash screen image in our steampunk style.
 
-Запуск из корня проекта (нужны Pillow и numpy):
+Run from the project root (needs Pillow and numpy):
 
     pip install --break-system-packages pillow numpy
     python3 tool/generate_icons.py
 
-Что создаётся в android/app/src/main/res:
-  mipmap-*/ic_launcher.png              обычная иконка (Android до 8.0)
-  mipmap-*/ic_launcher_foreground.png   передний слой адаптивной иконки (Android 8.0+)
-  drawable-xxhdpi/splash_icon.png       статичная картинка splash (Android до 12)
-  drawable/splash_icon_vector.xml       векторная эмблема splash (цепочка из 7 шестерёнок)
-  drawable/splash_icon_animated.xml     её анимация: шестерёнки вращаются (Android 12+)
+What is created in android/app/src/main/res:
+  mipmap-*/ic_launcher.png              the plain icon (Android before 8.0)
+  mipmap-*/ic_launcher_foreground.png   the foreground layer of the adaptive icon (Android 8.0+)
+  drawable-xxhdpi/splash_icon.png       the static splash image (Android before 12)
+  drawable/splash_icon_vector.xml       the vector splash emblem (a chain of 7 gears)
+  drawable/splash_icon_animated.xml     its animation: the gears rotate (Android 12+)
 
-Иконка приложения: три сцепленные латунные шестерёнки, на большой ступица
-со знаком школы 42. Рисунок не менялся с итерации 3, обновлены только цвета
-под актуальную палитру (орех вместо изумруда, см. lib/ui/steampunk/steampunk_theme.dart).
+The app icon: three meshed brass gears, with a hub carrying the school's 42
+mark on the big one. The drawing has not changed since iteration 3, only the
+colors were updated to the current palette (walnut instead of emerald, see
+lib/ui/steampunk/steampunk_theme.dart).
 
-Splash: цепочка из семи шестерёнок четырёх размеров, та же, что GearEmblem
-в lib/ui/steampunk/gears.dart (раскладка берётся из tool/emblem_layout.py).
+Splash: a chain of seven gears of four sizes, the same as GearEmblem in
+lib/ui/steampunk/gears.dart (the layout is taken from tool/emblem_layout.py).
 
-Знак 42 берётся из файла tool/42_logo.svg (его предоставил владелец
-проекта) и рисуется как есть: многоугольники из файла, без переделок.
+The 42 mark is taken from the file tool/42_logo.svg (provided by the project
+owner) and drawn as it is: the polygons from the file, without changes.
 """
 import math
 import os
@@ -32,27 +33,27 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import emblem_layout  # noqa: E402  (раскладка цепочки шестерёнок)
+import emblem_layout  # noqa: E402  (gear chain layout)
 
 RES = os.path.join('android', 'app', 'src', 'main', 'res')
 
 BRASS_LIGHT = (0xE6, 0xC8, 0x78)
 BRASS = (0xC8, 0xA0, 0x4A)
 COPPER = (0xB8, 0x73, 0x33)
-# Палитра как в steampunk_theme.dart (итерация 5б): орех вместо изумруда.
+# The palette as in steampunk_theme.dart (iteration 5b): walnut instead of emerald.
 WALNUT = (0x2A, 0x1B, 0x12)
 WALNUT_DEEP = (0x1B, 0x11, 0x0B)
 LEATHER_DEEP = (0x17, 0x0E, 0x09)
 
 LOGO_SVG = os.path.join('tool', '42_logo.svg')
 
-# Длительность одного прохода анимации splash, секунд. Скорость вращения не зависит
-# от неё (большая шестерёнка делает 83 градуса в секунду).
+# Duration of one pass of the splash animation, in seconds. The rotation speed
+# does not depend on it (the big gear makes 83 degrees per second).
 ANIM_SECONDS = 60
 
 
 def load_logo():
-    """Многоугольники знака из SVG (атрибуты points) и их габариты."""
+    """The polygons of the mark from the SVG (the points attributes) and their bounds."""
     with open(LOGO_SVG, encoding='utf-8') as f:
         svg = f.read()
     polys = []
@@ -65,9 +66,9 @@ def load_logo():
     return polys, bounds
 
 
-# (центр x, центр y, радиус, число зубьев, поворот) в условных единицах 0..1:
-# те же числа, что в GearEmblem.
-GEARS = [  # рисунок ИКОНКИ (не менялся)
+# (center x, center y, radius, tooth count, rotation) in relative units 0..1:
+# the same numbers as in GearEmblem.
+GEARS = [  # the ICON drawing (unchanged)
     (0.42, 0.52, 0.34, 14, 0.0),
     (0.80, 0.28, 0.17, 8, math.pi / 8),
     (0.76, 0.80, 0.14, 7, math.pi / 7),
@@ -87,7 +88,7 @@ def gear_points(cx, cy, radius, teeth, rotation):
 
 
 def gradient(size):
-    """Диагональный градиент светлая латунь -> латунь -> медь."""
+    """A diagonal gradient light brass -> brass -> copper."""
     y, x = np.mgrid[0:size, 0:size]
     t = (x + y) / (2.0 * (size - 1))
     stops = [(0.0, BRASS_LIGHT), (0.5, BRASS), (1.0, COPPER)]
@@ -99,7 +100,7 @@ def gradient(size):
 
 
 def draw_logo(draw, center, width):
-    """Рисует знак 42 светлой латунью: центр габаритов в center, ширина width."""
+    """Draws the 42 mark in light brass: the center of its bounds at center, the width equal to width."""
     polys, (x0, y0, x1, y1) = load_logo()
     scale = width / (x1 - x0)
     mx, my = (x0 + x1) / 2, (y0 + y1) / 2
@@ -109,15 +110,15 @@ def draw_logo(draw, center, width):
 
 
 def chain_gears():
-    """Цепочка из семи шестерёнок для splash: (cx, cy, r, зубья, поворот)."""
+    """A chain of seven gears for the splash: (cx, cy, r, teeth, rotation)."""
     placed = emblem_layout.place(emblem_layout.CHILDREN)
     return placed, [(g['c'][0], g['c'][1], g['r'], g['z'], g['phase']) for g in placed]
 
 
 def render(size, radius_frac, background=None, gears=None):
-    """Рисует эмблему так, чтобы самая дальняя точка лежала на расстоянии
-    radius_frac * size от центра холста (это нужно, чтобы эмблема не
-    обрезалась круглой маской лаунчера или splash screen)."""
+    """Draws the emblem so that the farthest point lies at a distance of
+    radius_frac * size from the center of the canvas (this is needed so the
+    emblem is not cut off by the launcher's round mask or the splash screen)."""
     ss = 4 if size <= 512 else 3
     big = size * ss
 
@@ -147,7 +148,7 @@ def render(size, radius_frac, background=None, gears=None):
         mask = Image.new('L', (big, big), 0)
         md = ImageDraw.Draw(mask)
         md.polygon(pts, fill=255)
-        if index != 0:  # у малых шестерёнок отверстие (evenOdd, как в приложении)
+        if index != 0:  # the small gears have a hole (evenOdd, as in the app)
             hole = r_px * 0.32
             md.ellipse([cc[0] - hole, cc[1] - hole, cc[0] + hole, cc[1] + hole], fill=0)
         base.paste(grad, (0, 0), mask)
@@ -156,14 +157,14 @@ def render(size, radius_frac, background=None, gears=None):
         d.line(pts + [pts[0]], fill=LEATHER_DEEP + (255,), width=edge_w, joint='curve')
 
         if index == 0:
-            # Ступица: тёмный диск с латунным ободком и цифрами 42.
+            # The hub: a dark disc with a brass rim and the digits 42.
             hub = r_px * 0.66
             d.ellipse([cc[0] - hub, cc[1] - hub, cc[0] + hub, cc[1] + hub],
                       fill=WALNUT_DEEP + (255,), outline=BRASS + (255,),
                       width=max(2, int(r_px * 0.06)))
             draw_logo(d, cc, hub * 1.42)
         else:
-            # Болт в отверстии: шляпка меди и косой шлиц.
+            # A bolt in the hole: a copper head and a slanted slot.
             bolt = r_px * 0.22
             d.ellipse([cc[0] - bolt, cc[1] - bolt, cc[0] + bolt, cc[1] + bolt],
                       fill=COPPER + (255,), outline=LEATHER_DEEP + (255,),
@@ -176,12 +177,12 @@ def render(size, radius_frac, background=None, gears=None):
 
 
 def fmt(v):
-    """Число для XML: две цифры после запятой, без хвоста нулей."""
+    """A number for XML: two digits after the decimal point, without trailing zeros."""
     return ('%.2f' % v).rstrip('0').rstrip('.')
 
 
 def circle_path(cx, cy, r):
-    """Контур круга в pathData: две дуги."""
+    """The outline of a circle in pathData: two arcs."""
     return (f'M{fmt(cx - r)},{fmt(cy)} a{fmt(r)},{fmt(r)} 0 1,0 {fmt(2 * r)},0 '
             f'a{fmt(r)},{fmt(r)} 0 1,0 {fmt(-2 * r)},0 Z')
 
@@ -191,22 +192,23 @@ def hex_color(rgb):
 
 
 def write_animated_splash(placed, chain):
-    """Векторная эмблема splash и её анимация для Android 12+.
+    """The vector splash emblem and its animation for Android 12+.
 
-    Идея: каждая шестерёнка это <group> со своим pivot в центре; AnimatedVectorDrawable
-    вращает группы. Угол поворота шестерёнки = передаточное число × угол большой,
-    поэтому зацепление не нарушается в любой момент. Знак 42 лежит в отдельной
-    группе без анимации.
+    The idea: each gear is a <group> with its own pivot at the center;
+    AnimatedVectorDrawable rotates the groups. The rotation angle of a gear =
+    gear ratio × the angle of the big one, so the meshing is never broken at
+    any moment. The 42 mark lies in a separate group without animation.
 
-    ПОЧЕМУ НЕТ ЗАЦИКЛИВАНИЯ. Раньше анимация длилась 1 с и повторялась: большая
-    поворачивалась на три шага зубьев, остальные на три своих зуба, так что ЗУБЬЯ
-    в конце цикла совпадали с началом. Но у малых шестерёнок есть болт со шлицем
-    (отвёрточной прорезью), и он совпадает с исходным положением только при
-    повороте на целое число оборотов (точнее, на 180 градусов). Три зуба это 216
-    градусов у шестерёнки на 5 зубьев, 154 на 7, 120 на 9: на стыке повторов шлиц
-    «соскакивал». Поэтому теперь ОДИН длинный проход (ANIM_SECONDS) без повтора:
-    скорость вращения та же, а скачка нет, потому что сброса в начало нет вовсе
-    (сплэш виден секунды, а не минуту).
+    WHY THERE IS NO LOOPING. The animation used to last 1 s and repeat: the big
+    gear turned by three tooth steps, the others by three of their own teeth,
+    so the TEETH at the end of the cycle matched the start. But the small gears
+    have a bolt with a slot (a screwdriver cut), and it matches the initial
+    position only when turned by a whole number of revolutions (more exactly,
+    by 180 degrees). Three teeth are 216 degrees for a gear with 5 teeth, 154
+    for 7, 120 for 9: at the seam of the repeats the slot "jumped". So now
+    there is ONE long pass (ANIM_SECONDS) without repeating: the rotation
+    speed is the same, and there is no jump, because there is no reset to the
+    start at all (the splash is visible for seconds, not for a minute).
     """
     viewport = 288.0
     radius_frac = 0.30
@@ -224,8 +226,8 @@ def write_animated_splash(placed, chain):
           'xmlns:aapt="http://schemas.android.com/aapt"')
     stroke = hex_color(LEATHER_DEEP)
     out = ['<?xml version="1.0" encoding="utf-8"?>',
-           '<!-- СОЗДАНО tool/generate_icons.py, руками не править. Векторная эмблема splash:',
-           '     цепочка из семи шестерёнок; анимация в splash_icon_animated.xml. -->',
+           '<!-- GENERATED by tool/generate_icons.py, do not edit by hand. Vector splash emblem:',
+           '     a chain of seven gears; the animation is in splash_icon_animated.xml. -->',
            f'<vector {ns}',
            f'    android:width="{fmt(viewport)}dp" android:height="{fmt(viewport)}dp"',
            f'    android:viewportWidth="{fmt(viewport)}" android:viewportHeight="{fmt(viewport)}">']
@@ -235,7 +237,7 @@ def write_animated_splash(placed, chain):
         r_px = radius * scale
         d = 'M' + ' L'.join(f'{fmt(x)},{fmt(y)}' for x, y in (tr(p) for p in poly)) + ' Z'
         if index != 0:
-            d += ' ' + circle_path(c[0], c[1], r_px * 0.36)  # отверстие (evenOdd)
+            d += ' ' + circle_path(c[0], c[1], r_px * 0.36)  # hole (evenOdd)
         out += [f'    <group android:name="gear{index}" android:pivotX="{fmt(c[0])}" '
                 f'android:pivotY="{fmt(c[1])}">',
                 f'        <path android:pathData="{d}" android:fillType="evenOdd">',
@@ -251,7 +253,7 @@ def write_animated_splash(placed, chain):
                 f'        <path android:pathData="{d}" android:fillType="evenOdd" '
                 f'android:fillColor="#00000000" android:strokeColor="{stroke}" '
                 f'android:strokeWidth="{fmt(max(1.0, r_px * 0.03))}" />']
-        if index != 0:  # болт в отверстии: медная шляпка и косой шлиц
+        if index != 0:  # a bolt in the hole: a copper head and a slanted slot
             bolt = r_px * 0.27
             dx, dy = math.cos(0.6) * bolt * 0.65, math.sin(0.6) * bolt * 0.65
             out += [f'        <path android:pathData="{circle_path(c[0], c[1], bolt)}" '
@@ -262,7 +264,7 @@ def write_animated_splash(placed, chain):
                     f'android:strokeWidth="{fmt(max(0.8, bolt * 0.18))}" android:strokeLineCap="round" />']
         out.append('    </group>')
 
-    # Ступица со знаком 42: без анимации, поверх большой шестерёнки.
+    # The hub with the 42 mark: no animation, on top of the big gear.
     big = tr((chain[0][0], chain[0][1]))
     hub = chain[0][2] * scale * 0.66
     out += ['    <group android:name="hub">',
@@ -283,11 +285,11 @@ def write_animated_splash(placed, chain):
         f.write('\n'.join(out))
     print('записано', path)
 
-    # Анимация: один длинный проход, линейно, без повтора (см. docstring).
-    step = 3 * 360.0 / chain[0][3]  # градусов в секунду у большой (три зуба за секунду)
+    # The animation: one long pass, linear, without repeating (see the docstring).
+    step = 3 * 360.0 / chain[0][3]  # degrees per second for the big one (three teeth per second)
     anim = ['<?xml version="1.0" encoding="utf-8"?>',
-            '<!-- СОЗДАНО tool/generate_icons.py, руками не править. Анимированный значок splash',
-            '     Android 12+: каждая шестерёнка вращается с передаточным числом цепочки. -->',
+            '<!-- GENERATED by tool/generate_icons.py, do not edit by hand. Animated splash icon',
+            '     for Android 12+: every gear rotates with the gear ratio of the chain. -->',
             f'<animated-vector {ns}',
             '    android:drawable="@drawable/splash_icon_vector">']
     for index, g in enumerate(placed):
@@ -329,18 +331,18 @@ def main():
 
     for density, px in legacy.items():
         icon = render(px, 0.40, background=WALNUT)
-        # тонкая латунная рамка по краю
+        # a thin brass border along the edge
         ImageDraw.Draw(icon).rounded_rectangle(
             [0, 0, px - 1, px - 1], radius=int(px * 0.2),
             outline=BRASS + (255,), width=max(1, px // 48))
         save(rounded(icon), f'mipmap-{density}', 'ic_launcher.png')
 
     for density, px in adaptive.items():
-        # безопасная зона адаптивной иконки: круг диаметром 66% холста
+        # the safe zone of the adaptive icon: a circle with a diameter of 66% of the canvas
         save(render(px, 0.30), f'mipmap-{density}', 'ic_launcher_foreground.png')
 
-    # splash: 288 dp * 3 = 864 px; видимый круг 192 dp = 576 px (радиус 1/3 холста).
-    # Статичная картинка для Android до 12: цепочка из семи шестерёнок.
+    # splash: 288 dp * 3 = 864 px; the visible circle is 192 dp = 576 px (radius 1/3 of the canvas).
+    # The static image for Android before 12: a chain of seven gears.
     placed, chain = chain_gears()
     save(render(864, 0.30, gears=chain), 'drawable-xxhdpi', 'splash_icon.png')
     write_animated_splash(placed, chain)

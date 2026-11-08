@@ -1,6 +1,6 @@
 import 'app_strings.dart';
 
-/// Английский. Включается, если язык телефона английский.
+/// English. Used if the phone language is English.
 class AppStringsEn extends AppStrings {
   const AppStringsEn();
 

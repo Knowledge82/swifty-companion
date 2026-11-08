@@ -14,13 +14,13 @@ import 'ui/splash_screen.dart';
 import 'ui/steampunk/steampunk_theme.dart';
 
 Future<void> main() async {
-  // Нужно, чтобы вызывать платформенный код (чтение ассета) до runApp.
+  // Needed to call platform code (reading an asset) before runApp.
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
     await dotenv.load(fileName: '.env');
     final config = AppConfig.fromMap(dotenv.env);
-    // Только факт загрузки; значения секретов в лог не выводим никогда.
+    // Only the fact of loading; secret values are never written to the log.
     debugPrint('Конфиг загружен');
     final deps = _buildDependencies(config);
     runApp(SwiftyApp(repository: deps.repository, photoLoader: deps.photos));
@@ -31,13 +31,14 @@ Future<void> main() async {
   }
 }
 
-/// Собирает зависимости: один `TokenService` на всё приложение, на нём
-/// клиент API (профиль) и загрузчик фото. Токен общий и запрашивается один раз.
+/// Assembles the dependencies: one `TokenService` for the whole app, with the
+/// API client (profile) and the photo loader on top of it. The token is shared
+/// and requested once.
 ({UserRepository repository, PhotoLoader photos}) _buildDependencies(
   AppConfig config,
 ) {
-  // В отладочной сборке пишем технический журнал в консоль (без секретов),
-  // в релизной молчим.
+  // In a debug build we write a technical log to the console (no secrets);
+  // in a release build we stay silent.
   final void Function(String)? log = kDebugMode ? debugPrint : null;
   final tokens = TokenService(config: config, onLog: log);
   final api = ApiClient(tokenService: tokens, onLog: log);

@@ -23,7 +23,7 @@ http.Response _token(String value, {int? expiresIn = 7200}) {
   return _json({
     'access_token': value,
     'token_type': 'bearer',
-    'expires_in': ?expiresIn, // «?» — добавить пару, только если значение не null
+    'expires_in': ?expiresIn, // "?" means add the pair only if the value is not null
   });
 }
 
@@ -86,11 +86,11 @@ void main() {
 
       expect(await service.getToken(), 'tok-1');
 
-      clock = start.add(const Duration(seconds: 7139)); // до границы 7200 - 60
+      clock = start.add(const Duration(seconds: 7139)); // up to the boundary 7200 - 60
       expect(await service.getToken(), 'tok-1');
       expect(calls, 1);
 
-      clock = start.add(const Duration(seconds: 7140)); // ровно граница
+      clock = start.add(const Duration(seconds: 7140)); // exactly the boundary
       expect(await service.getToken(), 'tok-2');
       expect(calls, 2);
     });
@@ -134,7 +134,7 @@ void main() {
       }));
 
       final futures = List.generate(5, (_) => service.getToken());
-      await Future<void>.delayed(Duration.zero); // запрос ещё «в пути»
+      await Future<void>.delayed(Duration.zero); // the request is still "on the way"
       expect(calls, 1);
 
       gate.complete();
@@ -194,12 +194,12 @@ void main() {
       final service = make(MockClient((_) async => _token('tok-${++calls}')));
 
       final old = await service.getToken(); // tok-1
-      service.invalidate(old); // первый запрос получил 401
+      service.invalidate(old); // the first request got 401
       expect(await service.getToken(), 'tok-2');
 
-      service.invalidate(old); // второй запрос с тем же tok-1 получил 401 позже
+      service.invalidate(old); // the second request with the same tok-1 got 401 later
       expect(await service.getToken(), 'tok-2');
-      expect(calls, 2); // третьего токена не потребовалось
+      expect(calls, 2); // a third token was not needed
     });
   });
 
@@ -280,7 +280,7 @@ void main() {
 
     test('200, но тело не годится: UnexpectedResponseException', () async {
       final bodies = <String>[
-        'not json at all', // только ASCII: http.Response кодирует тело в latin1
+        'not json at all', // ASCII only: http.Response encodes the body as latin1
         '[]',
         '{}',
         '{"access_token": ""}',

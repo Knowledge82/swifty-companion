@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Android 12+: системный splash. Он показывает ТОЛЬКО значок по центру
-         на цветном фоне (полноэкранную картинку система не разрешает).
-         Значок анимированный: шестерёнки вращаются (splash_icon_animated.xml).
-         Значок обрезается кругом диаметром 2/3 от 288 dp, поэтому эмблема
-         нарисована внутри этого круга (tool/generate_icons.py). -->
+    <!-- Android 12+: the system splash. It shows ONLY an icon in the center
+         on a colored background (the system does not allow a full-screen image).
+         The icon is animated: the gears rotate (splash_icon_animated.xml).
+         The icon is cropped by a circle with a diameter of 2/3 of 288 dp, so the
+         emblem is drawn inside that circle (tool/generate_icons.py). -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">@drawable/launch_background</item>
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_animated</item>
-        <!-- 1000 мс это максимум, который система позволяет для анимации значка -->
+        <!-- 1000 ms is the maximum the system allows for an icon animation -->
         <item name="android:windowSplashScreenAnimationDuration">1000</item>
     </style>
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">

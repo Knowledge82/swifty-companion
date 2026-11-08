@@ -12,14 +12,16 @@ import 'steampunk/gears.dart';
 import 'steampunk/steampunk_theme.dart';
 import 'steampunk/steampunk_widgets.dart';
 
-/// Экран 1: поле логина, кнопка поиска, индикатор загрузки, сообщение об ошибке.
+/// Screen 1: the login field, the search button, a loading indicator, an error
+/// message.
 ///
-/// Состояния экрана:
-/// - ожидание: поле и кнопка активны;
-/// - загрузка (`_loading`): кнопка показывает индикатор и не нажимается;
-/// - ошибка ввода (`_fieldError`): красный текст под полем, запрос не отправлялся;
-/// - ошибка запроса (`_requestError`): баннер под кнопкой;
-/// - успех: открывается экран профиля.
+/// Screen states:
+/// - waiting: the field and the button are active;
+/// - loading (`_loading`): the button shows an indicator and cannot be pressed;
+/// - input error (`_fieldError`): red text under the field, no request was
+///   sent;
+/// - request error (`_requestError`): a banner under the button;
+/// - success: the profile screen opens.
 class SearchScreen extends StatefulWidget {
   const SearchScreen({
     super.key,
@@ -48,7 +50,8 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _submit() async {
-    // Защита от двойного нажатия, пока предыдущий запрос не закончился.
+    // Protection against a double tap while the previous request has not
+    // finished.
     if (_loading) {
       return;
     }
@@ -71,8 +74,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     try {
       final profile = await widget.repository.fetchUser(raw);
-      // Пока шёл запрос, экран мог быть закрыт: после await к context
-      // можно обращаться, только убедившись, что виджет ещё в дереве.
+      // While the request was running, the screen could have been closed: after
+      // an await you may touch the context only after making sure the widget is
+      // still in the tree.
       if (!mounted) {
         return;
       }
@@ -94,8 +98,8 @@ class _SearchScreenState extends State<SearchScreen> {
         _loading = false;
       });
     } catch (e, stackTrace) {
-      // Сюда попадает только ошибка в нашем коде. Пользователю показываем
-      // общее сообщение, а в отладке выводим подробности.
+      // Only an error in our own code gets here. We show the user a general
+      // message, and in debug we print the details.
       if (kDebugMode) {
         debugPrint('Непредвиденная ошибка: $e\n$stackTrace');
       }
@@ -128,8 +132,8 @@ class _SearchScreenState extends State<SearchScreen> {
       body: SteampunkBackdrop(
         child: SafeArea(
           child: Center(
-            // Прокрутка спасает от переполнения, когда открыта клавиатура
-            // или экран повёрнут.
+            // Scrolling saves from overflow when the keyboard is open or the
+            // screen is rotated.
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: ConstrainedBox(

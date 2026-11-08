@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import '../l10n/app_strings.dart';
 import 'steampunk/steampunk_theme.dart';
 
-/// Показывается вместо приложения, если `.env` не прочитан или не заполнен.
+/// Shown instead of the app if `.env` could not be read or is not filled in.
 ///
-/// Это отдельное `MaterialApp`, поэтому делегаты локализации подключаются
-/// здесь заново. Вместо готового текста экран получает «что именно случилось»
-/// (`missingKeys` или `unreadable`) и сам подбирает фразу на нужном языке.
+/// This is a separate `MaterialApp`, so the localization delegates are
+/// connected here again. Instead of a ready-made text, the screen gets "what
+/// exactly happened" (`missingKeys` or `unreadable`) and picks the phrase in
+/// the right language itself.
 class ConfigErrorApp extends StatelessWidget {
   const ConfigErrorApp({
     super.key,
@@ -15,10 +16,10 @@ class ConfigErrorApp extends StatelessWidget {
     this.unreadable = false,
   });
 
-  /// Каких переменных не хватает в `.env`.
+  /// Which variables are missing from `.env`.
   final List<String> missingKeys;
 
-  /// Файл `.env` вообще не удалось прочитать из ассетов.
+  /// The `.env` file could not be read from the assets at all.
   final bool unreadable;
 
   @override

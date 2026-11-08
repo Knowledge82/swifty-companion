@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'steampunk/steampunk_theme.dart';
 
-/// Заголовок раздела на экране профиля: латунная шестерёнка, текст цвета
-/// окиси ([sectionTitleColor]) и линия.
+/// Section title on the profile screen: a brass gear, text in the oxide color
+/// ([sectionTitleColor]) and a line.
 class SectionTitle extends StatelessWidget {
   const SectionTitle(this.text, {super.key});
 

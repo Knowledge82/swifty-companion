@@ -9,11 +9,11 @@ import 'logo42.dart';
 import 'steampunk_theme.dart';
 import 'wear.dart';
 
-/// Контур шестерёнки: [teeth] зубьев вокруг [center], отверстие посередине.
+/// The outline of a gear: [teeth] teeth around [center], a hole in the middle.
 ///
-/// Каждый зуб это трапеция: две точки у «корня» (радиус 0.8 от внешнего)
-/// и две на вершине. Отверстие добавлено в тот же контур с правилом
-/// `evenOdd`, поэтому при заливке в центре остаётся дырка.
+/// Each tooth is a trapezoid: two points at the "root" (radius 0.8 of the outer
+/// one) and two at the tip. The hole is added to the same outline with the
+/// `evenOdd` rule, so when filled a hole is left in the center.
 Path gearPath({
   required Offset center,
   required double radius,
@@ -49,15 +49,15 @@ Path gearPath({
   return path;
 }
 
-/// Узор из полупрозрачных шестерёнок на всю площадь.
+/// A pattern of semi-transparent gears over the whole area.
 ///
-/// Раскладка детерминирована (фиксированное зерно `seed`): холст делится на
-/// клетки по 150 пикселей, в каждой (кроме случайно пропущенных) рисуется
-/// шестерёнка случайного размера, с случайным числом зубьев и поворотом.
-/// Примерно каждая третья шестерёнка окислена: рисуется цветом [patina]
-/// (зелёным), остальные латунные ([color]).
-/// Узор статичный: без анимации он ничего не стоит процессору и не мешает
-/// `pumpAndSettle` в тестах.
+/// The layout is deterministic (a fixed `seed`): the canvas is divided into
+/// cells of 150 pixels, and in each (except randomly skipped ones) a gear of
+/// random size, with a random number of teeth and rotation is drawn.
+/// About every third gear is oxidized: it is drawn in the [patina] color
+/// (green), the rest are brass ([color]).
+/// The pattern is static: without animation it costs the CPU nothing and does
+/// not interfere with `pumpAndSettle` in tests.
 class GearsPainter extends CustomPainter {
   const GearsPainter({required this.color, this.patina = oxide, this.seed = 42});
 
@@ -90,8 +90,9 @@ class GearsPainter extends CustomPainter {
 
     for (var row = 0; row < rows; row++) {
       for (var col = 0; col < cols; col++) {
-        // Случайные числа тратим в одном порядке для каждой клетки, чтобы
-        // пропуск одной клетки не сдвигал узор во всех следующих.
+        // Random numbers are spent in the same order for every cell, so that
+        // skipping one cell does not shift the pattern in all the following
+        // ones.
         final skip = random.nextDouble() < 0.25;
         final dx = random.nextDouble();
         final dy = random.nextDouble();
@@ -128,9 +129,9 @@ class GearsPainter extends CustomPainter {
       oldDelegate.seed != seed;
 }
 
-/// Кэш нарисованных картинок: каждая рисуется один раз на данный размер,
-/// а дальше только проигрывается (с поворотом). Контур шестерёнки, пятна и
-/// царапины не пересчитываются на каждом кадре.
+/// A cache of drawn pictures: each is drawn once for a given size and then only
+/// replayed (with rotation). The gear outline, the stains and the scratches are
+/// not recomputed on every frame.
 class _PictureCache {
   Size? _size;
   final Map<int, ui.Picture> _pictures = {};
@@ -148,7 +149,7 @@ class _PictureCache {
   }
 }
 
-/// Одна шестерёнка эмблемы с уже посчитанным положением и фазой.
+/// One gear of the emblem with its position and phase already computed.
 @visibleForTesting
 class PlacedGear {
   const PlacedGear({
@@ -160,28 +161,28 @@ class PlacedGear {
     this.parent = -1,
   });
 
-  /// Центр и радиус в долях стороны эмблемы (0..1).
+  /// Center and radius as fractions of the emblem side (0..1).
   final Offset center;
   final double radius;
   final int teeth;
 
-  /// Начальный поворот, при котором зубья входят во впадины соседа.
+  /// The initial rotation at which the teeth enter the gaps of the neighbor.
   final double phase;
 
-  /// Во сколько раз и в какую сторону крутится относительно большой.
-  /// У большой 1; каждая следующая в цепочке крутится **навстречу** своей
-  /// «родительской» (знак чередуется), а скорость обратно пропорциональна
-  /// числу зубьев (см. [placeEmblemGears]).
+  /// How many times faster and in which direction it turns relative to the big
+  /// one. The big one has 1; each next one in the chain turns **against** its
+  /// "parent" (the sign alternates), and the speed is inversely proportional to
+  /// the number of teeth (see [placeEmblemGears]).
   final double ratio;
 
-  /// Индекс шестерёнки, с которой эта сцеплена (в списке раскладки);
-  /// у большой, ведущей, -1.
+  /// Index of the gear this one meshes with (in the layout list);
+  /// -1 for the big, driving one.
   final int parent;
 
   bool get isBig => parent < 0;
 }
 
-/// Большая шестерёнка эмблемы (в долях стороны) и число её зубьев.
+/// The big gear of the emblem (as a fraction of the side) and its tooth count.
 @visibleForTesting
 const double emblemBigRadius = 0.26;
 @visibleForTesting
@@ -189,42 +190,42 @@ const int emblemBigTeeth = 13;
 @visibleForTesting
 const Offset emblemBigCenter = Offset(0.347, 0.585);
 
-/// Секунд на один оборот большой шестерёнки эмблемы.
+/// Seconds per one revolution of the emblem's big gear.
 @visibleForTesting
 const double emblemRevolutionSeconds = 36;
 
-/// Раскладка семи шестерёнок **четырёх размеров** (0.26, 0.19, 0.14, 0.10 от
-/// стороны эмблемы), собранных в несимметричную цепочку: большая слева внизу
-/// ведёт среднюю справа, та ведёт две поменьше, а дальше цепочка уходит
-/// вверх и влево к самой маленькой.
+/// A layout of seven gears of **four sizes** (0.26, 0.19, 0.14, 0.10 of the
+/// emblem side) assembled into an asymmetric chain: the big one at the bottom
+/// left drives the middle one on the right, that one drives two smaller ones,
+/// and then the chain goes up and to the left to the smallest.
 ///
-/// Раскладка не «подогнана на глаз», а считается:
-/// - **расстояние между осями** такое, чтобы вершина зуба одной почти
-///   касалась впадины другой: `max(R + 0.8·r, r + 0.8·R) + зазор`
-///   (впадина у нас на 0.8 радиуса, см. [gearPath]);
-/// - **фаза**: чтобы в точке касания зуб одной приходился на впадину другой,
-///   нужно, чтобы сумма «долей зубьев» с обеих сторон давала 0.5. Из этого
-///   условия выводится начальный поворот сцепленной шестерёнки. Теперь у
-///   «родителя» фаза не нулевая (он сам сцеплен со своим родителем), поэтому
-///   в формулу входит и его фаза;
-/// - **скорость**: у сцепленных шестерён скорость обратно пропорциональна
-///   числу зубьев и направлена в противоположную сторону. Для цепочки это
-///   значит `ratio = -ratio_родителя · зубьев_родителя / зубьев`. Тогда
-///   условие фазы выполняется в любой момент, и зубья не заходят друг на друга.
+/// The layout is not "fitted by eye" but computed:
+/// - the **distance between axes** is such that the tip of a tooth of one
+///   almost touches the gap of the other: `max(R + 0.8·r, r + 0.8·R) + gap`
+///   (our gap is at 0.8 of the radius, see [gearPath]);
+/// - the **phase**: so that at the contact point a tooth of one falls into a
+///   gap of the other, the sum of the "tooth fractions" on both sides must be
+///   0.5. The initial rotation of the meshed gear follows from this condition.
+///   The "parent" now has a non-zero phase (it is itself meshed with its own
+///   parent), so its phase enters the formula too;
+/// - the **speed**: for meshed gears the speed is inversely proportional to the
+///   tooth count and directed the opposite way. For a chain this means `ratio =
+///   -parent_ratio · parent_teeth / teeth`. Then the phase condition holds at
+///   any moment, and the teeth do not run into each other.
 ///
-/// Числа зубьев подобраны так, чтобы шаг зубьев (длина дуги на зуб) у всех
-/// был близок (0.12-0.13): зубья одной шестерёнки должны помещаться во
-/// впадины другой, а при разном шаге они бы цеплялись.
+/// The tooth counts are chosen so that the tooth pitch (the arc length per
+/// tooth) is close for all of them (0.12-0.13): the teeth of one gear must fit
+/// into the gaps of the other, and with a different pitch they would catch.
 ///
-/// Саму раскладку (углы и размеры) подбирал скрипт: случайный поиск с
-/// проверками «всё внутри квадрата с полем», «несцепленные шестерёнки не
-/// касаются (зазор не меньше 0.02)» и растровая проверка, что сцепленные
-/// пары не пересекаются ни в какой момент вращения. Тесты ниже повторяют эти
-/// проверки.
+/// The layout itself (angles and sizes) was found by a script: a random search
+/// with the checks "everything inside the square with a margin", "unmeshed
+/// gears do not touch (a gap of at least 0.02)" and a raster check that meshed
+/// pairs do not intersect at any moment of the rotation. The tests below repeat
+/// these checks.
 @visibleForTesting
 List<PlacedGear> placeEmblemGears() {
   const children = <(int, double, double, int)>[
-    // (индекс родителя, угол от родителя в градусах, радиус, зубья)
+    // (parent index, angle from the parent in degrees, radius, teeth)
     (0, -15.6, 0.19, 9),
     (1, 88.9, 0.14, 7),
     (1, -78.9, 0.14, 7),
@@ -247,7 +248,8 @@ List<PlacedGear> placeEmblemGears() {
     final distance =
         math.max(parent.radius + 0.8 * radius, radius + 0.8 * parent.radius) + 0.01;
     final center = parent.center + Offset(math.cos(alpha), math.sin(alpha)) * distance;
-    // Доля зубьев родителя в направлении на соседа (с учётом его фазы).
+    // The fraction of the parent's teeth in the direction of the neighbor
+    // (taking its phase into account).
     final toothFractionParent =
         (alpha - parent.phase) * parent.teeth / (2 * math.pi);
     final phase =
@@ -268,21 +270,22 @@ List<PlacedGear> placeEmblemGears() {
 
 final List<PlacedGear> _emblemGears = placeEmblemGears();
 
-/// Эмблема: семь сцепленных латунных шестерёнок четырёх размеров (цепочка
-/// без симметрии) с окисью и царапинами,
-/// **вращающихся** (если анимации не отключены, см. [GearClock]).
-/// На большой шестерёнке тёмная ступица со знаком школы 42 (она
-/// не вращается: знак всегда читается), в малых болты. Чисто декоративная.
+/// The emblem: seven meshed brass gears of four sizes (a chain without
+/// symmetry) with oxide and scratches, **rotating** (if animations are not
+/// disabled, see [GearClock]).
+/// On the big gear there is a dark hub with the school's 42 mark (it does not
+/// rotate: the mark is always readable), on the small ones there are bolts.
+/// Purely decorative.
 class GearEmblem extends StatelessWidget {
   const GearEmblem({super.key, this.size = 120, this.animate = true});
 
   final double size;
 
-  /// `false`: шестерёнки стоят (например, на скриншоте или в тесте).
+  /// `false`: the gears stand still (for example, in a screenshot or a test).
   final bool animate;
 
-  /// Секунд на один оборот большой шестерёнки. Остальные крутятся в
-  /// соотношении чисел зубьев (самые малые, на 5 зубьев, в 2,6 раза быстрее).
+  /// Seconds per revolution of the big gear. The others turn in the ratio of
+  /// the tooth counts (the smallest ones, with 5 teeth, 2.6 times faster).
   static const double revolutionSeconds = emblemRevolutionSeconds;
 
   @override
@@ -307,18 +310,19 @@ class _EmblemPainter extends CustomPainter {
   final ValueListenable<double> seconds;
   final _PictureCache _cache = _PictureCache();
 
-  /// Рисует саму шестерёнку в её собственных координатах (центр в нуле,
-  /// без поворота): дальше эту картинку только поворачивают.
+  /// Draws the gear itself in its own coordinates (center at zero, no
+  /// rotation): afterwards this picture is only rotated.
   void _recordGear(Canvas canvas, PlacedGear gear, int index, double s) {
     final r = gear.radius * s;
     final path = gearPath(
       center: Offset.zero,
       radius: r,
       teeth: gear.teeth,
-      // У большой шестерёнки отверстия нет: на его месте ступица со знаком.
+      // The big gear has no hole: in its place is a hub with the mark.
       holeRatio: gear.isBig ? 0 : 0.36,
     );
-    // Радиальный градиент симметричен, поэтому при вращении «свет» не ездит.
+    // The radial gradient is symmetric, so the "light" does not travel when
+    // rotating.
     canvas.drawPath(
       path,
       Paint()
@@ -334,7 +338,7 @@ class _EmblemPainter extends CustomPainter {
     canvas.drawPath(path, edge);
     canvas.drawCircle(Offset.zero, r * 0.58, edge);
 
-    // Состаривание только внутри этой шестерёнки; вращается вместе с ней.
+    // Aging only inside this gear; it rotates together with it.
     final random = math.Random(7 + index);
     canvas.save();
     canvas.clipPath(path);
@@ -386,7 +390,7 @@ class _EmblemPainter extends CustomPainter {
       canvas.restore();
     }
 
-    // Ступица со знаком 42 не вращается.
+    // The hub with the 42 mark does not rotate.
     final center = emblemBigCenter * s;
     final hub = emblemBigRadius * s * 0.66;
     canvas.drawCircle(center, hub, Paint()..color = walnutDeep);
@@ -411,17 +415,18 @@ class _EmblemPainter extends CustomPainter {
       oldDelegate.seconds != seconds;
 }
 
-/// Большая шестерня, выглядывающая из угла экрана. Ставится так, чтобы
-/// **центр лежал в углу**: тогда видна четверть (см. `SteampunkBackdrop`).
-/// Крутится очень медленно. Полупрозрачная, чтобы не спорить с содержимым.
+/// A big gear peeking out from a corner of the screen. It is placed so that the
+/// **center lies in the corner**: then a quarter is visible (see
+/// `SteampunkBackdrop`). Turns very slowly. Semi-transparent, so as not to
+/// compete with the content.
 class CornerGear extends StatelessWidget {
   const CornerGear({super.key, required this.radius, this.animate = true});
 
-  /// Внешний радиус (по вершинам зубьев).
+  /// Outer radius (to the tooth tips).
   final double radius;
   final bool animate;
 
-  /// Секунд на один оборот.
+  /// Seconds per revolution.
   static const double revolutionSeconds = 160;
 
   @override
@@ -476,7 +481,7 @@ class _CornerGearPainter extends CustomPainter {
     final hubRadius = r * 0.2;
     final ringInner = tip * 0.60;
 
-    // Спицы: тёмная окантовка и латунная полоса поверх.
+    // Spokes: a dark outline and a brass strip on top.
     for (var i = 0; i < _spokes; i++) {
       final angle = i * 2 * math.pi / _spokes;
       final dir = Offset(math.cos(angle), math.sin(angle));
@@ -498,7 +503,7 @@ class _CornerGearPainter extends CustomPainter {
       );
     }
 
-    // Ступица и болт.
+    // Hub and bolt.
     canvas.drawCircle(
       Offset.zero,
       hubRadius,
@@ -511,7 +516,7 @@ class _CornerGearPainter extends CustomPainter {
     canvas.drawCircle(Offset.zero, hubRadius, edge);
     canvas.drawCircle(Offset.zero, r * 0.07, Paint()..color = leatherDeep.withValues(alpha: 0.6));
 
-    // Отверстия под болты по кругу обода.
+    // Bolt holes around the circle of the rim.
     for (var i = 0; i < 12; i++) {
       final angle = (i + 0.5) * 2 * math.pi / 12;
       canvas.drawCircle(
@@ -523,7 +528,7 @@ class _CornerGearPainter extends CustomPainter {
 
     canvas.drawPath(body, edge);
 
-    // Окись и царапины только по ободу.
+    // Oxide and scratches only on the rim.
     final random = math.Random(11);
     canvas.save();
     canvas.clipPath(body);

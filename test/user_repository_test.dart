@@ -13,7 +13,7 @@ void main() {
 
     expect(fake.userRequests.single.url.path, '/v2/users/jdoe');
     expect(profile.login, 'jdoe');
-    expect(profile.phone, isNull); // "hidden" уже превращён в null
+    expect(profile.phone, isNull); // "hidden" has already been turned into null
     expect(profile.mainCursus?.slug, '42cursus');
     expect(
       profile.finishedProjects().map((p) => p.name),

@@ -13,11 +13,12 @@ import 'skills_section.dart';
 import 'steampunk/steampunk_theme.dart';
 import 'steampunk/steampunk_widgets.dart';
 
-/// Размер фото на экране профиля (в два раза больше первой версии).
+/// Photo size on the profile screen (twice as big as in the first version).
 const double avatarMaxSize = 224;
 
-/// Экран 2: данные студента. Кнопка «назад» в AppBar возвращает на экран 1.
-/// Содержимое разложено по латунным панелям на фоне из шестерёнок.
+/// Screen 2: the student's data. The "back" button in the AppBar returns to
+/// screen 1. The content is laid out on brass panels over a background of
+/// gears.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
     super.key,
@@ -27,7 +28,8 @@ class ProfileScreen extends StatelessWidget {
 
   final UserProfile profile;
 
-  /// Как скачать фото (токен нужен CDN, поэтому обычный `Image.network` не годится).
+  /// How to download the photo (the CDN needs the token, so a plain
+  /// `Image.network` does not work).
   final PhotoFetcher loadPhoto;
 
   @override
@@ -45,8 +47,9 @@ class ProfileScreen extends StatelessWidget {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480),
-                // LayoutBuilder: узнаём реальную ширину и не даём фото
-                // выйти за неё на очень узком экране (constraints вниз).
+                // LayoutBuilder: we learn the real width and do not let the
+                // photo go beyond it on a very narrow screen (constraints go
+                // down).
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     const ring = brassRingThickness;
@@ -101,7 +104,8 @@ class ProfileScreen extends StatelessWidget {
                                 onText: strings.onlineOn,
                                 offText: strings.onlineOff,
                               ),
-                              // Рабочее место показываем, только если студент в кампусе.
+                              // The workstation is shown only if the student is
+                              // on campus.
                               if (profile.location != null)
                                 _InfoRow(
                                   label: strings.locationLabel,
@@ -148,7 +152,8 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-/// Полоса «сколько пройдено до следующего уровня» (дробная часть уровня).
+/// A bar "how much has been done toward the next level" (the fractional part of
+/// the level).
 class _LevelBar extends StatelessWidget {
   const _LevelBar({required this.level});
 
@@ -172,8 +177,8 @@ class _LevelBar extends StatelessWidget {
   }
 }
 
-/// Строка «Estado» (статус): лампочка и слово. Зелёная лампочка с лёгким свечением, если
-/// студент в кампусе, серая погашенная, если нет.
+/// The "Estado" (status) row: a lamp and a word. A green lamp with a soft glow
+/// if the student is on campus, a grey extinguished one if not.
 class _StatusRow extends StatelessWidget {
   const _StatusRow({
     required this.label,

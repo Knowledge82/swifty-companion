@@ -6,18 +6,21 @@ import 'config.dart';
 import 'http_helpers.dart';
 import 'json_reader.dart';
 
-/// Выдаёт токен доступа к API 42 (OAuth2, Client Credentials).
+/// Provides the access token for the 42 API (OAuth2, Client Credentials).
 ///
-/// Правила:
-/// 1. Токен запрашивается **один раз** и хранится в памяти, пока не истечёт.
-/// 2. Если токен просят несколько мест одновременно, запрос уходит **один**,
-///    все получают один и тот же результат.
-/// 3. Срок жизни берётся из `expires_in` с запасом (по умолчанию минута).
-///    После истечения следующий вызов сам получает новый токен (бонус задания).
-/// 4. Токен и секрет никогда не попадают в логи, сообщения об ошибках и адрес запроса.
+/// Rules:
+/// 1. The token is requested **once** and kept in memory until it expires.
+/// 2. If several places ask for the token at the same time, **one** request is
+///    sent and everybody gets the same result.
+/// 3. The lifetime comes from `expires_in` with a safety margin (one minute by
+///    default). After expiry the next call gets a new token by itself (the
+///    bonus of the assignment).
+/// 4. The token and the secret never end up in logs, error messages or the
+///    request address.
 class TokenService {
-  // Приватные именованные параметры (Dart 3.12+): `this._config` означает
-  // параметр с публичным именем `config`, который сразу кладётся в поле `_config`.
+  // Private named parameters (Dart 3.12+): `this._config` means a parameter
+  // with the public name `config` that is put straight into the field
+  // `_config`.
   TokenService({
     required this._config,
     http.Client? client,
@@ -36,33 +39,35 @@ class TokenService {
   final Duration _safetyMargin;
   final Duration _defaultLifetime;
 
-  /// Куда писать отладочные сообщения (или `null` — молчать). В сообщения
-  /// не попадают ни токен, ни секрет, только факты вроде срока жизни.
+  /// Where to write debug messages (or `null` to stay silent). Neither the
+  /// token nor the secret gets into the messages, only facts such as the
+  /// lifetime.
   final void Function(String message)? _onLog;
 
   String? _token;
   DateTime? _expiresAt;
 
-  /// Запрос токена, который сейчас в полёте (если есть).
+  /// The token request that is in flight right now (if any).
   Future<String>? _pending;
 
-  /// Возвращает действующий токен: из памяти или, если его нет, из сети.
+  /// Returns a valid token: from memory or, if there is none, from the network.
   Future<String> getToken() {
     final cached = _validCachedToken();
     if (cached != null) {
       return Future.value(cached);
     }
-    // Если запрос уже идёт, присоединяемся к нему, а не создаём второй.
+    // If a request is already running, we join it instead of creating a second
+    // one.
     return _pending ??= _fetchAndStore().whenComplete(() {
       _pending = null;
     });
   }
 
-  /// Забывает токен, который сервер отверг (HTTP 401).
+  /// Forgets a token that the server rejected (HTTP 401).
   ///
-  /// Передаётся именно **тот токен, с которым сделан неудачный запрос**.
-  /// Если за это время в памяти уже появился новый токен (другой запрос успел
-  /// обновить), он остаётся нетронутым.
+  /// What is passed is exactly **the token the failed request was made with**.
+  /// If a new token has appeared in memory in the meantime (another request
+  /// managed to refresh it), it is left untouched.
   void invalidate(String failedToken) {
     if (_token == failedToken) {
       _token = null;
@@ -87,8 +92,8 @@ class TokenService {
     final response = await guardedRequest(
       () => _client.post(
         Uri.https(apiHost, '/oauth/token'),
-        // Map превращается в форму application/x-www-form-urlencoded.
-        // Секрет идёт в теле запроса, а не в адресе.
+        // The Map becomes an application/x-www-form-urlencoded form.
+        // The secret goes in the request body, not in the address.
         body: {
           'grant_type': 'client_credentials',
           'client_id': _config.clientId,

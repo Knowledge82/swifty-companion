@@ -31,8 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Переводы самих виджетов Flutter (кнопка «Назад», контекстное меню и т. д.)
-  # на испанский. Входит в SDK, отдельной версии нет.
+  # Translations of the Flutter widgets themselves (the "Back" button, the context menu,
+  # etc.) into Spanish. Part of the SDK, there is no separate version.
   flutter_localizations:
     sdk: flutter
 
@@ -40,10 +40,10 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
-  # HTTP-запросы к API 42 (этап 3 и 4).
+  # HTTP requests to the 42 API (stages 3 and 4).
   http: ^1.2.2
 
-  # Чтение .env (FT_UID, FT_SECRET). .env лежит в assets, см. docs/05.
+  # Reading .env (FT_UID, FT_SECRET). .env lives in assets, see docs/05.
   flutter_dotenv: ^5.2.1
 
 dev_dependencies:
@@ -68,8 +68,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # Файл .env должен существовать локально, иначе сборка упадёт.
-  # В git он не попадает (.gitignore); шаблон: .env.example.
+  # The .env file must exist locally, otherwise the build fails.
+  # It does not go into git (.gitignore); the template: .env.example.
   assets:
     - .env
     - assets/images/splash.jpg

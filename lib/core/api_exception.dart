@@ -1,30 +1,33 @@
-/// Все ошибки работы с API 42 в одном закрытом (sealed) семействе.
+// The parent:
 
-/// `sealed` значит: это абстрактный класс, и его прямые наследники объявлены только в этом файле.
-/// компилятор знает полный список и требует учесть каждый случай в `switch`.
-/// Забыть обработать новый вид ошибки не получится.
-
-// Родитель:
+/// All errors of working with the 42 API in one closed (sealed) family.
+///
+/// `sealed` means: this is an abstract class, and its direct subclasses are
+/// declared only in this file. The compiler knows the full list and requires
+/// every case to be handled in a `switch`. Forgetting to handle a new kind of
+/// error is impossible.
 sealed class ApiException implements Exception {
   const ApiException(this.message);
 
-  /// Описание для разработчика (логи, отладка, тесты). Пользователю
-  /// показывается не оно, а перевод из `AppStrings.errorText`: так язык
-  /// ошибки совпадает с языком интерфейса.
+  /// Description for the developer (logs, debugging, tests). The user is not
+  /// shown this but the translation from `AppStrings.errorText`, so the
+  /// language of the error matches the language of the interface.
   final String message;
 
-  // $ подставляет значение в строку. runtimeType это настоящий тип объекта во время работы, 
-  // поэтому получится, например, NetworkException: Нет соединения....
+  // `$` inserts a value into a string. `runtimeType` is the real type of the
+  // object at run time, so the result is, for example,
+  // `NetworkException: <message>`.
   @override
   String toString() => '$runtimeType: $message';
 }
 
-// Наследники:
+// The subclasses:
 
-//1. Нет сети, DNS не отвечает или сервер не ответил за отведённое время.
+// 1. No network, DNS does not answer, or the server did not respond in time.
 
-// final class - «меня нельзя наследовать и реализовывать за пределами этого файла». 
-// Так семейство остаётся закрытым, и никто снаружи не добавит свою «ошибку сети».
+// `final class` means "I cannot be extended or implemented outside this file".
+// This keeps the family closed, and nobody outside can add their own "network
+// error".
 final class NetworkException extends ApiException {
   const NetworkException()
       : isTimeout = false,
@@ -34,38 +37,40 @@ final class NetworkException extends ApiException {
       : isTimeout = true,
         super('Сервер не ответил вовремя. Повторите попытку позже.');
 
-  /// `true`, если сеть есть, но сервер не ответил за отведённое время.
-  /// Интерфейс по этому признаку выбирает текст.
+  /// `true` if the network is there but the server did not respond in time.
+  /// The interface picks the text based on this flag.
   final bool isTimeout;
 }
 
-//2. Приложение не смогло авторизоваться: неверные ключи или отклонённый токен.
+// 2. The app could not authorize: wrong keys or a rejected token.
 final class AuthException extends ApiException {
   const AuthException()
       : super('Не удалось авторизоваться в API 42. Проверьте ключи в .env.');
 }
 
-//3. Логин не найден (HTTP 404). Используется с этапа 4.
+// 3. Login not found (HTTP 404). Used since stage 4.
 final class NotFoundException extends ApiException {
   const NotFoundException() : super('Пользователь с таким логином не найден.');
 }
 
-//4. Превышен лимит запросов (HTTP 429).
+// 4. Rate limit exceeded (HTTP 429).
 final class RateLimitException extends ApiException {
   const RateLimitException({this.retryAfter})
       : super('Слишком много запросов. Подождите немного и повторите.');
 
-  /// Сколько просит подождать сервер (заголовок `Retry-After`), если сказал.
+  /// How long the server asks us to wait (the `Retry-After` header), if it
+  /// said.
   final Duration? retryAfter;
 }
 
-//5. Сервер API недоступен или сломан (HTTP 5xx).
+// 5. The API server is unavailable or broken (HTTP 5xx).
 final class ServerException extends ApiException {
   const ServerException()
       : super('Сервер API 42 сейчас недоступен. Повторите позже.');
 }
 
-//6. Ответ пришёл, но он не такой, как ожидалось: не JSON, нет нужных полей, неожиданный код.
+// 6. A response arrived, but not the one expected: not JSON, required fields
+// missing, unexpected status code.
 final class UnexpectedResponseException extends ApiException {
   const UnexpectedResponseException()
       : super('Получен неожиданный ответ от сервера.');

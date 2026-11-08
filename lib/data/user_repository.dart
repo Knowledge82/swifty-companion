@@ -4,17 +4,17 @@ import '../core/api_exception.dart';
 import '../core/login.dart';
 import '../models/user_profile.dart';
 
-/// Источник данных о студентах: превращает логин в [UserProfile].
-/// Экраны общаются только с ним и ничего не знают про HTTP и JSON.
+/// Source of student data: turns a login into a [UserProfile].
+/// Screens talk only to it and know nothing about HTTP and JSON.
 class UserRepository {
   UserRepository(this._api);
 
   final ApiClient _api;
 
-  /// Загружает профиль по логину. Бросает [ApiException] (и только её).
+  /// Loads a profile by login. Throws [ApiException] (and only it).
   Future<UserProfile> fetchUser(String rawLogin) async {
-    // Страховка на случай, если экран забыл проверить ввод. Такой логин
-    // существовать не может, и сетевой запрос на него тратить незачем.
+    // A safety net in case the screen forgot to check the input. Such a login
+    // cannot exist, and there is no point in spending a network request on it.
     if (validateLogin(rawLogin) != null) {
       throw const NotFoundException();
     }
@@ -24,7 +24,7 @@ class UserRepository {
     try {
       return UserProfile.fromJson(json);
     } on FormatException {
-      // Например, в ответе нет поля login.
+      // For example, the response has no `login` field.
       throw const UnexpectedResponseException();
     }
   }

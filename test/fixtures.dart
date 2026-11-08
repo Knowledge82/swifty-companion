@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-/// Вымышленный профиль, повторяющий ФОРМУ реального ответа API 42
-/// (см. docs/03), но без единого настоящего значения.
+/// A made-up profile that repeats the SHAPE of a real 42 API response
+/// (see docs/03) but without a single real value.
 ///
-/// Данные прогоняются через `jsonEncode` → `jsonDecode`, как в приложении:
-/// так типы такие же, как после настоящего HTTP-ответа.
+/// The data is run through `jsonEncode` -> `jsonDecode`, as in the app: so the
+/// types are the same as after a real HTTP response.
 Map<String, dynamic> sampleUserJson() {
   final raw = <String, dynamic>{
     'id': 1,
@@ -27,7 +27,8 @@ Map<String, dynamic> sampleUserJson() {
         'micro': 'https://example.com/micro.jpg',
       },
     },
-    // Порядок нарочно «неудобный»: основной курс не первый и не с наибольшим уровнем.
+    // The order is deliberately "inconvenient": the main cursus is neither
+    // first nor the one with the highest level.
     'cursus_users': [
       {
         'cursus_id': 9,
@@ -78,7 +79,7 @@ Map<String, dynamic> sampleUserJson() {
         'project': {'id': 11, 'name': 'ft_printf', 'slug': 'ft_printf'},
       },
       {
-        // Нет названия, нет итога, нет marked_at: берём slug и updated_at.
+        // No name, no result, no marked_at: we take the slug and updated_at.
         'id': 3,
         'status': 'finished',
         'validated?': null,
@@ -89,7 +90,7 @@ Map<String, dynamic> sampleUserJson() {
         'project': {'id': 12, 'slug': 'c-piscine-shell-00'},
       },
       {
-        // Странный случай из реальных данных: не завершён, но validated? == true.
+        // A strange case from real data: not finished, but validated? == true.
         'id': 4,
         'status': 'in_progress',
         'validated?': true,

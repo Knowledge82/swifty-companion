@@ -1,16 +1,18 @@
 import '../core/json_reader.dart';
 
-/// Максимальный уровень скилла. Подтверждён косвенно (масштаб радара в интре),
-/// см. docs/03, раздел 11. Если окажется иначе, меняется только эта константа.
+/// Maximum skill level. Confirmed indirectly (the radar scale in the intra),
+/// see docs/03, section 11. If it turns out otherwise, only this constant
+/// changes.
 const double maxSkillLevel = 20;
 
-/// Убирает «шум» чисел с плавающей точкой: 3.4699999999999998 → 3.47.
+/// Removes floating-point "noise": 3.4699999999999998 -> 3.47.
 double roundLevel(double value) => (value * 100).round() / 100;
 
-/// Процент скилла от максимума, от 0 до 100.
+/// Skill percentage of the maximum, from 0 to 100.
 ///
-/// Это единственное место, где задана формула. В API процента нет,
-/// формула `level / max × 100` наша (см. docs/03, раздел 11).
+/// This is the only place where the formula is defined. The API has no
+/// percentage; the formula `level / max * 100` is ours (see docs/03, section
+/// 11).
 double skillPercent(double level, {double maxLevel = maxSkillLevel}) {
   if (maxLevel <= 0) {
     return 0;
@@ -30,10 +32,11 @@ class Skill {
   }
 
   final int? id;
-  /// Название или `null`, если в ответе его нет (интерфейс подставит свой текст).
+  /// Name, or `null` if the response has none (the interface substitutes its
+  /// own text).
   final String? name;
 
-  /// Уровень, округлённый до двух знаков.
+  /// Level rounded to two decimals.
   final double level;
 
   double get percent => skillPercent(level);

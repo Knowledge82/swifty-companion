@@ -8,7 +8,7 @@ import 'package:swifty_companion/ui/steampunk/steampunk_theme.dart';
 import 'fixtures.dart';
 import 'test_app.dart';
 
-/// Коэффициент контрастности WCAG (как в steampunk_test.dart).
+/// The WCAG contrast ratio (as in steampunk_test.dart).
 double contrast(Color a, Color b) {
   final la = a.computeLuminance() + 0.05;
   final lb = b.computeLuminance() + 0.05;
@@ -21,14 +21,16 @@ void main() {
       testApp(
         ProfileScreen(
           profile: UserProfile.fromJson(json),
-          // Профили в этих тестах без фото, загрузка не должна вызываться.
+          // The profiles in these tests have no photo, loading must not be
+          // called.
           loadPhoto: (url) => Future.error(StateError('не должно вызываться: $url')),
         ),
       ),
     );
   }
 
-  /// Проекты по умолчанию свёрнуты: раскрываем группу касанием на заголовок.
+  /// Projects are collapsed by default: we expand a group with a tap on its
+  /// header.
   Future<void> expandGroup(WidgetTester tester, String title) async {
     await tester.ensureVisible(find.text(title));
     await tester.pumpAndSettle();
@@ -39,22 +41,23 @@ void main() {
   testWidgets('показывает основные поля профиля', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    expect(find.text('jdoe'), findsOneWidget); // заголовок
+    expect(find.text('jdoe'), findsOneWidget); // title
     expect(find.text('Jane Doe'), findsOneWidget);
     expect(find.text('jdoe@example.com'), findsOneWidget);
-    expect(find.text('3.00'), findsOneWidget); // уровень 42cursus
-    expect(find.text('42'), findsOneWidget); // кошелёк
-    expect(find.text('5'), findsOneWidget); // очки оценки
+    expect(find.text('3.00'), findsOneWidget); // 42cursus level
+    expect(find.text('42'), findsOneWidget); // wallet
+    expect(find.text('5'), findsOneWidget); // evaluation points
   });
 
   testWidgets('скрытое и пустое выводится как N/A', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // Проекты свёрнуты, поэтому виден только телефон ("hidden"). Место (null)
-    // не N/A: его строки нет, а в кампусе ли студент, говорит строка «Estado».
+    // Projects are collapsed, so only the phone ("hidden") is visible. The
+    // place (null) is not N/A: it has no row, and whether the student is on
+    // campus is told by the "Estado" row.
     expect(find.text('N/A'), findsNWidgets(1));
 
-    // Раскрыли группу: добавился итог проекта без оценки.
+    // We expanded the group: a project outcome without a mark was added.
     await expandGroup(tester, 'Piscina · 1');
     expect(find.text('N/A'), findsNWidgets(2));
   });
@@ -62,7 +65,7 @@ void main() {
   testWidgets('минимальный профиль не ломает экран', (tester) async {
     await pumpProfile(tester, {'login': 'x'});
 
-    // имя, email, телефон, уровень, кошелёк, очки (места нет: строка скрыта)
+    // name, email, phone, level, wallet, points (no place: the row is hidden)
     expect(find.text('N/A'), findsNWidgets(6));
     expect(tester.takeException(), isNull);
   });
@@ -80,7 +83,7 @@ void main() {
       expect(find.text('Fuera del campus'), findsOneWidget);
       expect(find.text('En el campus'), findsNothing);
       expect(lampOf(tester).color, offlineGray);
-      expect(lampOf(tester).boxShadow, isNull); // погашена: свечения нет
+      expect(lampOf(tester).boxShadow, isNull); // extinguished: no glow
       expect(find.text('Puesto'), findsNothing);
     });
 
@@ -93,11 +96,11 @@ void main() {
       expect(find.text('En el campus'), findsOneWidget);
       expect(find.text('Fuera del campus'), findsNothing);
       expect(lampOf(tester).color, onlineGreen);
-      expect(lampOf(tester).boxShadow, isNotEmpty); // свечение
+      expect(lampOf(tester).boxShadow, isNotEmpty); // glow
       expect(find.text('Puesto'), findsOneWidget);
       expect(find.text('c1r2s3'), findsOneWidget);
 
-      // Место ниже строки «Estado».
+      // The place is below the "Estado" row.
       expect(
         tester.getTopLeft(find.text('c1r2s3')).dy,
         greaterThan(tester.getTopLeft(find.text('Estado')).dy),
@@ -126,7 +129,7 @@ void main() {
     expect(find.text('Rigor'), findsOneWidget);
     expect(find.text('9.63 · 48 %'), findsOneWidget); // 9.63 / 20
     expect(find.text('7.00 · 35 %'), findsOneWidget);
-    expect(find.text('Sin nombre'), findsOneWidget); // скилл без названия
+    expect(find.text('Sin nombre'), findsOneWidget); // a skill without a name
     expect(find.text('0.00 · 0 %'), findsOneWidget);
     expect(
       tester.getTopLeft(find.text('Rigor')).dy,
@@ -139,7 +142,7 @@ void main() {
       (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // Заголовки групп со счётчиком; пустая группа Outer Core не показывается.
+    // Group headers with a counter; the empty Outer Core group is not shown.
     expect(find.text('Common Core · 3'), findsOneWidget);
     expect(find.text('Piscina · 1'), findsOneWidget);
     expect(find.textContaining('Outer Core'), findsNothing);
@@ -151,9 +154,9 @@ void main() {
     expect(find.text('Suspendido · 2024-05-01'), findsOneWidget); // ft_printf
     expect(find.text('Sin resultado · 2024-04-01'), findsOneWidget);
     expect(find.text('Aprobado · 2024-03-01'), findsOneWidget); // libft
-    expect(find.text('minishell'), findsNothing); // не завершён
+    expect(find.text('minishell'), findsNothing); // not finished
 
-    // Внутри Common Core новые сверху, Piscina ниже.
+    // Inside Common Core newest first, Piscina below.
     final y = [
       for (final name in ['push_swap', 'ft_printf', 'libft', 'c-piscine-shell-00'])
         tester.getTopLeft(find.text(name)).dy,
@@ -169,7 +172,7 @@ void main() {
       'status': 'finished',
       'validated?': true,
       'final_mark': 100,
-      'marked_at': '2020-01-01T10:00:00.000Z', // самый старый: порядок не от даты
+      'marked_at': '2020-01-01T10:00:00.000Z', // the oldest: the order is not by date
       'cursus_ids': [21],
       'project': {'id': 50, 'name': 'Swifty Companion', 'slug': 'swifty-companion'},
     });
@@ -178,7 +181,7 @@ void main() {
       'status': 'finished',
       'validated?': true,
       'final_mark': 100,
-      'marked_at': '2025-01-01T10:00:00.000Z', // самый новый: порядок не от даты
+      'marked_at': '2025-01-01T10:00:00.000Z', // the newest: the order is not by date
       'cursus_ids': [66],
       'project': {'id': 51, 'name': 'C-piscine-reloaded', 'slug': 'c-piscine-reloaded'},
     });
@@ -255,7 +258,8 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    // Содержимое прокручивается: раскрываем группы и долистываем до проектов.
+    // The content scrolls: we expand the groups and scroll down to the
+    // projects.
     await expandGroup(tester, 'Outer Core · 1');
     await expandGroup(tester, 'Common Core · 3');
     await tester.scrollUntilVisible(find.text('libft'), 300);
@@ -276,7 +280,7 @@ void main() {
 
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
-    // 280 - 2*24 (поля) = 232 ширины содержимого, минус 2*13 кольца.
+    // 280 - 2*24 (margins) = 232 of content width, minus 2*13 of the ring.
     expect(tester.getSize(find.byType(ProfileAvatar)), const Size(206, 206));
     expect(tester.takeException(), isNull);
   });

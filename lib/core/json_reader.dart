@@ -1,15 +1,17 @@
-// Безопасное чтение значений из разобранного JSON.
+// Safe reading of values from parsed JSON.
 //
-// После `jsonDecode` данные имеют тип `dynamic`: что там на самом деле,
-// известно только во время работы. Эти функции проверяют тип и при
-// несовпадении возвращают `null` (или пустой список), вместо того чтобы
-// падать. Поэтому одно «кривое» поле не роняет весь профиль.
+// After `jsonDecode` the data has type `dynamic`: what is really inside is
+// known only at run time. These functions check the type and, on a mismatch,
+// return `null` (or an empty list) instead of crashing. So one "broken" field
+// does not bring down the whole profile.
 
-/// Строка, которой интра помечает скрытые данные (например, `phone`). Константа верхнего уровня.
+/// The string the intra uses to mark hidden data (for example, `phone`).
+/// A top-level constant.
 const String hiddenMarker = 'hidden';
 
-/// Текст или `null`. Для приложения «нет данных» это три разных случая
-/// в JSON: `null`, пустая строка и строка `"hidden"`. Все они сводятся к `null`.
+/// Text or `null`. For the app "no data" is three different cases in JSON:
+/// `null`, an empty string and the string `"hidden"`. All of them become
+/// `null`.
 String? readString(Object? value) {
   if (value is int) {
     return value.toString();
@@ -24,7 +26,7 @@ String? readString(Object? value) {
   return text;
 }
 
-// JSON может отдать и `0`, и `0.0`; оба станут `double`.
+// JSON may give both `0` and `0.0`; both become `double`.
 double? readDouble(Object? value) {
   if (value is num && value.isFinite) {
     return value.toDouble();
@@ -32,7 +34,7 @@ double? readDouble(Object? value) {
   return null;
 }
 
-// Дробное значение округляется.
+// A fractional value is rounded.
 int? readInt(Object? value) {
   if (value is int) {
     return value;
@@ -46,7 +48,7 @@ int? readInt(Object? value) {
 // Bool
 bool? readBool(Object? value) => value is bool ? value : null;
 
-// Объект JSON или `null`.
+// A JSON object or `null`.
 Map<String, dynamic>? readMap(Object? value) {
   if (value is Map<String, dynamic>) {
     return value;
@@ -57,7 +59,7 @@ Map<String, dynamic>? readMap(Object? value) {
   return null;
 }
 
-// Список JSON. Если там не список, возвращается пустой.
+// A JSON list. If the value is not a list, an empty one is returned.
 List<Object?> readList(Object? value) {
   if (value is List) {
     return value;
@@ -65,7 +67,7 @@ List<Object?> readList(Object? value) {
   return const <Object?>[];
 }
 
-// Дата в формате ISO 8601 или `null`.
+// A date in ISO 8601 format or `null`.
 DateTime? readDate(Object? value) {
   final text = readString(value);
   if (text == null) {
@@ -74,8 +76,8 @@ DateTime? readDate(Object? value) {
   return DateTime.tryParse(text);
 }
 
-// Превращает список объектов JSON в список моделей.
-// Элементы, которые не являются объектами, пропускаются.
+// Turns a list of JSON objects into a list of models.
+// Elements that are not objects are skipped.
 List<T> readObjects<T>(
   Object? value,
   T Function(Map<String, dynamic> json) parse,

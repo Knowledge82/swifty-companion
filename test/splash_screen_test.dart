@@ -10,7 +10,7 @@ import 'package:swifty_companion/ui/steampunk/steampunk_widgets.dart';
 import 'fake_api.dart';
 import 'test_app.dart';
 
-/// Картинка, которая никогда не загружается: проверяем страховочный таймер.
+/// An image that never loads: we check the safety timer.
 class _NeverLoadedImage extends ImageProvider<_NeverLoadedImage> {
   const _NeverLoadedImage();
 
@@ -50,8 +50,8 @@ void main() {
     );
   }
 
-  /// Текущая прозрачность заставки (свой FadeTransition заставки, а не тот,
-  /// которым AnimatedSwitcher плавно меняет экраны).
+  /// The current opacity of the splash (the splash's own FadeTransition, not
+  /// the one with which AnimatedSwitcher smoothly changes screens).
   double introOpacity(WidgetTester tester) {
     final fade = tester.widget<FadeTransition>(
       find.byKey(const ValueKey('splash-fade')),
@@ -92,7 +92,7 @@ void main() {
 
   testWidgets('fade-out: перед концом картинка гаснет', (tester) async {
     await tester.pumpWidget(app());
-    // Общее время 3000, угасание последние 600: начинается на 2400.
+    // Total time 3000, fade-out the last 600: it starts at 2400.
     await tester.pump(const Duration(milliseconds: 2700));
 
     final value = introOpacity(tester);
@@ -104,10 +104,10 @@ void main() {
   testWidgets('по истечении времени заставка сменяется следующим экраном',
       (tester) async {
     await tester.pumpWidget(app());
-    // Контроллер считает себя завершённым только когда время ПРЕВЫСИЛО
-    // длительность (строго больше), поэтому берём чуть больше 3 секунд.
+    // The controller considers itself finished only when the time EXCEEDED the
+    // duration (strictly greater), so we take a bit more than 3 seconds.
     await tester.pump(const Duration(milliseconds: 3100));
-    await tester.pump(const Duration(milliseconds: 500)); // дошла смена кадра
+    await tester.pump(const Duration(milliseconds: 500)); // the screen change arrived
 
     expect(find.text('next-screen'), findsOneWidget);
     expect(find.text('Swifty Companion'), findsNothing);
@@ -138,14 +138,14 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 1000));
-    expect(introOpacity(tester), 0); // ждём, время проявления не тратится
+    expect(introOpacity(tester), 0); // we wait, the fade-in time is not spent
 
-    await tester.pump(const Duration(milliseconds: 600)); // ждали 1600 > 1500
+    await tester.pump(const Duration(milliseconds: 600)); // we waited 1600 > 1500
     await tester.pump(const Duration(milliseconds: 350));
-    expect(introOpacity(tester), greaterThan(0)); // проявление пошло
+    expect(introOpacity(tester), greaterThan(0)); // the fade-in has started
 
-    await tester.pump(const Duration(seconds: 5)); // доиграть до конца
-    await tester.pump(const Duration(milliseconds: 500)); // смена экрана
+    await tester.pump(const Duration(seconds: 5)); // play it to the end
+    await tester.pump(const Duration(milliseconds: 500)); // the screen change
     expect(find.text('next-screen'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -156,7 +156,8 @@ void main() {
       app(waitForImage: true, image: const _NeverLoadedImage()),
     );
     await tester.pumpWidget(const SizedBox.shrink());
-    // Если бы таймер остался, тест упал бы с «Timer is still pending».
+    // If the timer had remained, the test would fail with "Timer is still
+    // pending".
     expect(tester.takeException(), isNull);
   });
 
@@ -172,9 +173,9 @@ void main() {
   });
 
   test('фон заставки: один сплошной очень тёмный цвет, но не чисто чёрный', () {
-    expect(splashBackgroundColor.a, 1); // сплошной, без прозрачности
-    expect(splashBackgroundColor.computeLuminance(), lessThan(0.02)); // очень тёмный
-    expect(splashBackgroundColor.computeLuminance(), greaterThan(0.003)); // не чёрный
+    expect(splashBackgroundColor.a, 1); // solid, no transparency
+    expect(splashBackgroundColor.computeLuminance(), lessThan(0.02)); // very dark
+    expect(splashBackgroundColor.computeLuminance(), greaterThan(0.003)); // not black
   });
 
   testWidgets('на заставке нет узорного фона: шестерёнок и труб',
@@ -200,15 +201,16 @@ void main() {
     await tester.pumpWidget(app());
 
     final size = tester.getSize(find.byType(Image));
-    expect(size.width, 400); // по ширине экрана: бока не обрезаются
+    expect(size.width, 400); // by screen width: the sides are not cropped
     expect(size.height, closeTo(400 / splashImageAspect, 0.001)); // 600
-    expect(size.height, lessThan(900)); // сверху и снизу остаётся фон
+    expect(size.height, lessThan(900)); // background remains at the top and bottom
 
-    // Картинка по центру по вертикали: полосы фона равны.
+    // The image is vertically centered: the background strips are equal.
     final rect = tester.getRect(find.byType(Image));
     expect(rect.top, closeTo(900 - rect.bottom, 0.001));
 
-    // Растушёвка ровно одна, и это вертикальная: градиент идёт сверху вниз.
+    // There is exactly one feather, and it is vertical: the gradient goes top
+    // to bottom.
     final masks = tester.widgetList<ShaderMask>(find.descendant(
       of: find.byType(SplashScreen),
       matching: find.byType(ShaderMask),
@@ -238,7 +240,7 @@ void main() {
       of: find.byType(SplashScreen),
       matching: find.byType(ShaderMask),
     ));
-    expect(masks, hasLength(1)); // только по горизонтали
+    expect(masks, hasLength(1)); // horizontal only
     expect(masks.single.blendMode, BlendMode.dstIn);
   });
 

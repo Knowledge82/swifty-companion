@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Знак школы 42 в виде четырёх многоугольников.
+/// The school's 42 mark as four polygons.
 ///
-/// Координаты взяты из файла `tool/42_logo.svg` (его принёс владелец проекта;
-/// знак использовать можно: в проекте ft_hangouts он обязателен). Они
-/// переписаны сюда как есть, без правок, чтобы не тащить в приложение пакет
-/// для SVG. Тест `logo42_test.dart` сверяет эти числа с файлом, так что
-/// расхождение не пройдёт незамеченным.
+/// The coordinates are taken from the file `tool/42_logo.svg` (brought by the
+/// project owner; the mark may be used: it is mandatory in the ft_hangouts
+/// project). They are copied here as they are, without changes, so as not to
+/// pull an SVG package into the app. The test `logo42_test.dart` checks these
+/// numbers against the file, so a mismatch will not go unnoticed.
 const List<List<Offset>> logo42Polygons = [
   [
     Offset(32, 412.6),
@@ -41,11 +41,11 @@ const List<List<Offset>> logo42Polygons = [
   ],
 ];
 
-/// Габариты знака в координатах файла: ширина 896, высота 629.1.
+/// Dimensions of the mark in the file's coordinates: width 896, height 629.1.
 const Rect logo42Bounds = Rect.fromLTRB(32, -51.1, 928, 578);
 
-/// Рисует знак так, чтобы центр его габаритов оказался в [center],
-/// а ширина стала [width]. Пропорции сохраняются.
+/// Draws the mark so that the center of its bounds ends up at [center] and its
+/// width becomes [width]. Proportions are preserved.
 void drawLogo42(Canvas canvas, Offset center, double width, Paint paint) {
   final scale = width / logo42Bounds.width;
   final shift = center - logo42Bounds.center * scale;

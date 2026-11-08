@@ -1,27 +1,28 @@
 #!/usr/bin/env python3
-"""Выгрузка проектов студента и проверка, в какой раздел их положит приложение.
+"""Dump a student's projects and check which section the app would put them in.
 
-Запуск из корня проекта (нужен .env с FT_UID и FT_SECRET; секреты НЕ печатаются):
+Run from the project root (needs .env with FT_UID and FT_SECRET; secrets are NOT printed):
 
-    python3 tool/dump_projects.py LOGIN            # живой запрос к API 42
-    python3 tool/dump_projects.py LOGIN --deep     # + сверка с постраничным списком и /exams
-    python3 tool/dump_projects.py --file user.json # тот же разбор по сохранённому ответу
+    python3 tool/dump_projects.py LOGIN            # live request to the 42 API
+    python3 tool/dump_projects.py LOGIN --deep     # + compare with the paged list and /exams
+    python3 tool/dump_projects.py --file user.json # the same analysis of a saved response
 
-Что печатается:
-  1. курсы студента (cursus_users): id, название, slug, уровень, даты;
-  2. ВСЕ проекты (не только завершённые) с полями: раздел по правилам приложения,
-     slug, название, статус, cursus_ids, validated, оценка.
+What is printed:
+  1. the student's cursuses (cursus_users): id, name, slug, level, dates;
+  2. ALL projects (not only completed ones) with the fields: section by the
+     app's rules, slug, name, status, cursus_ids, validated, mark.
 
-Режим --deep отвечает на вопрос «API вообще не отдаёт эти проекты или мы их теряем»:
-  3. постраничный `/v2/users/LOGIN/projects_users` (page[size]=100) сравнивается со
-     списком, который приходит внутри профиля; печатаются проекты, которых во
-     вложенном списке нет;
-  4. проект-кандидаты по словам exam/rush/bsq: slug, название, статус;
-  5. проба `/v2/users/LOGIN/exams`: код ответа и сколько записей.
+The --deep mode answers the question "does the API not return these projects
+at all, or do we lose them":
+  3. the paged `/v2/users/LOGIN/projects_users` (page[size]=100) is compared
+     with the list that comes inside the profile; projects that are missing
+     from the nested list are printed;
+  4. candidate projects by the words exam/rush/bsq: slug, name, status;
+  5. a probe of `/v2/users/LOGIN/exams`: the response code and the number of records.
 
-Правила разбиения (commonCoreSlugs, шаблоны) читаются прямо из
-lib/models/project_category.dart, поэтому скрипт не расходится с приложением.
-Зависимостей нет: только стандартная библиотека Python 3.
+The splitting rules (commonCoreSlugs, patterns) are read straight from
+lib/models/project_category.dart, so the script does not drift from the app.
+No dependencies: only the Python 3 standard library.
 """
 import json
 import os
@@ -31,8 +32,9 @@ import urllib.parse
 import urllib.request
 
 API = 'https://api.intra.42.fr'
-# Cloudflare перед API режет дефолтный UA «Python-urllib/3.x» (403), поэтому
-# представляемся сами. curl проходит именно потому, что у него другой UA.
+# Cloudflare in front of the API cuts the default UA "Python-urllib/3.x" (403),
+# so we introduce ourselves. curl gets through precisely because it has a
+# different UA.
 HEADERS = {'User-Agent': 'swifty-companion-tool/1.0 (42 Barcelona student project)',
            'Accept': 'application/json'}
 CATEGORY_DART = os.path.join('lib', 'models', 'project_category.dart')
@@ -53,12 +55,12 @@ def load_core_slugs():
     with open(CATEGORY_DART, encoding='utf-8') as f:
         text = f.read()
     block = re.search(r'commonCoreSlugs\s*=\s*\{(.*?)\};', text, re.S).group(1)
-    block = re.sub(r'//[^\n]*', '', block)  # без комментариев
+    block = re.sub(r'//[^\n]*', '', block)  # without comments
     return set(re.findall(r"'([^']+)'", block))
 
 
 def load_dart():
-    """Префиксы, шаблоны RegExp и список slug берём из dart: скрипт не расходится с приложением."""
+    """Prefixes, RegExp patterns and the slug list are taken from Dart: the script does not drift from the app."""
     with open(CATEGORY_DART, encoding='utf-8') as f:
         text = f.read()
     prefixes = re.findall(r"'([^']+)'", re.search(
@@ -115,13 +117,13 @@ def fetch(login, token=None):
 
 
 def http_json(req, what, fatal=True):
-    """JSON-ответ; при ошибке либо завершает скрипт (fatal), либо возвращает {'_error': текст}."""
+    """A JSON response; on error it either ends the script (fatal) or returns {'_error': text}."""
     try:
         with urllib.request.urlopen(req, timeout=20) as r:
             return json.load(r)
     except urllib.error.HTTPError as e:
-        # Тело ответа сервера секретов не содержит (мы их не эхо-печатаем),
-        # но обрезаем, чтобы не засорять вывод HTML-страницей Cloudflare.
+        # The server response body contains no secrets (we never echo them),
+        # but we truncate it so an HTML page from Cloudflare does not clutter the output.
         body = e.read(400).decode('utf-8', 'replace').replace('\n', ' ')
         message = f'Ошибка HTTP {e.code} при операции «{what}»: {body}'
     except urllib.error.URLError as e:
@@ -132,13 +134,13 @@ def http_json(req, what, fatal=True):
 
 
 def deep_checks(login, token, data):
-    """Где пропадают проекты: во вложенном списке, в постраничном или их нет в API вообще."""
+    """Where projects get lost: in the nested list, in the paged one, or they are not in the API at all."""
     quoted = urllib.parse.quote(login, safe='')
     embedded = {(pu.get('project') or {}).get('slug') for pu in data.get('projects_users') or []}
     print(f'\n== deep: вложенный список в профиле: {len(data.get("projects_users") or [])} записей ==')
 
     paged, page = [], 1
-    while page <= 20:  # предохранитель: 2000 записей хватит с запасом
+    while page <= 20:  # a safety limit: 2000 records is plenty
         chunk = api_get(token, f'/v2/users/{quoted}/projects_users?page[size]=100&page[number]={page}',
                         f'projects_users, страница {page}', fatal=False)
         if isinstance(chunk, dict):
@@ -160,7 +162,7 @@ def deep_checks(login, token, data):
     for pu in list(data.get('projects_users') or []) + paged:
         p = pu.get('project') or {}
         text = f"{p.get('slug')} {p.get('name')}".lower()
-        key = (p.get('slug'), pu.get('status'))  # без id: во вложенном списке он может отсутствовать
+        key = (p.get('slug'), pu.get('status'))  # no id: it may be missing in the nested list
         if key in seen or not re.search(r'exam|rush|bsq', text):
             continue
         seen.add(key)
