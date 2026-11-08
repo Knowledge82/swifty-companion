@@ -9,30 +9,30 @@ import 'test_app.dart';
 
 void main() {
   group('easterEggFor', () {
-    test('известные логины получают надпись', () {
+    test('known logins get a caption', () {
       expect(easterEggFor('vdarsuye'), 'EL PUTO AMO');
       expect(easterEggFor('pdoltu'), 'ЙЕБАНИСТА');
     });
 
-    test('регистр и пробелы не мешают', () {
+    test('case and spaces do not matter', () {
       expect(easterEggFor('  VDarsuye '), 'EL PUTO AMO');
       expect(easterEggFor('PDOLTU'), 'ЙЕБАНИСТА');
     });
 
-    test('остальным ничего', () {
+    test('others get nothing', () {
       expect(easterEggFor('jdoe'), isNull);
       expect(easterEggFor(''), isNull);
       expect(easterEggFor('vdarsuye2'), isNull);
     });
 
-    test('выключатель включён по умолчанию', () {
+    test('the switch is on by default', () {
       // If you set false before the defense, this test reminds you to fix the
       // other easter egg checks too.
       expect(easterEggsEnabled, isTrue);
     });
   });
 
-  group('на экране профиля', () {
+  group('on the profile screen', () {
     Future<void> pumpAs(WidgetTester tester, String login, {double scale = 1}) {
       final json = sampleUserJson()
         ..remove('image')
@@ -41,14 +41,14 @@ void main() {
         testApp(
           ProfileScreen(
             profile: UserProfile.fromJson(json),
-            loadPhoto: (url) => Future.error(StateError('нет')),
+            loadPhoto: (url) => Future.error(StateError('none')),
           ),
           textScale: scale,
         ),
       );
     }
 
-    testWidgets('vdarsuye: надпись под именем', (tester) async {
+    testWidgets('vdarsuye: caption under the name', (tester) async {
       await pumpAs(tester, 'vdarsuye');
 
       expect(find.text('EL PUTO AMO'), findsOneWidget);
@@ -64,20 +64,20 @@ void main() {
       );
     });
 
-    testWidgets('pdoltu: своя надпись', (tester) async {
+    testWidgets('pdoltu: its own caption', (tester) async {
       await pumpAs(tester, 'pdoltu');
 
       expect(find.text('ЙЕБАНИСТА'), findsOneWidget);
       expect(find.text('EL PUTO AMO'), findsNothing);
     });
 
-    testWidgets('обычный логин: надписей нет', (tester) async {
+    testWidgets('ordinary login: no captions', (tester) async {
       await pumpAs(tester, 'jdoe');
 
       expect(find.byType(EasterEggBadge), findsNothing);
     });
 
-    testWidgets('крупный шрифт на узком экране: надпись не переполняет',
+    testWidgets('large font on a narrow screen: the caption does not overflow',
         (tester) async {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(320, 480);

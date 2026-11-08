@@ -5,7 +5,7 @@ import 'package:swifty_companion/data/user_repository.dart';
 import 'fake_api.dart';
 
 void main() {
-  test('нормализует логин и собирает профиль из ответа', () async {
+  test('normalizes the login and builds a profile from the response', () async {
     final fake = FakeApi();
     final repository = UserRepository(fake.api);
 
@@ -21,7 +21,7 @@ void main() {
     );
   });
 
-  test('недопустимый логин: NotFoundException и ни одного запроса', () async {
+  test('an invalid login: NotFoundException and no requests', () async {
     for (final login in ['', '   ', '../me', 'a b', 'a?b']) {
       final fake = FakeApi();
       final repository = UserRepository(fake.api);
@@ -29,11 +29,11 @@ void main() {
       await expectLater(
         repository.fetchUser(login),
         throwsA(isA<NotFoundException>()),
-        reason: 'логин: "$login"',
+        reason: 'login: "$login"',
       );
 
-      expect(fake.tokenCalls, 0, reason: 'логин: "$login"');
-      expect(fake.userRequests, isEmpty, reason: 'логин: "$login"');
+      expect(fake.tokenCalls, 0, reason: 'login: "$login"');
+      expect(fake.userRequests, isEmpty, reason: 'login: "$login"');
     }
   });
 
@@ -47,7 +47,7 @@ void main() {
     );
   });
 
-  test('ошибки клиента проходят без изменений', () async {
+  test('client errors pass through unchanged', () async {
     final fake = FakeApi(
       onUser: (request, attempt) async => jsonResponse({}, 503),
     );
@@ -57,7 +57,7 @@ void main() {
     );
   });
 
-  test('ответ без login — UnexpectedResponseException, не FormatException', () async {
+  test('a response without login gives UnexpectedResponseException, not FormatException', () async {
     for (final body in <Map<String, dynamic>>[
       {},
       {'id': 1, 'email': 'x@example.com'},
@@ -69,12 +69,12 @@ void main() {
       await expectLater(
         UserRepository(fake.api).fetchUser('jdoe'),
         throwsA(isA<UnexpectedResponseException>()),
-        reason: 'тело: $body',
+        reason: 'body: $body',
       );
     }
   });
 
-  test('минимальный ответ (только login) даёт пустой, но рабочий профиль', () async {
+  test('a minimal response (login only) gives an empty but working profile', () async {
     final fake = FakeApi(
       onUser: (request, attempt) async => jsonResponse({'login': 'jdoe'}),
     );

@@ -78,7 +78,7 @@ def check(gears, verbose=True):
         y0, y1 = g['c'][1] - g['r'], g['c'][1] + g['r']
         if min(x0, y0) < 0.02 or max(x1, y1) > 0.98:
             ok = False
-            print(f'шестерёнка {i} вылезает за поле:', x0, x1, y0, y1)
+            print(f'gear {i} sticks out of the field:', x0, x1, y0, y1)
     gap = 1.0
     for i in range(len(gears)):
         for j in range(i + 1, len(gears)):
@@ -95,9 +95,9 @@ def check(gears, verbose=True):
     if worst:
         ok = False
     if verbose:
-        print(f'минимальный зазор между несцепленными: {gap:.3f}')
-        print(f'наибольшее пересечение сцепленных пар (пикселей): {worst}')
-        print('ИТОГ:', 'всё в порядке' if ok else 'ЕСТЬ ПРОБЛЕМЫ')
+        print(f'minimum gap between unmeshed gears: {gap:.3f}')
+        print(f'largest overlap of meshed pairs (pixels): {worst}')
+        print('RESULT:', 'all good' if ok else 'THERE ARE PROBLEMS')
     return ok
 
 
@@ -139,7 +139,7 @@ def search(trials, sizes=((0.19, 9), (0.14, 7), (0.10, 5))):
             best.append((sum(g['r'] ** 2 for g in gears), seed, children, big))
     best.sort(key=lambda t: -t[0])
     for area, seed, children, big in best[:5]:
-        print(f'seed={seed} площадь={area:.3f} big=({big[0]:.3f}, {big[1]:.3f})')
+        print(f'seed={seed} area={area:.3f} big=({big[0]:.3f}, {big[1]:.3f})')
         for c in children:
             print('   ', c)
 
@@ -151,5 +151,5 @@ if __name__ == '__main__':
         gears = place(CHILDREN)
         ok = check(gears)
         preview(gears, 'tool/emblem_preview.png')
-        print('картинка: tool/emblem_preview.png')
+        print('image: tool/emblem_preview.png')
         sys.exit(0 if ok else 1)

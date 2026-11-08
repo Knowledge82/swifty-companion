@@ -28,7 +28,7 @@ class UserProfile {
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     final login = readString(json['login']);
     if (login == null) {
-      throw const FormatException('В ответе API нет поля login');
+      throw const FormatException('The API response has no login field');
     }
     return UserProfile(
       id: readInt(json['id']),

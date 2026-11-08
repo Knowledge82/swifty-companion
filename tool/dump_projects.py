@@ -102,7 +102,7 @@ def get_token():
         'client_secret': env['FT_SECRET'],
     }).encode()
     return http_json(urllib.request.Request(
-        f'{API}/oauth/token', data=body, headers=HEADERS), 'получение токена')['access_token']
+        f'{API}/oauth/token', data=body, headers=HEADERS), 'token request')['access_token']
 
 
 def api_get(token, path, what, fatal=True):
@@ -113,7 +113,7 @@ def api_get(token, path, what, fatal=True):
 
 def fetch(login, token=None):
     token = token or get_token()
-    return api_get(token, f'/v2/users/{urllib.parse.quote(login, safe="")}', f'профиль {login}')
+    return api_get(token, f'/v2/users/{urllib.parse.quote(login, safe="")}', f'profile {login}')
 
 
 def http_json(req, what, fatal=True):
@@ -125,9 +125,9 @@ def http_json(req, what, fatal=True):
         # The server response body contains no secrets (we never echo them),
         # but we truncate it so an HTML page from Cloudflare does not clutter the output.
         body = e.read(400).decode('utf-8', 'replace').replace('\n', ' ')
-        message = f'Ошибка HTTP {e.code} при операции «{what}»: {body}'
+        message = f'HTTP error {e.code} during "{what}": {body}'
     except urllib.error.URLError as e:
-        message = f'Сеть недоступна при операции «{what}»: {e.reason}'
+        message = f'Network unavailable during "{what}": {e.reason}'
     if fatal:
         sys.exit(message)
     return {'_error': message}
@@ -137,27 +137,27 @@ def deep_checks(login, token, data):
     """Where projects get lost: in the nested list, in the paged one, or they are not in the API at all."""
     quoted = urllib.parse.quote(login, safe='')
     embedded = {(pu.get('project') or {}).get('slug') for pu in data.get('projects_users') or []}
-    print(f'\n== deep: вложенный список в профиле: {len(data.get("projects_users") or [])} записей ==')
+    print(f'\n== deep: nested list in the profile: {len(data.get("projects_users") or [])} records ==')
 
     paged, page = [], 1
     while page <= 20:  # a safety limit: 2000 records is plenty
         chunk = api_get(token, f'/v2/users/{quoted}/projects_users?page[size]=100&page[number]={page}',
-                        f'projects_users, страница {page}', fatal=False)
+                        f'projects_users, page {page}', fatal=False)
         if isinstance(chunk, dict):
-            print(chunk.get('_error', 'неожиданный ответ'))
+            print(chunk.get('_error', 'unexpected response'))
             break
         paged.extend(chunk)
         if len(chunk) < 100:
             break
         page += 1
-    print(f'== deep: постраничный /projects_users: {len(paged)} записей ==')
+    print(f'== deep: paged /projects_users: {len(paged)} records ==')
     extra = [pu for pu in paged if (pu.get('project') or {}).get('slug') not in embedded]
-    print(f'только в постраничном (нет во вложенном): {len(extra)}')
+    print(f'only in the paged list (missing from the nested one): {len(extra)}')
     for pu in extra:
         p = pu.get('project') or {}
         print('  ', p.get('slug'), '|', p.get('name'), '|', pu.get('status'), '|', pu.get('cursus_ids'))
 
-    print('\n== deep: кандидаты exam / rush / bsq среди ВСЕХ известных записей ==')
+    print('\n== deep: exam / rush / bsq candidates among ALL known records ==')
     seen = set()
     for pu in list(data.get('projects_users') or []) + paged:
         p = pu.get('project') or {}
@@ -169,14 +169,14 @@ def deep_checks(login, token, data):
         print('  ', p.get('slug'), '|', p.get('name'), '|', pu.get('status'),
               '|', pu.get('cursus_ids'), '|', pu.get('validated?'), '|', pu.get('final_mark'))
     if not seen:
-        print('   (ни одной записи)')
+        print('   (no records)')
 
-    exams = api_get(token, f'/v2/users/{quoted}/exams', 'exams пользователя', fatal=False)
+    exams = api_get(token, f'/v2/users/{quoted}/exams', 'exams of the user', fatal=False)
     print('\n== deep: /v2/users/LOGIN/exams ==')
     if isinstance(exams, dict) and '_error' in exams:
         print(exams['_error'])
     else:
-        print(f'записей: {len(exams)}')
+        print(f'records: {len(exams)}')
         for e in exams[:15]:
             print('  ', {k: e.get(k) for k in ('id', 'name', 'begin_at', 'end_at', 'project_id') if k in e})
 
@@ -188,7 +188,7 @@ def main():
     token = None
     if len(args) == 2 and args[0] == '--file':
         if deep:
-            sys.exit('--deep работает только с живым запросом (LOGIN), не с --file')
+            sys.exit('--deep works only with a live request (LOGIN), not with --file')
         with open(args[1], encoding='utf-8') as f:
             data = json.load(f)
     elif len(args) == 1 and not args[0].startswith('-'):
@@ -197,7 +197,7 @@ def main():
     else:
         sys.exit(__doc__)
 
-    print('== курсы (cursus_users) ==')
+    print('== cursuses (cursus_users) ==')
     print('cursus_id | name | slug | level | begin | end')
     for cu in data.get('cursus_users') or []:
         c = cu.get('cursus') or {}
@@ -205,8 +205,8 @@ def main():
             cu.get('cursus_id'), c.get('name'), c.get('slug'), cu.get('level'),
             (cu.get('begin_at') or '')[:10], (cu.get('end_at') or '')[:10])))
 
-    print('\n== проекты (все статусы) ==')
-    print('раздел | slug | name | status | cursus_ids | validated | mark')
+    print('\n== projects (all statuses) ==')
+    print('section | slug | name | status | cursus_ids | validated | mark')
     rows = []
     for pu in data.get('projects_users') or []:
         p = pu.get('project') or {}

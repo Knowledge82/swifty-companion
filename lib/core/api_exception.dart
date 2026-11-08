@@ -31,11 +31,11 @@ sealed class ApiException implements Exception {
 final class NetworkException extends ApiException {
   const NetworkException()
       : isTimeout = false,
-        super('Нет соединения с интернетом. Проверьте сеть и повторите.');
+        super('No internet connection. Check the network and try again.');
 
   const NetworkException.timeout()
       : isTimeout = true,
-        super('Сервер не ответил вовремя. Повторите попытку позже.');
+        super('The server did not respond in time. Try again later.');
 
   /// `true` if the network is there but the server did not respond in time.
   /// The interface picks the text based on this flag.
@@ -45,18 +45,18 @@ final class NetworkException extends ApiException {
 // 2. The app could not authorize: wrong keys or a rejected token.
 final class AuthException extends ApiException {
   const AuthException()
-      : super('Не удалось авторизоваться в API 42. Проверьте ключи в .env.');
+      : super('Could not authorize with the 42 API. Check the keys in .env.');
 }
 
 // 3. Login not found (HTTP 404). Used since stage 4.
 final class NotFoundException extends ApiException {
-  const NotFoundException() : super('Пользователь с таким логином не найден.');
+  const NotFoundException() : super('User with this login was not found.');
 }
 
 // 4. Rate limit exceeded (HTTP 429).
 final class RateLimitException extends ApiException {
   const RateLimitException({this.retryAfter})
-      : super('Слишком много запросов. Подождите немного и повторите.');
+      : super('Too many requests. Wait a little and try again.');
 
   /// How long the server asks us to wait (the `Retry-After` header), if it
   /// said.
@@ -66,12 +66,12 @@ final class RateLimitException extends ApiException {
 // 5. The API server is unavailable or broken (HTTP 5xx).
 final class ServerException extends ApiException {
   const ServerException()
-      : super('Сервер API 42 сейчас недоступен. Повторите позже.');
+      : super('The 42 API server is unavailable right now. Try again later.');
 }
 
 // 6. A response arrived, but not the one expected: not JSON, required fields
 // missing, unexpected status code.
 final class UnexpectedResponseException extends ApiException {
   const UnexpectedResponseException()
-      : super('Получен неожиданный ответ от сервера.');
+      : super('Received an unexpected response from the server.');
 }

@@ -9,47 +9,47 @@ import 'fixtures.dart';
 
 void main() {
   group('skillPercent', () {
-    test('считает долю от 20', () {
+    test('computes the share of 20', () {
       expect(skillPercent(10), 50);
       expect(skillPercent(0), 0);
       expect(skillPercent(20), 100);
       expect(skillPercent(9.63), closeTo(48.15, 1e-9));
     });
 
-    test('ограничена диапазоном 0..100', () {
+    test('limited to the range 0..100', () {
       expect(skillPercent(25), 100);
       expect(skillPercent(-3), 0);
     });
 
-    test('нулевой максимум не делит на ноль', () {
+    test('a zero maximum does not divide by zero', () {
       expect(skillPercent(5, maxLevel: 0), 0);
     });
   });
 
   group('Skill.fromJson', () {
-    test('убирает шум плавающей точки', () {
+    test('removes floating-point noise', () {
       final skill = Skill.fromJson({'id': 1, 'name': 'Unix', 'level': 3.4699999999999998});
       expect(skill.level, 3.47);
     });
 
-    test('целый уровень становится double', () {
+    test('an integer level becomes a double', () {
       expect(Skill.fromJson({'name': 'Web', 'level': 7}).level, 7.0);
     });
 
-    test('нет названия и уровня — запасные значения', () {
+    test('no name and no level give fallback values', () {
       final skill = Skill.fromJson({'level': 'abc'});
       expect(skill.name, isNull);
       expect(skill.level, 0);
     });
 
-    test('процент берётся из функции skillPercent', () {
+    test('the percentage comes from the skillPercent function', () {
       final skill = Skill.fromJson({'name': 'Rigor', 'level': 9.63});
       expect(skill.percent, skillPercent(9.63));
     });
   });
 
   group('ProjectResult.fromJson', () {
-    test('сданный и проваленный проекты', () {
+    test('passed and failed projects', () {
       final json = sampleUserJson();
       final projects = UserProfile.fromJson(json).projects;
       final libft = projects.firstWhere((p) => p.name == 'libft');
@@ -61,7 +61,7 @@ void main() {
       expect(printf.finalMark, 0);
     });
 
-    test('без названия берётся slug, без итога — unknown и null', () {
+    test('without a name the slug is used, without a result: unknown and null', () {
       final project = ProjectResult.fromJson({
         'status': 'finished',
         'validated?': null,
@@ -73,14 +73,14 @@ void main() {
       expect(project.finalMark, isNull);
     });
 
-    test('совсем пустая запись не падает', () {
+    test('a completely empty record does not crash', () {
       final project = ProjectResult.fromJson({});
       expect(project.name, isNull);
       expect(project.isFinished, isFalse);
       expect(project.cursusIds, isEmpty);
     });
 
-    test('дата: marked_at, иначе updated_at, иначе created_at', () {
+    test('date: marked_at, otherwise updated_at, otherwise created_at', () {
       expect(
         ProjectResult.fromJson({
           'marked_at': '2024-01-01T00:00:00.000Z',
@@ -103,23 +103,23 @@ void main() {
     CursusProgress make(String slug, double level) =>
         CursusProgress(slug: slug, level: level);
 
-    test('пустой список — null', () {
+    test('an empty list gives null', () {
       expect(pickMainCursus([]), isNull);
     });
 
-    test('42cursus выбирается по slug, даже если уровень ниже', () {
+    test('42cursus is chosen by slug even if its level is lower', () {
       final main = pickMainCursus([make('c-piscine', 5), make('42cursus', 3)]);
       expect(main?.slug, '42cursus');
     });
 
-    test('без 42cursus берётся курс с наибольшим уровнем', () {
+    test('without 42cursus the cursus with the highest level is taken', () {
       final main = pickMainCursus([make('a', 1), make('b', 5), make('c', 2)]);
       expect(main?.slug, 'b');
     });
   });
 
   group('UserProfile.fromJson', () {
-    test('скрытый телефон становится null и показывается как N/A', () {
+    test('a hidden phone becomes null and is shown as N/A', () {
       final profile = UserProfile.fromJson(sampleUserJson());
       expect(profile.phone, isNull);
       expect(profile.phone.orNA, 'N/A');
@@ -127,21 +127,21 @@ void main() {
       expect(profile.isOnline, isFalse); // no place: not on campus
     });
 
-    test('есть место: студент в кампусе', () {
+    test('there is a place: the student is on campus', () {
       final json = sampleUserJson()..['location'] = 'c1r2s3';
       final profile = UserProfile.fromJson(json);
       expect(profile.location, 'c1r2s3');
       expect(profile.isOnline, isTrue);
     });
 
-    test('пустая строка и пробелы вместо места: не в кампусе', () {
+    test('an empty string and spaces instead of a place: not on campus', () {
       for (final value in ['', '   ']) {
         final json = sampleUserJson()..['location'] = value;
         expect(UserProfile.fromJson(json).isOnline, isFalse, reason: '"$value"');
       }
     });
 
-    test('обычные поля читаются', () {
+    test('ordinary fields are read', () {
       final profile = UserProfile.fromJson(sampleUserJson());
       expect(profile.login, 'jdoe');
       expect(profile.displayName, 'Jane Doe');
@@ -152,7 +152,7 @@ void main() {
       expect(profile.poolYear, '2023');
     });
 
-    test('без login — FormatException', () {
+    test('without login: FormatException', () {
       expect(() => UserProfile.fromJson({}), throwsFormatException);
       expect(
         () => UserProfile.fromJson({'login': 'hidden'}),
@@ -160,7 +160,7 @@ void main() {
       );
     });
 
-    test('минимальный профиль (только login) не падает', () {
+    test('a minimal profile (login only) does not crash', () {
       final profile = UserProfile.fromJson({'login': 'x'});
       expect(profile.email, isNull);
       expect(profile.imageUrl, isNull);
@@ -170,7 +170,7 @@ void main() {
       expect(profile.finishedProjects(), isEmpty);
     });
 
-    test('фото: medium, иначе link, иначе другие, http отвергается', () {
+    test('photo: medium, otherwise link, otherwise others, http is rejected', () {
       expect(
         UserProfile.fromJson(sampleUserJson()).imageUrl,
         'https://example.com/medium.jpg',
@@ -191,7 +191,7 @@ void main() {
       );
     });
 
-    test('фото: основной и один запасной адрес, без повторов', () {
+    test('photo: a main and one spare address, no repeats', () {
       // The sample has five versions, but only medium and link are kept.
       expect(UserProfile.fromJson(sampleUserJson()).imageUrls, [
         'https://example.com/medium.jpg',
@@ -210,7 +210,7 @@ void main() {
       );
     });
 
-    test('фото: нет medium и link, берутся large, затем (если есть) ничего лишнего', () {
+    test('photo: no medium and link, large is taken, then nothing extra (if any)', () {
       expect(
         UserProfile.fromJson({
           'login': 'x',
@@ -226,25 +226,25 @@ void main() {
       );
     });
 
-    test('основной курс — 42cursus и его скиллы разобраны', () {
+    test('the main cursus is 42cursus and its skills are parsed', () {
       final main = UserProfile.fromJson(sampleUserJson()).mainCursus;
       expect(main?.slug, '42cursus');
       expect(main?.cursusId, 21);
       expect(main?.skills.map((s) => s.name), ['Rigor', 'Web', null]);
     });
 
-    test('скилл с шумом в бассейне округлён', () {
+    test('a skill with noise in the piscine is rounded', () {
       final profile = UserProfile.fromJson(sampleUserJson());
       final piscine = profile.cursuses.firstWhere((c) => c.slug == 'c-piscine');
       expect(piscine.skills.single.level, 3.47);
     });
 
-    test('мусорный элемент в списке проектов пропущен', () {
+    test('a junk element in the project list is skipped', () {
       final profile = UserProfile.fromJson(sampleUserJson());
       expect(profile.projects.length, 5);
     });
 
-    test('finishedProjects: только завершённые, включая проваленные, новые сверху', () {
+    test('finishedProjects: only completed ones, including failed, newest first', () {
       final names = UserProfile.fromJson(sampleUserJson())
           .finishedProjects()
           .map((p) => p.name)
@@ -252,14 +252,14 @@ void main() {
       expect(names, ['push_swap', 'ft_printf', 'c-piscine-shell-00', 'libft']);
     });
 
-    test('незавершённый проект не попадает в список, даже если validated? == true', () {
+    test('an unfinished project is not in the list even if validated? == true', () {
       final names = UserProfile.fromJson(sampleUserJson())
           .finishedProjects()
           .map((p) => p.name);
       expect(names, isNot(contains('minishell')));
     });
 
-    group('экзамены в статусе in_progress (так их отдаёт API у старого набора)', () {
+    group('exams with status in_progress (this is how the API returns them for the old intake)', () {
       Map<String, dynamic> project(
         String slug, {
         String status = 'in_progress',
@@ -280,7 +280,7 @@ void main() {
         return UserProfile.fromJson(json).finishedProjects().map((p) => p.name).toList();
       }
 
-      test('экзамен с итогом показывается, сданный и проваленный', () {
+      test('an exam with a result is shown, passed and failed', () {
         expect(
           shown([
             project('c-piscine-exam-00', validated: false, mark: 20),
@@ -297,7 +297,7 @@ void main() {
         );
       });
 
-      test('экзамен без итога (ещё не сдавал, ищет группу) не показывается', () {
+      test('an exam without a result (not taken yet, looking for a group) is not shown', () {
         expect(
           shown([
             project('exam-atonement', status: 'searching_a_group'),
@@ -309,21 +309,21 @@ void main() {
         );
       });
 
-      test('обычный проект в процессе не показывается, даже с прошлой оценкой', () {
+      test('an ordinary project in progress is not shown, even with a previous mark', () {
         // A retake: the status is in_progress, and the record still has the old
         // mark.
         expect(shown([project('minishell', validated: false, mark: 40)]), isEmpty);
         expect(shown([project('c-piscine-c-05', validated: true, mark: 80)]), isEmpty);
       });
 
-      test('завершённые проекты и экзамены по-прежнему показываются как раньше', () {
+      test('completed projects and exams are still shown as before', () {
         expect(
           shown([project('exam-rank-03', status: 'finished', validated: true, mark: 100)]),
           ['exam-rank-03'],
         );
       });
 
-      test('isExam и hasResult', () {
+      test('isExam and hasResult', () {
         expect(const ProjectResult(slug: 'c-piscine-final-exam').isExam, isTrue);
         expect(const ProjectResult(slug: '42next-Exam-Rank-02').isExam, isTrue);
         expect(const ProjectResult(slug: 'libft').isExam, isFalse);
@@ -333,7 +333,7 @@ void main() {
       });
     });
 
-    test('finishedProjects с фильтром по курсу', () {
+    test('finishedProjects with a cursus filter', () {
       final names = UserProfile.fromJson(sampleUserJson())
           .finishedProjects(cursusId: 21)
           .map((p) => p.name)

@@ -7,11 +7,11 @@ import 'package:swifty_companion/core/http_helpers.dart';
 
 void main() {
   group('parseRetryAfter', () {
-    test('секунды превращаются в Duration', () {
+    test('seconds turn into a Duration', () {
       expect(parseRetryAfter({'retry-after': '30'}), const Duration(seconds: 30));
     });
 
-    test('нет заголовка, не число или отрицательное — null', () {
+    test('no header, not a number or negative gives null', () {
       expect(parseRetryAfter({}), isNull);
       expect(parseRetryAfter({'retry-after': 'abc'}), isNull);
       expect(parseRetryAfter({'retry-after': '-5'}), isNull);
@@ -19,7 +19,7 @@ void main() {
   });
 
   group('decodeJsonObject', () {
-    test('читает UTF-8 без charset и вообще без Content-Type', () {
+    test('reads UTF-8 without charset and even without Content-Type', () {
       final bytes = utf8.encode('{"name":"José Ñandú"}');
       final withoutCharset = http.Response.bytes(
         bytes,
@@ -32,7 +32,7 @@ void main() {
       expect(decodeJsonObject(withoutHeader)['name'], 'José Ñandú');
     });
 
-    test('не объект, не JSON и не UTF-8 — UnexpectedResponseException', () {
+    test('not an object, not JSON and not UTF-8 give UnexpectedResponseException', () {
       final bad = <http.Response>[
         http.Response('[]', 200),
         http.Response('not json', 200),

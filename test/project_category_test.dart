@@ -9,7 +9,7 @@ void main() {
   ProjectCategory of(String? slug) => categoryOf(ProjectResult(slug: slug));
 
   group('categoryOf', () {
-    test('бассейн: slug начинается с c-piscine или piscine', () {
+    test('piscine: the slug starts with c-piscine or piscine', () {
       for (final slug in [
         'c-piscine-shell-00',
         'c-piscine-c-05',
@@ -22,7 +22,7 @@ void main() {
       }
     });
 
-    test('Common Core: известные проекты', () {
+    test('Common Core: known projects', () {
       for (final slug in [
         'libft',
         'get_next_line',
@@ -47,7 +47,7 @@ void main() {
       }
     });
 
-    test('Reloaded: отдельный раздел, не бассейн и не Common Core', () {
+    test('Reloaded: a separate section, not the piscine and not Common Core', () {
       expect(of('c-piscine-reloaded'), ProjectCategory.piscineReloaded);
       expect(of('42cursus-c-piscine-reloaded'), ProjectCategory.piscineReloaded);
       expect(of('C-Piscine-Reloaded'), ProjectCategory.piscineReloaded);
@@ -55,11 +55,11 @@ void main() {
       expect(of('c-piscine-c-00'), ProjectCategory.piscine);
     });
 
-    test('коллективное резюме относится к Common Core', () {
+    test('the collective resume belongs to Common Core', () {
       expect(of('42_collaborative_resume'), ProjectCategory.commonCore);
     });
 
-    test('Common Core: серии cpp-module и exam-rank', () {
+    test('Common Core: the cpp-module and exam-rank series', () {
       for (var i = 0; i <= 9; i++) {
         expect(of('cpp-module-0$i'), ProjectCategory.commonCore);
       }
@@ -68,7 +68,7 @@ void main() {
       }
     });
 
-    test('префикс 42cursus- и регистр не мешают', () {
+    test('the 42cursus- prefix and case do not matter', () {
       expect(of('42cursus-libft'), ProjectCategory.commonCore);
       expect(of('42cursus-ft_printf'), ProjectCategory.commonCore);
       expect(of('42cursus-exam-rank-03'), ProjectCategory.commonCore);
@@ -76,7 +76,7 @@ void main() {
       expect(of('  libft '), ProjectCategory.commonCore);
     });
 
-    test('настоящие slug из интры (вывод скрипта проверки): разложены верно', () {
+    test('real slugs from the intra (output of the check script): sorted correctly', () {
       // This is how they are recorded in the API for a real student: some with
       // the 42cursus- prefix, some without; the piscine and the "reload" with
       // cursus 66.
@@ -106,7 +106,7 @@ void main() {
       });
     });
 
-    test('новая программа Common Core: префикс 42next- и серии', () {
+    test('new Common Core program: the 42next- prefix and series', () {
       // The same projects as in the old program, but with a different prefix.
       expect(of('42next-born2beroot'), ProjectCategory.commonCore);
       expect(of('42next-push_swap'), ProjectCategory.commonCore);
@@ -124,7 +124,7 @@ void main() {
       expect(of('42next-libft-extra'), ProjectCategory.outerCore);
     });
 
-    test('настоящие slug студента новой программы (выгрузка из API)', () {
+    test('real slugs of a student of the new program (an API dump)', () {
       // The student has not reached Outer Core yet: none of his projects must
       // end up in that section. Piscine/Reloaded stay as they were.
       const commonCore = [
@@ -168,7 +168,7 @@ void main() {
       expect(of('c-piscine-reloaded'), ProjectCategory.piscineReloaded);
     });
 
-    test('всё неизвестное, включая проект без slug, уходит в Outer Core', () {
+    test('everything unknown, including a project without a slug, goes to Outer Core', () {
       expect(of('swifty-companion'), ProjectCategory.outerCore);
       expect(of('mobile-0'), ProjectCategory.outerCore);
       expect(of('libft-extra'), ProjectCategory.outerCore); // does not match as a whole
@@ -181,13 +181,13 @@ void main() {
   });
 
   group('finishedProjectsByCategory', () {
-    test('все разделы всегда есть, в порядке показа', () {
+    test('all sections are always present, in display order', () {
       final grouped = const UserProfile(login: 'x').finishedProjectsByCategory();
       expect(grouped.keys.toList(), ProjectCategory.values);
       expect(grouped.values.every((list) => list.isEmpty), isTrue);
     });
 
-    test('проекты разложены по разделам, внутри новые сверху', () {
+    test('projects are sorted into sections, newest first inside', () {
       final grouped =
           UserProfile.fromJson(sampleUserJson()).finishedProjectsByCategory();
 
@@ -202,7 +202,7 @@ void main() {
       );
     });
 
-    test('экзамены бассейна в статусе in_progress попадают в Piscina', () {
+    test('piscine exams with status in_progress go to Piscina', () {
       // Real records of the old intake: status in_progress, but a result
       // exists.
       final json = sampleUserJson();
@@ -231,7 +231,7 @@ void main() {
       );
     });
 
-    test('незавершённые проекты не попадают ни в один раздел', () {
+    test('unfinished projects go into no section', () {
       final grouped =
           UserProfile.fromJson(sampleUserJson()).finishedProjectsByCategory();
       final all = grouped.values.expand((list) => list).map((p) => p.name);

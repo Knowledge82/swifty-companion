@@ -23,7 +23,7 @@ void main() {
           profile: UserProfile.fromJson(json),
           // The profiles in these tests have no photo, loading must not be
           // called.
-          loadPhoto: (url) => Future.error(StateError('не должно вызываться: $url')),
+          loadPhoto: (url) => Future.error(StateError('must not be called: $url')),
         ),
       ),
     );
@@ -38,7 +38,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('показывает основные поля профиля', (tester) async {
+  testWidgets('shows the main profile fields', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     expect(find.text('jdoe'), findsOneWidget); // title
@@ -49,7 +49,7 @@ void main() {
     expect(find.text('5'), findsOneWidget); // evaluation points
   });
 
-  testWidgets('скрытое и пустое выводится как N/A', (tester) async {
+  testWidgets('hidden and empty values are shown as N/A', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     // Projects are collapsed, so only the phone ("hidden") is visible. The
@@ -62,7 +62,7 @@ void main() {
     expect(find.text('N/A'), findsNWidgets(2));
   });
 
-  testWidgets('минимальный профиль не ломает экран', (tester) async {
+  testWidgets('a minimal profile does not break the screen', (tester) async {
     await pumpProfile(tester, {'login': 'x'});
 
     // name, email, phone, level, wallet, points (no place: the row is hidden)
@@ -70,12 +70,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  group('Статус (лампочка) и рабочее место', () {
+  group('Status (lamp) and workstation', () {
     BoxDecoration lampOf(WidgetTester tester) => tester
         .widget<Container>(find.byKey(const ValueKey('online-lamp')))
         .decoration! as BoxDecoration;
 
-    testWidgets('нет места: серая лампочка, «Fuera del campus», строки места нет',
+    testWidgets('no place: grey lamp, "Fuera del campus", no place row',
         (tester) async {
       await pumpProfile(tester, sampleUserJson()..remove('image'));
 
@@ -87,7 +87,7 @@ void main() {
       expect(find.text('Puesto'), findsNothing);
     });
 
-    testWidgets('есть место: зелёная светящаяся лампочка и само место ниже',
+    testWidgets('there is a place: green glowing lamp and the place below',
         (tester) async {
       final json = sampleUserJson()..remove('image');
       json['location'] = 'c1r2s3';
@@ -107,7 +107,7 @@ void main() {
       );
     });
 
-    testWidgets('для чтения с экрана статус одной фразой', (tester) async {
+    testWidgets('for screen readers the status is one phrase', (tester) async {
       final handle = tester.ensureSemantics();
       final json = sampleUserJson()..remove('image');
       json['location'] = 'c1r2s3';
@@ -117,13 +117,13 @@ void main() {
       handle.dispose();
     });
 
-    test('лампочка различима на панели (не ниже 3:1 для значков)', () {
+    test('the lamp is distinguishable on the panel (at least 3:1 for icons)', () {
       expect(contrast(onlineGreen, walnut), greaterThanOrEqualTo(3));
       expect(contrast(offlineGray, walnut), greaterThanOrEqualTo(3));
     });
   });
 
-  testWidgets('скиллы: уровень и процент, сильные сверху', (tester) async {
+  testWidgets('skills: level and percentage, strong ones on top', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     expect(find.text('Rigor'), findsOneWidget);
@@ -138,7 +138,7 @@ void main() {
     expect(find.textContaining('nivel ÷ 20'), findsOneWidget);
   });
 
-  testWidgets('проекты: сданные и проваленные, по разделам, новые сверху',
+  testWidgets('projects: passed and failed, by section, newest first',
       (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
@@ -164,7 +164,7 @@ void main() {
     expect(y, [...y]..sort());
   });
 
-  testWidgets('порядок разделов: Outer Core, Common Core, Piscina, Reloaded',
+  testWidgets('section order: Outer Core, Common Core, Piscina, Reloaded',
       (tester) async {
     final json = sampleUserJson()..remove('image');
     (json['projects_users'] as List).add({
@@ -201,19 +201,19 @@ void main() {
     expect(y, [...y]..sort());
   });
 
-  testWidgets('нет скиллов и проектов: понятные сообщения', (tester) async {
+  testWidgets('no skills and no projects: clear messages', (tester) async {
     await pumpProfile(tester, {'login': 'x'});
 
     expect(find.text('Sin habilidades todavía'), findsOneWidget);
     expect(find.text('Aún no hay proyectos completados'), findsOneWidget);
   });
 
-  testWidgets('английский язык: заголовки разделов', (tester) async {
+  testWidgets('English language: section titles', (tester) async {
     await tester.pumpWidget(
       testApp(
         ProfileScreen(
           profile: UserProfile.fromJson(sampleUserJson()..remove('image')),
-          loadPhoto: (url) => Future.error(StateError('нет')),
+          loadPhoto: (url) => Future.error(StateError('none')),
         ),
         locale: const Locale('en'),
       ),
@@ -227,7 +227,7 @@ void main() {
     expect(find.text('Piscine · 1'), findsOneWidget);
   });
 
-  testWidgets('узкий экран и крупный шрифт: ничего не переполняется',
+  testWidgets('narrow screen and large font: nothing overflows',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(320, 480);
@@ -251,7 +251,7 @@ void main() {
       testApp(
         ProfileScreen(
           profile: UserProfile.fromJson(json),
-          loadPhoto: (url) => Future.error(StateError('нет')),
+          loadPhoto: (url) => Future.error(StateError('none')),
         ),
         textScale: 2,
       ),
@@ -267,13 +267,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('фото крупное: 224 на обычном экране', (tester) async {
+  testWidgets('the photo is large: 224 on a normal screen', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     expect(tester.getSize(find.byType(ProfileAvatar)), const Size(224, 224));
   });
 
-  testWidgets('на узком экране фото уменьшается и не вылезает', (tester) async {
+  testWidgets('on a narrow screen the photo shrinks and does not stick out', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(280, 600);
     addTearDown(tester.view.reset);
@@ -285,14 +285,14 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('без фото в заглушке инициалы имени', (tester) async {
+  testWidgets('without a photo the placeholder shows the name initials', (tester) async {
     await pumpProfile(tester, sampleUserJson()..remove('image'));
 
     expect(find.text('JD'), findsOneWidget); // Jane Doe
     expect(find.byIcon(Icons.person), findsNothing);
   });
 
-  testWidgets('без имени инициал берётся из логина', (tester) async {
+  testWidgets('without a name the initial comes from the login', (tester) async {
     await pumpProfile(tester, {'login': 'x'});
 
     expect(find.text('X'), findsOneWidget);

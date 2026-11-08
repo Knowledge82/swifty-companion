@@ -19,22 +19,22 @@ void main() {
   ];
 
   for (final code in ['es', 'en']) {
-    group('словарь "$code"', () {
+    group('dictionary "$code"', () {
       final strings = AppStrings.forLocale(Locale(code));
 
-      test('у каждой ошибки непустой уникальный текст', () {
+      test('every error has a non-empty unique text', () {
         final texts = errors.map(strings.errorText).toList();
         expect(texts.every((t) => t.isNotEmpty), isTrue);
         expect(texts.toSet().length, texts.length);
       });
 
-      test('у каждой проблемы логина свой непустой текст', () {
+      test('every login problem has its own non-empty text', () {
         final texts = LoginProblem.values.map(strings.loginProblemText).toList();
         expect(texts.every((t) => t.isNotEmpty), isTrue);
         expect(texts.toSet().length, texts.length);
       });
 
-      test('Retry-After дописывается числом секунд', () {
+      test('Retry-After is appended as a number of seconds', () {
         final text =
             strings.errorText(const RateLimitException(retryAfter: Duration(seconds: 42)));
         expect(text, contains('42'));
@@ -43,14 +43,14 @@ void main() {
     });
   }
 
-  test('испанский и английский словари действительно разные', () {
+  test('the Spanish and English dictionaries really differ', () {
     final es = AppStrings.forLocale(const Locale('es'));
     final en = AppStrings.forLocale(const Locale('en'));
     expect(es.searchButton, isNot(en.searchButton));
     expect(es.notFoundError, isNot(en.notFoundError));
   });
 
-  group('выбор языка по языку телефона', () {
+  group('language choice by the phone language', () {
     Future<String> searchLabelFor(WidgetTester tester, Locale locale) async {
       late String label;
       await tester.pumpWidget(
@@ -67,22 +67,22 @@ void main() {
       return label;
     }
 
-    testWidgets('es-ES → испанский', (tester) async {
+    testWidgets('es-ES gives Spanish', (tester) async {
       expect(await searchLabelFor(tester, const Locale('es', 'ES')), 'Buscar');
     });
 
-    testWidgets('en-US → английский', (tester) async {
+    testWidgets('en-US gives English', (tester) async {
       expect(await searchLabelFor(tester, const Locale('en', 'US')), 'Search');
     });
 
-    testWidgets('русский и любой другой → испанский по умолчанию', (tester) async {
+    testWidgets('Russian and any other language give Spanish by default', (tester) async {
       expect(await searchLabelFor(tester, const Locale('ru')), 'Buscar');
       expect(await searchLabelFor(tester, const Locale('de', 'DE')), 'Buscar');
     });
   });
 
-  group('экран ошибки конфигурации', () {
-    testWidgets('показывает недостающие переменные', (tester) async {
+  group('configuration error screen', () {
+    testWidgets('shows the missing variables', (tester) async {
       await tester.pumpWidget(
         const ConfigErrorApp(missingKeys: ['FT_UID', 'FT_SECRET']),
       );
@@ -91,13 +91,13 @@ void main() {
       expect(find.textContaining('FT_UID, FT_SECRET'), findsOneWidget);
     });
 
-    testWidgets('нечитаемый .env', (tester) async {
+    testWidgets('unreadable .env', (tester) async {
       await tester.pumpWidget(const ConfigErrorApp(unreadable: true));
       expect(find.textContaining('.env'), findsWidgets);
     });
   });
 
-  testWidgets('testApp подключает встроенные переводы Flutter', (tester) async {
+  testWidgets('testApp plugs in the built-in Flutter translations', (tester) async {
     await tester.pumpWidget(
       testApp(
         Builder(

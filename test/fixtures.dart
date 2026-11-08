@@ -98,7 +98,7 @@ Map<String, dynamic> sampleUserJson() {
         'cursus_ids': [21],
         'project': {'id': 13, 'name': 'minishell', 'slug': 'minishell'},
       },
-      'мусор вместо объекта',
+      'junk instead of an object',
       {
         'id': 6,
         'status': 'finished',

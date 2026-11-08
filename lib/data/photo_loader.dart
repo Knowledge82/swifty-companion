@@ -65,7 +65,7 @@ class PhotoLoader {
     );
     _onLog?.call(
       'GET ${uri.host}/…/${uri.pathSegments.last} → ${response.statusCode}, '
-      '${response.bodyBytes.length} байт, ${watch.elapsedMilliseconds} мс',
+      '${response.bodyBytes.length} bytes, ${watch.elapsedMilliseconds} ms',
     );
 
     final bytes = _bytesOrThrow(response);

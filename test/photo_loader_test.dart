@@ -10,7 +10,7 @@ import 'fake_api.dart';
 const _url = 'https://cdn.intra.42.fr/users/abc123/medium_jdoe.png';
 
 void main() {
-  test('скачивает фото с Bearer-токеном и возвращает байты', () async {
+  test('downloads the photo with a Bearer token and returns the bytes', () async {
     final fake = FakeApi();
 
     final bytes = await fake.photos.load(_url);
@@ -21,7 +21,7 @@ void main() {
     expect(request.headers['Authorization'], 'Bearer tok-1');
   });
 
-  test('токен общий для профиля и фото: запрошен один раз', () async {
+  test('the token is shared by profile and photo: requested once', () async {
     final fake = FakeApi();
 
     await UserRepository(fake.api).fetchUser('jdoe');
@@ -31,7 +31,7 @@ void main() {
     expect(fake.photoRequests.single.headers['Authorization'], 'Bearer tok-1');
   });
 
-  test('повторная загрузка того же адреса берётся из кэша', () async {
+  test('a repeated load of the same address comes from the cache', () async {
     final fake = FakeApi();
 
     await fake.photos.load(_url);
@@ -40,7 +40,7 @@ void main() {
     expect(fake.photoRequests, hasLength(1));
   });
 
-  group('токен не уходит на чужие адреса', () {
+  group('the token does not go to foreign addresses', () {
     const bad = <String>[
       'https://evil.example.com/a.png',
       'http://cdn.intra.42.fr/users/a/b.png',
@@ -48,11 +48,11 @@ void main() {
       'https://cdn.intra.42.fr:8443/users/a/b.png',
       'https://cdn.intra.42.fr.evil.example.com/a.png',
       'https://cdn.intra.42.fr',
-      'не адрес',
+      'not an address',
       '',
     ];
     for (final url in bad) {
-      test('отклонён: "$url"', () async {
+      test('rejected: "$url"', () async {
         final fake = FakeApi();
 
         await expectLater(
@@ -66,7 +66,7 @@ void main() {
     }
   });
 
-  group('коды ответа', () {
+  group('response codes', () {
     Future<void> expectFails<T extends ApiException>(int status) async {
       final fake = FakeApi(
         onPhoto: (request, attempt) async => jsonResponse({}, status),
@@ -77,7 +77,7 @@ void main() {
       expect(fake.photoRequests, hasLength(1));
     }
 
-    test('403 и 401 — AuthException, без повторов и новых токенов', () async {
+    test('403 and 401 give AuthException, no retries and no new tokens', () async {
       await expectFails<AuthException>(403);
       await expectFails<AuthException>(401);
     });
@@ -85,7 +85,7 @@ void main() {
     test('404 — NotFoundException', () => expectFails<NotFoundException>(404));
     test('500 — ServerException', () => expectFails<ServerException>(500));
 
-    test('429 передаёт Retry-After', () async {
+    test('429 passes on Retry-After', () async {
       final fake = FakeApi(
         onPhoto: (request, attempt) async =>
             jsonResponse({}, 429, {'retry-after': '12'}),
@@ -102,7 +102,7 @@ void main() {
       );
     });
 
-    test('неудачный ответ в кэш не попадает: повтор уходит в сеть', () async {
+    test('a failed response is not cached: a repeat goes to the network', () async {
       final fake = FakeApi(
         onPhoto: (request, attempt) async => attempt == 1
             ? jsonResponse({}, 500)
@@ -117,7 +117,7 @@ void main() {
     });
   });
 
-  test('пустое тело при 200 — UnexpectedResponseException', () async {
+  test('an empty body with 200 gives UnexpectedResponseException', () async {
     final fake = FakeApi(
       onPhoto: (request, attempt) async => http.Response.bytes(const [], 200),
     );
@@ -127,7 +127,7 @@ void main() {
     );
   });
 
-  test('сеть пропала — NetworkException', () async {
+  test('a lost network gives NetworkException', () async {
     final fake = FakeApi(
       onPhoto: (request, attempt) async => throw const SocketException('offline'),
     );
@@ -137,7 +137,7 @@ void main() {
     );
   });
 
-  test('токен и адрес с хешем не попадают в журнал целиком', () async {
+  test('the token and an address with a hash do not get into the log in full', () async {
     final fake = FakeApi();
 
     await fake.photos.load(_url);

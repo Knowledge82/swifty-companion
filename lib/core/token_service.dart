@@ -72,7 +72,7 @@ class TokenService {
     if (_token == failedToken) {
       _token = null;
       _expiresAt = null;
-      _onLog?.call('Токен отвергнут сервером и сброшен');
+      _onLog?.call('Token rejected by the server and discarded');
     }
   }
 
@@ -131,7 +131,7 @@ class TokenService {
 
     _token = token;
     _expiresAt = _now().add(lifetime);
-    _onLog?.call('Получен токен, срок жизни ${lifetime.inSeconds} с');
+    _onLog?.call('Token received, lifetime ${lifetime.inSeconds} s');
     return token;
   }
 }

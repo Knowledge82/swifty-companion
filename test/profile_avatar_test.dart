@@ -21,7 +21,7 @@ void main() {
     );
   }
 
-  testWidgets('нет адресов: сразу заглушка, загрузка не вызывается', (tester) async {
+  testWidgets('no addresses: placeholder at once, loading is not called', (tester) async {
     var calls = 0;
     await tester.pumpWidget(avatar([], (url) async {
       calls++;
@@ -32,7 +32,7 @@ void main() {
     expect(calls, 0);
   });
 
-  testWidgets('пока фото грузится — индикатор', (tester) async {
+  testWidgets('while the photo loads: an indicator', (tester) async {
     final gate = Completer<Uint8List>();
     await tester.pumpWidget(avatar(['u1'], (url) => gate.future));
 
@@ -44,7 +44,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
-  testWidgets('первый адрес загрузился: показывается картинка', (tester) async {
+  testWidgets('the first address loaded: the image is shown', (tester) async {
     final asked = <String>[];
     await tester.pumpWidget(avatar(['u1', 'u2'], (url) async {
       asked.add(url);
@@ -57,7 +57,7 @@ void main() {
     expect(find.text('JD'), findsNothing);
   });
 
-  testWidgets('первый адрес упал: пробуется второй', (tester) async {
+  testWidgets('the first address failed: the second is tried', (tester) async {
     final asked = <String>[];
     await tester.pumpWidget(avatar(['u1', 'u2'], (url) async {
       asked.add(url);
@@ -72,7 +72,7 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('упали все адреса: заглушка с инициалами', (tester) async {
+  testWidgets('all addresses failed: a placeholder with initials', (tester) async {
     final asked = <String>[];
     await tester.pumpWidget(avatar(['u1', 'u2', 'u3'], (url) async {
       asked.add(url);

@@ -29,7 +29,7 @@ class AppConfig {
     ];
     if (missing.isNotEmpty) {
       throw ConfigException(
-        'В .env не заполнено: ${missing.join(', ')}',
+        'Missing values in .env: ${missing.join(', ')}',
         missing: missing,
       );
     }

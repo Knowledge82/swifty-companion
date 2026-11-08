@@ -4,16 +4,16 @@ import 'package:swifty_companion/data/user_repository.dart';
 import 'fake_api.dart';
 
 void main() {
-  test('журнал содержит факты о токене и запросе, но не секреты', () async {
+  test('the log contains facts about the token and the request, but no secrets', () async {
     final fake = FakeApi();
 
     await UserRepository(fake.api).fetchUser('jdoe');
 
-    expect(fake.logs, contains('Получен токен, срок жизни 7200 с'));
+    expect(fake.logs, contains('Token received, lifetime 7200 s'));
     expect(
       fake.logs.any((l) => l.startsWith('GET /v2/users/jdoe → 200, ')),
       isTrue,
-      reason: 'журнал: ${fake.logs}',
+      reason: 'log: ${fake.logs}',
     );
     final all = fake.logs.join('\n');
     expect(all, isNot(contains('tok-1')));
@@ -21,7 +21,7 @@ void main() {
     expect(all, isNot(contains('test-uid')));
   });
 
-  test('после 401 в журнале есть сброс токена и новый токен', () async {
+  test('after a 401 the log has a token reset and a new token', () async {
     final fake = FakeApi(
       onUser: (request, attempt) async =>
           attempt == 1 ? jsonResponse({}, 401) : jsonResponse({'login': 'jdoe'}),
@@ -29,9 +29,9 @@ void main() {
 
     await UserRepository(fake.api).fetchUser('jdoe');
 
-    expect(fake.logs, contains('Токен отвергнут сервером и сброшен'));
+    expect(fake.logs, contains('Token rejected by the server and discarded'));
     expect(
-      fake.logs.where((l) => l.startsWith('Получен токен')),
+      fake.logs.where((l) => l.startsWith('Token received')),
       hasLength(2),
     );
     expect(fake.logs.join('\n'), isNot(contains('tok-')));

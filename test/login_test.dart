@@ -3,24 +3,24 @@ import 'package:swifty_companion/core/login.dart';
 
 void main() {
   group('normalizeLogin', () {
-    test('обрезает пробелы и приводит к нижнему регистру', () {
+    test('trims spaces and lowercases', () {
       expect(normalizeLogin('  VDarsuye \n'), 'vdarsuye');
     });
   });
 
   group('validateLogin', () {
-    test('пустой ввод и пробелы — LoginProblem.empty', () {
+    test('empty input and spaces give LoginProblem.empty', () {
       expect(validateLogin(''), LoginProblem.empty);
       expect(validateLogin('   '), LoginProblem.empty);
     });
 
-    test('обычные логины проходят', () {
+    test('ordinary logins pass', () {
       expect(validateLogin('vdarsuye'), isNull);
       expect(validateLogin('  Vdarsuye '), isNull);
       expect(validateLogin('ab-c_1'), isNull);
     });
 
-    test('опасные и лишние символы отклоняются', () {
+    test('dangerous and extra characters are rejected', () {
       expect(validateLogin('a b'), LoginProblem.invalidChars);
       expect(validateLogin('../me'), LoginProblem.invalidChars);
       expect(validateLogin('a?b=c'), LoginProblem.invalidChars);

@@ -13,8 +13,8 @@ import 'fixtures.dart';
 const _path = ['v2', 'users', 'jdoe'];
 
 void main() {
-  group('успешный запрос', () {
-    test('GET на правильный адрес с Bearer-токеном', () async {
+  group('successful request', () {
+    test('GET to the right address with a Bearer token', () async {
       final fake = FakeApi();
 
       final json = await fake.api.getJson(_path);
@@ -27,7 +27,7 @@ void main() {
       expect(request.headers['Accept'], 'application/json');
     });
 
-    test('токен не запрашивается на каждый запрос', () async {
+    test('the token is not requested for every request', () async {
       final fake = FakeApi();
 
       await fake.api.getJson(_path);
@@ -38,7 +38,7 @@ void main() {
       expect(fake.tokenCalls, 1);
     });
 
-    test('два параллельных запроса — один запрос токена', () async {
+    test('two parallel requests: one token request', () async {
       final fake = FakeApi();
 
       await Future.wait([fake.api.getJson(_path), fake.api.getJson(_path)]);
@@ -47,7 +47,7 @@ void main() {
       expect(fake.tokenCalls, 1);
     });
 
-    test('части пути кодируются и не меняют структуру адреса', () async {
+    test('path parts are encoded and do not change the structure of the address', () async {
       final fake = FakeApi();
 
       await fake.api.getJson(['v2', 'users', 'a b/c?d']);
@@ -57,7 +57,7 @@ void main() {
       expect(url.query, isEmpty);
     });
 
-    test('тело читается как UTF-8, даже если Content-Type не указан', () async {
+    test('the body is read as UTF-8 even if Content-Type is not set', () async {
       final fake = FakeApi(
         // Without a Content-Type header: `response.body` would read this as
         // latin1.
@@ -73,8 +73,8 @@ void main() {
     });
   });
 
-  group('повтор после 401', () {
-    test('401, затем 200: новый токен и ровно один повтор', () async {
+  group('retry after 401', () {
+    test('401, then 200: a new token and exactly one retry', () async {
       final fake = FakeApi(
         onUser: (request, attempt) async =>
             attempt == 1 ? jsonResponse({}, 401) : jsonResponse(sampleUserJson()),
@@ -90,7 +90,7 @@ void main() {
       expect(fake.tokenCalls, 2);
     });
 
-    test('два 401 подряд: AuthException, повтор был только один', () async {
+    test('two 401s in a row: AuthException, only one retry was made', () async {
       final fake = FakeApi(
         onUser: (request, attempt) async => jsonResponse({}, 401),
       );
@@ -104,7 +104,7 @@ void main() {
       expect(fake.tokenCalls, 2);
     });
 
-    test('ошибка получения токена пробрасывается, запрос профиля не уходит', () async {
+    test('a token error is passed on, the profile request is not sent', () async {
       final fake = FakeApi(tokenStatus: 401);
 
       await expectLater(
@@ -116,7 +116,7 @@ void main() {
     });
   });
 
-  group('коды ответа', () {
+  group('response codes', () {
     final cases = <(int, Matcher)>[
       (404, isA<NotFoundException>()),
       (429, isA<RateLimitException>()),
@@ -135,7 +135,7 @@ void main() {
       });
     }
 
-    test('429 передаёт Retry-After', () async {
+    test('429 passes on Retry-After', () async {
       final fake = FakeApi(
         onUser: (request, attempt) async =>
             jsonResponse({}, 429, {'retry-after': '7'}),
@@ -154,8 +154,8 @@ void main() {
     });
   });
 
-  group('сеть', () {
-    test('SocketException и ClientException — NetworkException', () async {
+  group('network', () {
+    test('SocketException and ClientException give NetworkException', () async {
       for (final error in <Exception>[
         const SocketException('offline'),
         http.ClientException('offline'),
@@ -168,7 +168,7 @@ void main() {
       }
     });
 
-    test('таймаут — NetworkException с текстом про время', () async {
+    test('a timeout gives NetworkException with text about time', () async {
       final fake = FakeApi(
         onUser: (request, attempt) => Completer<http.Response>().future,
       );
@@ -184,14 +184,14 @@ void main() {
           isA<NetworkException>().having(
             (e) => e.message,
             'message',
-            contains('вовремя'),
+            contains('in time'),
           ),
         ),
       );
     });
   });
 
-  test('200, но тело не годится: UnexpectedResponseException', () async {
+  test('200, but the body is unusable: UnexpectedResponseException', () async {
     final bodies = <List<int>>[
       utf8.encode('not json'),
       utf8.encode('[]'),

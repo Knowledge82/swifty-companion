@@ -38,7 +38,7 @@ void main() {
         onUser: (request, attempt) async => jsonResponse(_userWithoutImage()),
       );
 
-  testWidgets('пустой ввод: ошибка под полем и ни одного запроса',
+  testWidgets('empty input: an error under the field and no requests',
       (tester) async {
     final fake = okApi();
     await pumpScreen(tester, fake);
@@ -52,7 +52,7 @@ void main() {
     expect(fake.userRequests, isEmpty);
   });
 
-  testWidgets('неверные символы: ошибка под полем и ни одного запроса',
+  testWidgets('invalid characters: an error under the field and no requests',
       (tester) async {
     final fake = okApi();
     await pumpScreen(tester, fake);
@@ -64,7 +64,7 @@ void main() {
     expect(fake.userRequests, isEmpty);
   });
 
-  testWidgets('успех: открывается профиль, назад возвращает на поиск',
+  testWidgets('success: the profile opens, back returns to the search',
       (tester) async {
     final fake = okApi();
     await pumpScreen(tester, fake);
@@ -84,7 +84,7 @@ void main() {
     expect(find.text('Buscar'), findsOneWidget);
   });
 
-  testWidgets('логин не найден: баннер, остаёмся на экране поиска',
+  testWidgets('login not found: a banner, we stay on the search screen',
       (tester) async {
     final fake = FakeApi(
       onUser: (request, attempt) async => jsonResponse({'error': 'x'}, 404),
@@ -99,7 +99,7 @@ void main() {
     expect(find.text('Buscar'), findsOneWidget);
   });
 
-  testWidgets('нет сети: баннер про соединение', (tester) async {
+  testWidgets('no network: a banner about the connection', (tester) async {
     final fake = FakeApi(
       onUser: (request, attempt) async =>
           throw const SocketException('offline'),
@@ -113,7 +113,7 @@ void main() {
     expect(find.byIcon(Icons.wifi_off), findsOneWidget);
   });
 
-  testWidgets('429 с Retry-After: в баннере указано время ожидания',
+  testWidgets('429 with Retry-After: the banner shows the waiting time',
       (tester) async {
     final fake = FakeApi(
       onUser: (request, attempt) async =>
@@ -127,10 +127,10 @@ void main() {
     expect(find.textContaining('Puedes reintentar en 30 s.'), findsOneWidget);
   });
 
-  testWidgets('ошибка в нашем коде: общее сообщение, приложение живо',
+  testWidgets('an error in our code: a general message, the app is alive',
       (tester) async {
     final fake = FakeApi(
-      onUser: (request, attempt) async => throw StateError('баг'),
+      onUser: (request, attempt) async => throw StateError('bug'),
     );
     await pumpScreen(tester, fake);
 
@@ -141,7 +141,7 @@ void main() {
     expect(find.text('Buscar'), findsOneWidget);
   });
 
-  testWidgets('загрузка: индикатор, поле и кнопка заблокированы, запрос один',
+  testWidgets('loading: an indicator, the field and button are blocked, one request',
       (tester) async {
     final gate = Completer<void>();
     final fake = FakeApi(
@@ -171,7 +171,7 @@ void main() {
     expect(find.text('Jane Doe'), findsOneWidget);
   });
 
-  testWidgets('ввод символа убирает старую ошибку', (tester) async {
+  testWidgets('typing a character removes the old error', (tester) async {
     final fake = FakeApi(
       onUser: (request, attempt) async => jsonResponse({}, 404),
     );
@@ -187,7 +187,7 @@ void main() {
     expect(find.byType(ErrorBanner), findsNothing);
   });
 
-  testWidgets('после ошибки можно повторить поиск и получить успех',
+  testWidgets('after an error the search can be repeated and succeed',
       (tester) async {
     final fake = FakeApi(
       onUser: (request, attempt) async => attempt == 1
@@ -207,7 +207,7 @@ void main() {
     expect(find.text('Jane Doe'), findsOneWidget);
   });
 
-  testWidgets('стимпанк: на экране поиска есть эмблема из шестерёнок', (tester) async {
+  testWidgets('steampunk: the search screen has a gear emblem', (tester) async {
     await pumpScreen(tester, okApi());
 
     expect(find.byType(GearEmblem), findsOneWidget);

@@ -101,7 +101,7 @@ class _SearchScreenState extends State<SearchScreen> {
       // Only an error in our own code gets here. We show the user a general
       // message, and in debug we print the details.
       if (kDebugMode) {
-        debugPrint('Непредвиденная ошибка: $e\n$stackTrace');
+        debugPrint('Unexpected error: $e\n$stackTrace');
       }
       if (!mounted) {
         return;

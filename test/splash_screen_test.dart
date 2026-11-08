@@ -59,7 +59,7 @@ void main() {
     return fade.opacity.value;
   }
 
-  testWidgets('сначала заставка: название и картинка, следующего экрана нет',
+  testWidgets('splash first: the title and the image, no next screen',
       (tester) async {
     await tester.pumpWidget(app());
 
@@ -68,7 +68,7 @@ void main() {
     expect(find.text('next-screen'), findsNothing);
   });
 
-  testWidgets('fade-in: в начале прозрачно, к концу появления полностью видно',
+  testWidgets('fade-in: transparent at the start, fully visible by the end of the fade-in',
       (tester) async {
     await tester.pumpWidget(app());
     expect(introOpacity(tester), 0);
@@ -82,7 +82,7 @@ void main() {
     expect(introOpacity(tester), 1);
   });
 
-  testWidgets('в середине заставка держится полностью видимой', (tester) async {
+  testWidgets('in the middle the splash stays fully visible', (tester) async {
     await tester.pumpWidget(app());
     await tester.pump(const Duration(milliseconds: 1500));
 
@@ -90,7 +90,7 @@ void main() {
     expect(find.text('next-screen'), findsNothing);
   });
 
-  testWidgets('fade-out: перед концом картинка гаснет', (tester) async {
+  testWidgets('fade-out: the image fades before the end', (tester) async {
     await tester.pumpWidget(app());
     // Total time 3000, fade-out the last 600: it starts at 2400.
     await tester.pump(const Duration(milliseconds: 2700));
@@ -101,7 +101,7 @@ void main() {
     expect(find.text('next-screen'), findsNothing);
   });
 
-  testWidgets('по истечении времени заставка сменяется следующим экраном',
+  testWidgets('when the time is up the splash is replaced by the next screen',
       (tester) async {
     await tester.pumpWidget(app());
     // The controller considers itself finished only when the time EXCEEDED the
@@ -113,14 +113,14 @@ void main() {
     expect(find.text('Swifty Companion'), findsNothing);
   });
 
-  testWidgets('«убрать анимации»: без плавности, картинка сразу видна',
+  testWidgets('"remove animations": no smoothness, the image is visible at once',
       (tester) async {
     await tester.pumpWidget(app(disableAnimations: true));
 
     expect(introOpacity(tester), 1);
   });
 
-  testWidgets('касание пропускает заставку', (tester) async {
+  testWidgets('a tap skips the splash', (tester) async {
     await tester.pumpWidget(app(duration: const Duration(minutes: 5)));
 
     await tester.tap(find.byType(Image));
@@ -131,8 +131,8 @@ void main() {
   });
 
   testWidgets(
-      'часы ждут картинку: пока она не готова, заставка прозрачна; '
-      'страховочный таймер всё равно запускает проявление', (tester) async {
+      'the clock waits for the image: while it is not ready the splash is transparent; '
+      'the safety timer starts the fade-in anyway', (tester) async {
     await tester.pumpWidget(
       app(waitForImage: true, image: const _NeverLoadedImage()),
     );
@@ -150,7 +150,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('уход с экрана во время ожидания картинки гасит таймер',
+  testWidgets('leaving the screen while waiting for the image cancels the timer',
       (tester) async {
     await tester.pumpWidget(
       app(waitForImage: true, image: const _NeverLoadedImage()),
@@ -161,7 +161,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('уход с экрана раньше времени не оставляет анимации и ошибок',
+  testWidgets('leaving the screen early leaves no animation and no errors',
       (tester) async {
     await tester.pumpWidget(app());
     await tester.pump(const Duration(milliseconds: 300));
@@ -172,13 +172,13 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  test('фон заставки: один сплошной очень тёмный цвет, но не чисто чёрный', () {
+  test('splash background: one solid very dark color, but not pure black', () {
     expect(splashBackgroundColor.a, 1); // solid, no transparency
     expect(splashBackgroundColor.computeLuminance(), lessThan(0.02)); // very dark
     expect(splashBackgroundColor.computeLuminance(), greaterThan(0.003)); // not black
   });
 
-  testWidgets('на заставке нет узорного фона: шестерёнок и труб',
+  testWidgets('the splash has no patterned background: no gears and pipes',
       (tester) async {
     await tester.pumpWidget(app());
 
@@ -192,7 +192,7 @@ void main() {
     expect(scaffold.backgroundColor, splashBackgroundColor);
   });
 
-  testWidgets('телефон в портрете: картинка целиком по ширине, сверху и снизу фон',
+  testWidgets('phone in portrait: the whole image by width, background at the top and bottom',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(400, 900);
@@ -219,11 +219,11 @@ void main() {
     expect(masks.single.blendMode, BlendMode.dstIn);
   });
 
-  test('длина перехода в фон разумна: от 5 до 30 % размера картинки', () {
+  test('the length of the transition into the background is reasonable: 5 to 30 % of the image size', () {
     expect(splashFeather, inInclusiveRange(0.05, 0.30));
   });
 
-  testWidgets('широкий экран: по высоте, по бокам тёмный фон и растушёванные края',
+  testWidgets('wide screen: by height, dark background at the sides and feathered edges',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1200, 600);
@@ -244,7 +244,7 @@ void main() {
     expect(masks.single.blendMode, BlendMode.dstIn);
   });
 
-  testWidgets('экран с теми же пропорциями, что у картинки: масок нет',
+  testWidgets('a screen with the same proportions as the image: no masks',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(400, 600);
@@ -277,21 +277,21 @@ void main() {
       return tester.widgetList(find.byType(ShaderMask)).length;
     }
 
-    testWidgets('обе оси: две маски', (tester) async {
+    testWidgets('both axes: two masks', (tester) async {
       expect(await maskCount(tester), 2);
     });
 
-    testWidgets('одна ось: одна маска', (tester) async {
+    testWidgets('one axis: one mask', (tester) async {
       expect(await maskCount(tester, vertical: false), 1);
       expect(await maskCount(tester, horizontal: false), 1);
     });
 
-    testWidgets('ни одной оси: масок нет', (tester) async {
+    testWidgets('no axes: no masks', (tester) async {
       expect(await maskCount(tester, horizontal: false, vertical: false), 0);
     });
   });
 
-  test('файл картинки на месте и объявлен в pubspec.yaml', () {
+  test('the image file is in place and declared in pubspec.yaml', () {
     expect(File(splashImageAsset).existsSync(), isTrue);
     expect(File('pubspec.yaml').readAsStringSync(), contains(splashImageAsset));
   });

@@ -20,26 +20,26 @@ double contrast(Color a, Color b) {
 }
 
 void main() {
-  group('палитра', () {
+  group('palette', () {
     // The panel background (walnut) and the screen/AppBar (dark leather). Text
     // and icons on them.
     final pairs = <(String, Color, Color, double)>[
-      ('основной текст на панели', steampunkColors.onSurface, steampunkColors.surface, 7),
-      ('основной текст на фоне', steampunkColors.onSurface, leatherDeep, 7),
-      ('подписи на панели', steampunkColors.onSurfaceVariant, steampunkColors.surface, 4.5),
-      ('латунь на панели', steampunkColors.primary, steampunkColors.surface, 4.5),
-      ('латунь на фоне (AppBar)', steampunkColors.primary, leatherDeep, 4.5),
-      ('«сдан» на панели', steampunkColors.tertiary, steampunkColors.surface, 4.5),
-      ('«провален» на панели', steampunkColors.error, steampunkColors.surface, 4.5),
-      ('текст кнопки', steampunkColors.onPrimary, steampunkColors.primary, 4.5),
-      ('текст ошибки', steampunkColors.onErrorContainer, steampunkColors.errorContainer, 4.5),
-      ('названия разделов (окись) на панели', sectionTitleColor, steampunkColors.surface, 4.5),
-      ('подпись поля ввода', mutedBrass, walnutDeep, 4.5),
-      ('инициалы на заглушке фото (крупный текст)', mutedBrass, walnutLight, 3),
+      ('main text on the panel', steampunkColors.onSurface, steampunkColors.surface, 7),
+      ('main text on the background', steampunkColors.onSurface, leatherDeep, 7),
+      ('captions on the panel', steampunkColors.onSurfaceVariant, steampunkColors.surface, 4.5),
+      ('brass on the panel', steampunkColors.primary, steampunkColors.surface, 4.5),
+      ('brass on the background (AppBar)', steampunkColors.primary, leatherDeep, 4.5),
+      ('"passed" on the panel', steampunkColors.tertiary, steampunkColors.surface, 4.5),
+      ('"failed" on the panel', steampunkColors.error, steampunkColors.surface, 4.5),
+      ('button text', steampunkColors.onPrimary, steampunkColors.primary, 4.5),
+      ('error text', steampunkColors.onErrorContainer, steampunkColors.errorContainer, 4.5),
+      ('section titles (oxide) on the panel', sectionTitleColor, steampunkColors.surface, 4.5),
+      ('input field label', mutedBrass, walnutDeep, 4.5),
+      ('initials on the photo placeholder (large text)', mutedBrass, walnutLight, 3),
     ];
 
     for (final (name, foreground, background, minimum) in pairs) {
-      test('контраст: $name не ниже $minimum:1', () {
+      test('contrast: $name at least $minimum:1', () {
         expect(contrast(foreground, background), greaterThanOrEqualTo(minimum));
       });
     }
@@ -48,7 +48,7 @@ void main() {
     // merged with it (1.13:1). Now it is lighter than the background at ALL
     // points of the radial gradient, and stands out by tone, not by the border
     // alone.
-    test('панель светлее фона везде: и в центре, и по краям градиента', () {
+    test('the panel is lighter than the background everywhere: in the center and at the gradient edges', () {
       for (final background in backdropColors) {
         expect(
           walnut.computeLuminance(),
@@ -60,17 +60,17 @@ void main() {
       expect(contrast(walnut, backdropColors.last), greaterThanOrEqualTo(1.3));
     });
 
-    test('заглушка фото отличается от панели, поле ввода темнее панели', () {
+    test('the photo placeholder differs from the panel, the input field is darker than the panel', () {
       expect(contrast(walnutLight, walnut), greaterThanOrEqualTo(1.2));
       expect(walnutDeep.computeLuminance(), lessThan(walnut.computeLuminance()));
     });
 
-    test('заставка и AppBar не изменились: общий край фона leatherDeep', () {
+    test('splash and AppBar are unchanged: the shared background edge leatherDeep', () {
       expect(backdropColors.last, leatherDeep);
       expect(splashBackgroundColor, leatherDeep);
     });
 
-    test('тема собирается и тёмная', () {
+    test('the theme builds and is dark', () {
       final theme = buildSteampunkTheme();
       expect(theme.colorScheme.brightness, Brightness.dark);
       expect(theme.scaffoldBackgroundColor, leatherDeep);
@@ -80,7 +80,7 @@ void main() {
   group('gearPath', () {
     const center = Offset(100, 100);
 
-    test('зубья в пределах радиуса, в центре отверстие', () {
+    test('teeth within the radius, a hole in the center', () {
       final path = gearPath(center: center, radius: 50, teeth: 10);
       final bounds = path.getBounds();
 
@@ -95,8 +95,8 @@ void main() {
     });
   });
 
-  group('рисование', () {
-    test('GearsPainter рисует на холсте без ошибок, в том числе на пустом', () {
+  group('painting', () {
+    test('GearsPainter paints on a canvas without errors, including an empty one', () {
       const painter = GearsPainter(color: brass);
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
@@ -105,19 +105,19 @@ void main() {
       recorder.endRecording().dispose();
     });
 
-    test('окисленные шестерёнки: смена цвета окиси тоже перерисовывает', () {
+    test('oxidized gears: changing the oxide color also repaints', () {
       const base = GearsPainter(color: brass);
       expect(base.shouldRepaint(const GearsPainter(color: brass, patina: copper)), isTrue);
     });
 
-    test('shouldRepaint: только при смене цвета или зерна', () {
+    test('shouldRepaint: only when the color or the seed changes', () {
       const base = GearsPainter(color: brass);
       expect(base.shouldRepaint(const GearsPainter(color: brass)), isFalse);
       expect(base.shouldRepaint(const GearsPainter(color: copper)), isTrue);
       expect(base.shouldRepaint(const GearsPainter(color: brass, seed: 1)), isTrue);
     });
 
-    testWidgets('фон и панель показывают содержимое и не зацикливают анимацию',
+    testWidgets('the background and the panel show the content and do not loop the animation',
         (tester) async {
       await tester.pumpWidget(
         testApp(
@@ -135,7 +135,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('эмблема и кольцо рисуются', (tester) async {
+    testWidgets('the emblem and the ring are painted', (tester) async {
       await tester.pumpWidget(
         testApp(
           const Scaffold(
@@ -151,7 +151,7 @@ void main() {
       expect(tester.getSize(find.byType(BrassRing)), const Size(126, 126));
     });
 
-    testWidgets('панели любых размеров рисуются без ошибок, в том числе крошечные',
+    testWidgets('panels of any size paint without errors, including tiny ones',
         (tester) async {
       for (final side in [20.0, 59.0, 61.0, 120.0, 400.0]) {
         await tester.pumpWidget(
@@ -167,11 +167,11 @@ void main() {
             ),
           ),
         );
-        expect(tester.takeException(), isNull, reason: 'сторона $side');
+        expect(tester.takeException(), isNull, reason: 'side $side');
       }
     });
 
-    testWidgets('латунная линия: высота и вставка в AppBar', (tester) async {
+    testWidgets('brass line: height and insertion into the AppBar', (tester) async {
       expect(const BrassLine().preferredSize.height, BrassLine.height);
 
       await tester.pumpWidget(
@@ -186,7 +186,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    test('PipesPainter рисует трубы и кабели, на крошечном окне ничего не рисует', () {
+    test('PipesPainter paints pipes and cables, paints nothing on a tiny window', () {
       const painter = PipesPainter();
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
@@ -197,7 +197,7 @@ void main() {
       expect(painter.shouldRepaint(const PipesPainter()), isFalse);
     });
 
-    testWidgets('угловая шестерня: центр в правом нижнем углу, видна четверть',
+    testWidgets('corner gear: the center in the bottom right corner, a quarter is visible',
         (tester) async {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(400, 800);
@@ -217,17 +217,17 @@ void main() {
     });
   });
 
-  group('эмблема: цепочка из семи шестерёнок четырёх размеров', () {
+  group('emblem: a chain of seven gears of four sizes', () {
     final gears = placeEmblemGears();
 
-    test('их семь, большая первая и ведущая', () {
+    test('there are seven, the big one is first and driving', () {
       expect(gears, hasLength(7));
       expect(gears.first.isBig, isTrue);
       expect(gears.first.parent, -1);
       expect(gears.skip(1).every((g) => !g.isBig), isTrue);
     });
 
-    test('четыре разных размера: не «одна большая и четыре одинаковых»', () {
+    test('four different sizes: not "one big and four equal"', () {
       final radii = gears.map((g) => g.radius).toSet();
       expect(radii, hasLength(4));
       // The big one is clearly larger than the others, the smallest clearly
@@ -236,7 +236,7 @@ void main() {
       expect(gears.first.radius / radii.reduce(math.min), greaterThan(2));
     });
 
-    test('цепочка несимметрична: ветвление и глубина больше двух', () {
+    test('the chain is asymmetric: branching and depth greater than two', () {
       int depth(int i) => gears[i].parent < 0 ? 0 : 1 + depth(gears[i].parent);
       expect(List.generate(gears.length, depth).reduce(math.max), greaterThanOrEqualTo(3));
 
@@ -251,7 +251,7 @@ void main() {
       expect(children.keys.where((i) => i != 0), isNotEmpty);
     });
 
-    test('все помещаются в квадрат эмблемы с полем', () {
+    test('all fit into the emblem square with a margin', () {
       for (final g in gears) {
         expect(g.center.dx - g.radius, greaterThanOrEqualTo(0.02));
         expect(g.center.dy - g.radius, greaterThanOrEqualTo(0.02));
@@ -260,7 +260,7 @@ void main() {
       }
     });
 
-    test('каждая зацеплена со своим родителем: вершина зуба заходит во впадину, но не глубже', () {
+    test('each is meshed with its parent: the tooth tip enters the gap but not deeper', () {
       for (final g in gears.skip(1)) {
         final p = gears[g.parent];
         final distance = (g.center - p.center).distance;
@@ -273,7 +273,7 @@ void main() {
       }
     });
 
-    test('несцепленные шестерёнки не касаются друг друга', () {
+    test('unmeshed gears do not touch each other', () {
       for (var i = 0; i < gears.length; i++) {
         for (var j = i + 1; j < gears.length; j++) {
           if (gears[j].parent == i || gears[i].parent == j) {
@@ -281,12 +281,12 @@ void main() {
           }
           final distance = (gears[i].center - gears[j].center).distance;
           expect(distance, greaterThan(gears[i].radius + gears[j].radius + 0.02),
-              reason: 'шестерёнки $i и $j');
+              reason: 'gears $i and $j');
         }
       }
     });
 
-    test('шаг зубьев у всех близок: зубья помещаются во впадины соседей', () {
+    test('the tooth pitch is close for all: teeth fit into the neighbors gaps', () {
       // Pitch = the arc length at the outer radius per tooth.
       final pitches = [
         for (final g in gears) 2 * math.pi * g.radius / g.teeth,
@@ -296,7 +296,7 @@ void main() {
       expect(highest / lowest, lessThan(1.15));
     });
 
-    test('скорости обратно пропорциональны числу зубьев, соседи крутятся навстречу', () {
+    test('speeds are inversely proportional to the tooth count, neighbors turn against each other', () {
       expect(gears.first.ratio, 1);
       for (final g in gears.skip(1)) {
         final p = gears[g.parent];
@@ -308,7 +308,7 @@ void main() {
       }
     });
 
-    test('зубья входят во впадины в любой момент вращения (для всей цепочки)', () {
+    test('teeth enter the gaps at any moment of the rotation (for the whole chain)', () {
       // The meshing condition: at the contact point the parent's "tooth
       // fraction" plus the child's "tooth fraction" equals 0.5 (mod 1): a tooth
       // against a gap.
@@ -327,12 +327,12 @@ void main() {
               (alpha + math.pi - thetaChild) * g.teeth / (2 * math.pi);
           final sum = (fractionParent + fractionChild) % 1;
           expect(sum, closeTo(0.5, 1e-9),
-              reason: 'шестерёнка на ${g.teeth} зубьев, t=$t');
+              reason: 'gear with ${g.teeth} teeth, t=$t');
         }
       }
     });
 
-    test('геометрия: контуры сцепленных пар не пересекаются в любой момент', () {
+    test('geometry: the outlines of meshed pairs do not intersect at any moment', () {
       // The most reliable check: we take the real outlines (gearPath) and count
       // whether a point falls inside both. A sample of grid points in the area
       // where the pair's circles intersect.
@@ -359,13 +359,13 @@ void main() {
               }
             }
           }
-          expect(bothInside, 0, reason: 'зубья «наехали», t=$t, зубьев: ${g.teeth}');
+          expect(bothInside, 0, reason: 'teeth ran into each other, t=$t, teeth: ${g.teeth}');
         }
       }
     });
   });
 
-  group('вращение', () {
+  group('rotation', () {
     Widget scene({required bool disableAnimations}) => testApp(
           const Scaffold(
             body: Center(child: GearEmblem(size: 120)),
@@ -373,7 +373,7 @@ void main() {
           disableAnimations: disableAnimations,
         );
 
-    testWidgets('по умолчанию шестерёнки крутятся: кадры планируются', (tester) async {
+    testWidgets('by default the gears rotate: frames are scheduled', (tester) async {
       await tester.pumpWidget(scene(disableAnimations: false));
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -381,7 +381,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('«убрать анимации» в системе: шестерёнки стоят', (tester) async {
+    testWidgets('"remove animations" in the system: the gears stand still', (tester) async {
       await tester.pumpWidget(scene(disableAnimations: true));
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -389,7 +389,7 @@ void main() {
       await tester.pumpAndSettle(); // does not hang
     });
 
-    testWidgets('animate: false останавливает вращение', (tester) async {
+    testWidgets('animate: false stops the rotation', (tester) async {
       await tester.pumpWidget(
         testApp(
           const Scaffold(body: Center(child: GearEmblem(animate: false))),
@@ -401,7 +401,7 @@ void main() {
       expect(tester.binding.transientCallbackCount, 0);
     });
 
-    testWidgets('часы идут вместе со временем',
+    testWidgets('the clock runs with time',
         (tester) async {
       final seen = <double>[];
       Widget clock({required bool enabled}) => testApp(
@@ -422,7 +422,7 @@ void main() {
       expect(seen.last, greaterThan(0.9));
     });
 
-    testWidgets('уход с экрана освобождает часы без ошибок', (tester) async {
+    testWidgets('leaving the screen releases the clock without errors', (tester) async {
       await tester.pumpWidget(scene(disableAnimations: false));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pumpWidget(const SizedBox.shrink());

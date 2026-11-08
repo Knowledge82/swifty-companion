@@ -21,7 +21,7 @@ Future<void> main() async {
     await dotenv.load(fileName: '.env');
     final config = AppConfig.fromMap(dotenv.env);
     // Only the fact of loading; secret values are never written to the log.
-    debugPrint('Конфиг загружен');
+    debugPrint('Config loaded');
     final deps = _buildDependencies(config);
     runApp(SwiftyApp(repository: deps.repository, photoLoader: deps.photos));
   } on ConfigException catch (e) {

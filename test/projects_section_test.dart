@@ -21,7 +21,7 @@ void main() {
     );
   }
 
-  testWidgets('по умолчанию все группы свёрнуты: видны только заголовки',
+  testWidgets('by default all groups are collapsed: only the headers are visible',
       (tester) async {
     await pumpSection(tester);
 
@@ -32,7 +32,7 @@ void main() {
     }
   });
 
-  testWidgets('название раздела цвета окиси', (tester) async {
+  testWidgets('the section title has the oxide color', (tester) async {
     await pumpSection(tester);
 
     final title = tester.widget<Text>(find.text('Proyectos completados'));
@@ -42,7 +42,7 @@ void main() {
     expect(sectionTitleColor, isNot(oxide));
   });
 
-  testWidgets('тап по заголовку раскрывает группу, повторный сворачивает',
+  testWidgets('a tap on the header expands the group, another one collapses it',
       (tester) async {
     await pumpSection(tester);
 
@@ -57,7 +57,7 @@ void main() {
     expect(find.text('libft'), findsNothing);
   });
 
-  testWidgets('группы раскрываются независимо друг от друга', (tester) async {
+  testWidgets('groups expand independently of each other', (tester) async {
     await pumpSection(tester);
 
     await tester.tap(find.text('Piscina · 1'));
@@ -67,7 +67,7 @@ void main() {
     expect(find.text('push_swap'), findsNothing); // Common Core stayed collapsed
   });
 
-  testWidgets('проваленные проекты видны после раскрытия', (tester) async {
+  testWidgets('failed projects are visible after expanding', (tester) async {
     await pumpSection(tester);
 
     await tester.tap(find.text('Common Core · 3'));
@@ -78,7 +78,7 @@ void main() {
     expect(find.byIcon(Icons.cancel), findsOneWidget);
   });
 
-  testWidgets('стрелка поворачивается при раскрытии', (tester) async {
+  testWidgets('the arrow rotates on expanding', (tester) async {
     await pumpSection(tester);
 
     double turns() => tester
@@ -91,7 +91,7 @@ void main() {
     expect(turns(), 0.5);
   });
 
-  testWidgets('заголовок группы не ниже 48 пикселей: удобно попасть пальцем',
+  testWidgets('a group header is at least 48 pixels tall: easy to hit with a finger',
       (tester) async {
     await pumpSection(tester);
 
@@ -102,7 +102,7 @@ void main() {
     expect(tester.getSize(inkWell).height, greaterThanOrEqualTo(48));
   });
 
-  testWidgets('без проектов: сообщение, заголовков групп нет', (tester) async {
+  testWidgets('no projects: a message, no group headers', (tester) async {
     await tester.pumpWidget(
       testApp(const Scaffold(body: ProjectsSection(groups: {}))),
     );
@@ -111,7 +111,7 @@ void main() {
     expect(find.byType(InkWell), findsNothing);
   });
 
-  testWidgets('крупный шрифт на узком экране: заголовок не переполняется',
+  testWidgets('large font on a narrow screen: the header does not overflow',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(320, 480);

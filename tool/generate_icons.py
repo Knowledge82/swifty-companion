@@ -283,7 +283,7 @@ def write_animated_splash(placed, chain):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(out))
-    print('записано', path)
+    print('written', path)
 
     # The animation: one long pass, linear, without repeating (see the docstring).
     step = 3 * 360.0 / chain[0][3]  # degrees per second for the big one (three teeth per second)
@@ -305,7 +305,7 @@ def write_animated_splash(placed, chain):
     path = os.path.join(RES, 'drawable', 'splash_icon_animated.xml')
     with open(path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(anim))
-    print('записано', path)
+    print('written', path)
 
 
 def rounded(img, radius_frac=0.2):
@@ -322,7 +322,7 @@ def save(img, *parts):
     path = os.path.join(RES, *parts)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     img.save(path)
-    print('записано', path, img.size)
+    print('written', path, img.size)
 
 
 def main():

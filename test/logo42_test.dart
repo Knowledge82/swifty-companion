@@ -24,14 +24,14 @@ List<List<Offset>> polygonsFromSvg(String svg) {
 }
 
 void main() {
-  test('числа в Dart совпадают с файлом tool/42_logo.svg', () {
+  test('the numbers in Dart match the file tool/42_logo.svg', () {
     final fromFile = polygonsFromSvg(File('tool/42_logo.svg').readAsStringSync());
 
     expect(fromFile, hasLength(4));
     expect(logo42Polygons, equals(fromFile));
   });
 
-  test('габариты знака вычислены верно', () {
+  test('the mark bounds are computed correctly', () {
     final all = logo42Polygons.expand((p) => p);
     final minX = all.map((p) => p.dx).reduce((a, b) => a < b ? a : b);
     final maxX = all.map((p) => p.dx).reduce((a, b) => a > b ? a : b);
@@ -41,7 +41,7 @@ void main() {
     expect(logo42Bounds, Rect.fromLTRB(minX, minY, maxX, maxY));
   });
 
-  test('рисуется без ошибок любой ширины', () {
+  test('draws without errors at any width', () {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
     for (final width in [0.0, 1.0, 100.0, 5000.0]) {

@@ -45,8 +45,8 @@ void main() {
     );
   }
 
-  group('запрос токена', () {
-    test('один POST на правильный адрес, секрет в теле, а не в адресе', () async {
+  group('token request', () {
+    test('one POST to the right address, the secret in the body, not in the address', () async {
       late http.Request seen;
       var calls = 0;
       final service = make(MockClient((request) async {
@@ -69,8 +69,8 @@ void main() {
     });
   });
 
-  group('кэш и срок жизни', () {
-    test('повторные вызовы берут токен из памяти', () async {
+  group('cache and lifetime', () {
+    test('repeated calls take the token from memory', () async {
       var calls = 0;
       final service = make(MockClient((_) async => _token('tok-${++calls}')));
 
@@ -80,7 +80,7 @@ void main() {
       expect(calls, 1);
     });
 
-    test('после истечения (с запасом 60 с) берётся новый токен', () async {
+    test('after expiry (with a 60 s margin) a new token is taken', () async {
       var calls = 0;
       final service = make(MockClient((_) async => _token('tok-${++calls}')));
 
@@ -95,7 +95,7 @@ void main() {
       expect(calls, 2);
     });
 
-    test('без expires_in действует срок по умолчанию (1 час)', () async {
+    test('without expires_in the default lifetime applies (1 hour)', () async {
       var calls = 0;
       final service = make(
         MockClient((_) async => _token('tok-${++calls}', expiresIn: null)),
@@ -111,7 +111,7 @@ void main() {
       expect(calls, 2);
     });
 
-    test('expires_in = 0 тоже заменяется сроком по умолчанию', () async {
+    test('expires_in = 0 is also replaced by the default lifetime', () async {
       var calls = 0;
       final service = make(
         MockClient((_) async => _token('tok-${++calls}', expiresIn: 0)),
@@ -123,8 +123,8 @@ void main() {
     });
   });
 
-  group('параллельные вызовы', () {
-    test('пять одновременных getToken дают один запрос', () async {
+  group('parallel calls', () {
+    test('five simultaneous getToken calls give one request', () async {
       final gate = Completer<void>();
       var calls = 0;
       final service = make(MockClient((_) async {
@@ -144,7 +144,7 @@ void main() {
       expect(calls, 1);
     });
 
-    test('ошибка не кэшируется: следующий вызов пробует снова', () async {
+    test('an error is not cached: the next call tries again', () async {
       var calls = 0;
       final service = make(MockClient((_) async {
         calls++;
@@ -156,7 +156,7 @@ void main() {
       expect(calls, 2);
     });
 
-    test('все ожидающие получают одну и ту же ошибку', () async {
+    test('all waiters get the same error', () async {
       final gate = Completer<void>();
       var calls = 0;
       final service = make(MockClient((_) async {
@@ -178,7 +178,7 @@ void main() {
   });
 
   group('invalidate', () {
-    test('после invalidate берётся новый токен', () async {
+    test('after invalidate a new token is taken', () async {
       var calls = 0;
       final service = make(MockClient((_) async => _token('tok-${++calls}')));
 
@@ -189,7 +189,7 @@ void main() {
       expect(calls, 2);
     });
 
-    test('запоздалый invalidate старого токена не стирает новый', () async {
+    test('a late invalidate of the old token does not erase the new one', () async {
       var calls = 0;
       final service = make(MockClient((_) async => _token('tok-${++calls}')));
 
@@ -203,7 +203,7 @@ void main() {
     });
   });
 
-  group('ошибки токена', () {
+  group('token errors', () {
     final cases = <(int, Matcher)>[
       (400, isA<AuthException>()),
       (401, isA<AuthException>()),
@@ -224,7 +224,7 @@ void main() {
       });
     }
 
-    test('429 передаёт Retry-After', () async {
+    test('429 passes on Retry-After', () async {
       final service = make(
         MockClient((_) async => _json({}, 429, {'retry-after': '30'})),
       );
@@ -240,18 +240,18 @@ void main() {
       );
     });
 
-    test('в тексте ошибки нет ни секрета, ни идентификатора', () async {
+    test('the error text contains neither the secret nor the identifier', () async {
       final service = make(MockClient((_) async => _json({}, 401)));
       try {
         await service.getToken();
-        fail('ожидалась AuthException');
+        fail('AuthException was expected');
       } on AuthException catch (e) {
         expect(e.toString(), isNot(contains('test-secret')));
         expect(e.toString(), isNot(contains('test-uid')));
       }
     });
 
-    test('нет сети: SocketException и ClientException', () async {
+    test('no network: SocketException and ClientException', () async {
       for (final error in <Exception>[
         const SocketException('offline'),
         http.ClientException('offline'),
@@ -261,7 +261,7 @@ void main() {
       }
     });
 
-    test('таймаут даёт NetworkException с текстом про время', () async {
+    test('a timeout gives NetworkException with text about time', () async {
       final service = make(
         MockClient((_) => Completer<http.Response>().future),
         requestTimeout: const Duration(milliseconds: 50),
@@ -272,13 +272,13 @@ void main() {
           isA<NetworkException>().having(
             (e) => e.message,
             'message',
-            contains('вовремя'),
+            contains('in time'),
           ),
         ),
       );
     });
 
-    test('200, но тело не годится: UnexpectedResponseException', () async {
+    test('200, but the body is unusable: UnexpectedResponseException', () async {
       final bodies = <String>[
         'not json at all', // ASCII only: http.Response encodes the body as latin1
         '[]',
@@ -291,7 +291,7 @@ void main() {
         await expectLater(
           service.getToken(),
           throwsA(isA<UnexpectedResponseException>()),
-          reason: 'тело: $body',
+          reason: 'body: $body',
         );
       }
     });

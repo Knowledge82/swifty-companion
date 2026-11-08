@@ -23,13 +23,13 @@ void main() {
     UnexpectedResponseException(),
   ];
 
-  test('у каждой ошибки есть непустой уникальный текст для пользователя', () {
+  test('every error has a non-empty unique message', () {
     final messages = all.map((e) => e.message).toList();
     expect(messages.every((m) => m.isNotEmpty), isTrue);
     expect(messages.toSet().length, messages.length);
   });
 
-  test('switch различает все виды', () {
+  test('switch tells all kinds apart', () {
     expect(all.map(kind).toSet(), {
       'network',
       'auth',
@@ -40,13 +40,13 @@ void main() {
     });
   });
 
-  test('isTimeout отличает таймаут от обрыва сети', () {
+  test('isTimeout tells a timeout from a lost network', () {
     expect(const NetworkException().isTimeout, isFalse);
     expect(const NetworkException.timeout().isTimeout, isTrue);
   });
 
-  test('toString содержит тип и текст', () {
+  test('toString contains the type and the message', () {
     expect(const NotFoundException().toString(), contains('NotFoundException'));
-    expect(const NotFoundException().toString(), contains('не найден'));
+    expect(const NotFoundException().toString(), contains('not found'));
   });
 }

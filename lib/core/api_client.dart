@@ -62,7 +62,7 @@ class ApiClient {
     );
     _onLog?.call(
       'GET ${uri.path} → ${response.statusCode}, '
-      '${response.bodyBytes.length} байт, ${watch.elapsedMilliseconds} мс',
+      '${response.bodyBytes.length} bytes, ${watch.elapsedMilliseconds} ms',
     );
     return response;
   }

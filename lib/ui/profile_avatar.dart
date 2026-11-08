@@ -61,7 +61,7 @@ class _ProfileAvatarState extends State<ProfileAvatar> {
         // The reason is visible only in debug. Any failure (network, 403, junk)
         // means "try the next address", and in the end "show the placeholder".
         if (kDebugMode) {
-          debugPrint('Фото не загрузилось (${i + 1} из ${urls.length}) (${urls[i]}): $e');
+          debugPrint('Photo failed to load (${i + 1} of ${urls.length}) (${urls[i]}): $e');
         }
       }
     }
