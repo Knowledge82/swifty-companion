@@ -14,9 +14,10 @@ What is printed:
   2. ALL projects (not only completed ones) with the fields: section by the
      app's rules, slug, name, status, cursus_ids, validated, mark.
      The section is chosen like in lib/models/project_section.dart: FIRST by
-     the cursus of the project (c-piscine -> Piscina, c-piscine-reloaded ->
-     Reloaded, any other cursus except 42cursus -> "Cursus: <its name>"), and
-     only then by the slug (Common Core / Outer Core).
+     the cursus of the project (c-piscine-reloaded -> Reloaded, c-piscine or
+     kind piscine / piscine_deprecated -> Piscina, any other cursus except
+     42cursus -> "Cursus: <its name>"), and only then by the slug (Common Core
+     / Outer Core).
 
 The --deep mode answers the question "does the API not return these projects
 at all, or do we lose them":
@@ -92,6 +93,7 @@ CORE = load_core_slugs()
 PREFIXES, PATTERNS = load_dart()
 SECTION_CONSTS = load_consts(SECTION_DART)
 PISCINE_SLUG = SECTION_CONSTS['piscineCursusSlug']
+PISCINE_KINDS = {SECTION_CONSTS['piscineKind'], SECTION_CONSTS['piscineDeprecatedKind']}
 RELOADED_SLUG = SECTION_CONSTS['piscineReloadedCursusSlug']
 MAIN_SLUG = load_consts(CURSUS_DART)['mainCursusSlug']
 
@@ -120,21 +122,22 @@ def category(slug):
 def section(pu, cursuses):
     """The section of a projects_users record: first by cursus, then by slug.
 
-    `cursuses` maps cursus_id -> (slug, name) for the cursuses the student has.
+    `cursuses` maps cursus_id -> (slug, name, kind) for the cursuses the student has.
     It is the same algorithm as `sectionOf` in lib/models/project_section.dart.
     """
     for cursus_id in pu.get('cursus_ids') or []:
         info = cursuses.get(cursus_id)
         if info is None:
             continue
-        slug, name = info
+        slug, name, kind = info
         slug = (slug or '').lower()
+        kind = (kind or '').lower()
         if slug == MAIN_SLUG:
             continue
-        if slug == PISCINE_SLUG:
-            return 'Piscina'
         if slug == RELOADED_SLUG:
             return 'Reloaded'
+        if slug == PISCINE_SLUG or kind in PISCINE_KINDS:
+            return 'Piscina'
         title = name or slug
         if title:
             return f'Cursus: {title}'
@@ -279,7 +282,7 @@ def main():
         c = cu.get('cursus') or {}
         cursus_id = cu.get('cursus_id') if cu.get('cursus_id') is not None else c.get('id')
         if cursus_id is not None:
-            by_id[cursus_id] = (c.get('slug'), c.get('name'))
+            by_id[cursus_id] = (c.get('slug'), c.get('name'), c.get('kind'))
 
     print('\n== projects (all statuses) ==')
     print('section | slug | name | status | cursus_ids | validated | mark')

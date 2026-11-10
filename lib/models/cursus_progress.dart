@@ -10,6 +10,7 @@ class CursusProgress {
     this.cursusId,
     this.name,
     this.slug,
+    this.kind,
     required this.level,
     this.beginAt,
     this.endAt,
@@ -22,6 +23,7 @@ class CursusProgress {
       cursusId: readInt(json['cursus_id']) ?? readInt(cursus?['id']),
       name: readString(cursus?['name']),
       slug: readString(cursus?['slug']),
+      kind: readString(cursus?['kind']),
       level: roundLevel(readDouble(json['level']) ?? 0),
       beginAt: readDate(json['begin_at']),
       endAt: readDate(json['end_at']),
@@ -32,6 +34,12 @@ class CursusProgress {
   final int? cursusId;
   final String? name;
   final String? slug;
+
+  /// The kind of the cursus as the API gives it: `main`, `piscine`,
+  /// `piscine_deprecated`, `professional_training`, `external` and others (the
+  /// full list of values is in docs/12, section 24.12). `null` if the API did
+  /// not send it.
+  final String? kind;
 
   /// Overall level of the cursus, rounded to two decimals (12.44).
   final double level;

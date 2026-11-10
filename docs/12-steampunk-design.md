@@ -1149,8 +1149,8 @@ Wrap(alignment: WrapAlignment.spaceBetween, spacing: 12, runSpacing: 2,
 
 | Шаг | Условие | Результат |
 |---|---|---|
-| 1 | у проекта есть курс из `cursus_ids`, который есть у студента (`cursus_users`), и он **не** `42cursus`; slug курса `c-piscine` | Piscina |
-| 1 | то же, slug `c-piscine-reloaded` | Piscina Reloaded |
+| 1 | у проекта есть курс из `cursus_ids`, который есть у студента (`cursus_users`), и он **не** `42cursus`; slug курса `c-piscine-reloaded` | Piscina Reloaded |
+| 1 | то же; slug `c-piscine` **или** `kind` равен `piscine` / `piscine_deprecated` (см. §24.13) | Piscina |
 | 1 | то же, любой другой курс | **отдельный раздел** с названием курса из API |
 | 2 | иначе (проект только в `42cursus`, или про курс ничего не известно) | прежние правила по slug (`categoryOf`): Common Core или Outer Core |
 
@@ -1286,4 +1286,29 @@ python3 tool/dump_projects.py --cursus
 | Другие `main`: `42.zip` (53), `42Senior` (78) | это другие программы; сейчас они получают свои разделы по имени, что верно | оставить как есть |
 | `professional_training`, `external`, `test` и прочее | свои разделы по имени курса | оставить как есть |
 
-**Ограничение, которое надо проверить:** `kind` точно есть в ответе `/v2/cursus`, но неизвестно, приходит ли он внутри `cursus_users[].cursus` профиля (приложение читает именно оттуда). Для проверки колонка `kind` добавлена в таблицу курсов профильного дампа: `python3 tool/dump_projects.py <login>`. Если там `None`, поле не встроено, и опираться на него без дополнительного запроса нельзя.
+**Проверка встроенности `kind` (сделана).** Колонка `kind` была добавлена в таблицу курсов профильного дампа. Вывод для студента показал реальные значения внутри `cursus_users[].cursus`: `piscine` (курс 9), `main` (21), `external` (66), `professional_training` (68 и 80). Значит, приложение может читать `kind` из того же ответа `/v2/users/<login>`, дополнительный запрос не нужен.
+
+### 24.13. Правило по `kind` для семейства бассейнов
+
+**Что сделано.** В `CursusProgress` появилось поле `kind` (необязательное). В `sectionOf` курс с `kind` равным `piscine` или `piscine_deprecated` даёт раздел Piscina. Slug `c-piscine` оставлен как запасное правило на случай, если API когда-нибудь перестанет присылать `kind`. Reloaded по-прежнему определяется по slug `c-piscine-reloaded` и проверяется **первым**.
+
+| Курс | `kind` | Раздел |
+|---|---|---|
+| `c-piscine` (9), `c-piscine-brussels` (64), `c-piscine-antwerp` (65) | `piscine` | Piscina |
+| `piscine-c` (4), `piscine-c-decloisonnee` (6), `piscine-c-a-distance` (7), `bootcamp` (11) | `piscine_deprecated` | Piscina |
+| `c-piscine-reloaded` (66) | `external` | Piscina Reloaded (по slug) |
+| `reloaded` (28) | `external` | **отдельный раздел «Reloaded»** по имени из API (решение: не склеивать, пока неизвестно, что это одно и то же) |
+| Discovery, Pro Piscine, Intermediate | `professional_training` | отдельные разделы по имени |
+| Basecamp в разных странах | `piscine_community` | отдельные разделы по имени |
+| `42.zip` (53), `42Senior` (78) | `main` | отдельные разделы по имени (`main` не значит «`42cursus`») |
+
+**Почему не «всё, в названии чего есть piscine».** Подстрока `piscine` встречается и у Discovery Piscine, и у Pro Piscine, а это другие программы. `kind` для этого и существует: школа сама разделила бассейны на `piscine`, `piscine_community`, `professional_training`.
+
+**Почему `piscine_community` (Basecamp) не в Piscina.** Это бассейны-«базовые лагеря» отдельных партнёров, а не C Piscine. Если ты решишь, что их тоже нужно сливать с Piscina, достаточно добавить ещё одну константу и условие.
+
+**Риски.**
+1. Школа может добавить новое значение `kind` для бассейна (например, `piscine_pro`). Оно попадёт в отдельный раздел по имени курса, ничего не пропадёт.
+2. Если когда-нибудь `kind` перестанет приходить, продолжает работать проверка по slug `c-piscine`, но бассейны других кампусов снова получат отдельные разделы.
+3. Правило продублировано на Python (`tool/dump_projects.py`): константы читаются из Dart, а условие надо менять в двух местах.
+
+**Тесты** (`project_section_test.dart`): `piscine` и `piscine_deprecated` дают Piscina независимо от slug; регистр `kind` не важен; `main` с другим slug (`42.zip`) остаётся отдельным разделом; `piscine_community`, `professional_training`, `external`, `test` не считаются бассейнами; Reloaded с `external` остаётся Reloaded; курс `reloaded` (28) получает свой раздел; без `kind` работает запасное правило по slug. Тест на дампе студента теперь содержит настоящие `kind`.

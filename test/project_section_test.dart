@@ -8,11 +8,18 @@ import 'package:swifty_companion/models/project_section.dart';
 import 'package:swifty_companion/models/user_profile.dart';
 
 void main() {
-  CursusProgress cursus(int id, String? slug, {String? name, DateTime? begin}) =>
+  CursusProgress cursus(
+    int id,
+    String? slug, {
+    String? name,
+    String? kind,
+    DateTime? begin,
+  }) =>
       CursusProgress(
         cursusId: id,
         slug: slug,
         name: name,
+        kind: kind,
         level: 0,
         beginAt: begin,
       );
@@ -62,6 +69,85 @@ void main() {
       final cursusSection = section as CursusSection;
       expect(cursusSection.cursusId, 68);
       expect(cursusSection.name, 'Discovery Piscine - Cybersecurity');
+    });
+
+    test('kind piscine: a piscine of another campus is Piscina', () {
+      // c-piscine-brussels (id 64) has kind `piscine` but another slug.
+      expect(
+        sectionOf(
+          project('x', [64]),
+          [cursus(64, 'c-piscine-brussels', name: 'C Piscine Brussels', kind: 'piscine')],
+        ),
+        const KnownSection(ProjectCategory.piscine),
+      );
+    });
+
+    test('kind piscine_deprecated: an old piscine is Piscina', () {
+      expect(
+        sectionOf(
+          project('piscine-c-day-00', [4]),
+          [cursus(4, 'piscine-c', name: 'Piscine C', kind: 'piscine_deprecated')],
+        ),
+        const KnownSection(ProjectCategory.piscine),
+      );
+    });
+
+    test('the kind is compared in any case', () {
+      expect(
+        sectionOf(project('x', [4]), [cursus(4, 'a', kind: 'PISCINE')]),
+        const KnownSection(ProjectCategory.piscine),
+      );
+    });
+
+    test('kind main with another slug (42.zip) is not 42cursus: own section', () {
+      final section = sectionOf(
+        project('x', [53]),
+        [cursus(53, '42-zip', name: '42.zip', kind: 'main')],
+      ) as CursusSection;
+      expect(section.name, '42.zip');
+    });
+
+    test('other kinds are not piscines: Basecamp and Discovery get own sections', () {
+      for (final kind in [
+        'piscine_community',
+        'professional_training',
+        'external',
+        'test',
+      ]) {
+        expect(
+          sectionOf(
+            project('x', [7]),
+            [cursus(7, 'some-slug', name: 'Some', kind: kind)],
+          ),
+          isA<CursusSection>(),
+          reason: kind,
+        );
+      }
+    });
+
+    test('kind external does not stop c-piscine-reloaded from being Reloaded', () {
+      expect(
+        sectionOf(
+          project('x', [66]),
+          [cursus(66, 'c-piscine-reloaded', kind: 'external')],
+        ),
+        const KnownSection(ProjectCategory.piscineReloaded),
+      );
+    });
+
+    test('the second "reloaded" cursus (slug reloaded) gets its own section', () {
+      final section = sectionOf(
+        project('x', [28]),
+        [cursus(28, 'reloaded', name: 'Reloaded', kind: 'external')],
+      );
+      expect(section, isA<CursusSection>());
+    });
+
+    test('without kind the slug c-piscine still works (fallback)', () {
+      expect(
+        sectionOf(project('x', [9]), [cursus(9, 'c-piscine')]),
+        const KnownSection(ProjectCategory.piscine),
+      );
     });
 
     test('a cursus without a name is named by its slug', () {
@@ -235,13 +321,14 @@ void main() {
       int id,
       String name,
       String slug,
+      String kind,
       String begin,
     ) =>
         {
           'cursus_id': id,
           'level': 1.0,
           'begin_at': '${begin}T00:00:00.000Z',
-          'cursus': {'id': id, 'name': name, 'slug': slug},
+          'cursus': {'id': id, 'name': name, 'slug': slug, 'kind': kind},
         };
 
     Map<String, dynamic> record(
@@ -266,24 +353,27 @@ void main() {
       final json = <String, dynamic>{
         'login': 'student',
         'cursus_users': [
-          cursusUser(9, 'C Piscine', 'c-piscine', '2026-03-02'),
-          cursusUser(21, '42cursus', '42cursus', '2026-04-13'),
+          cursusUser(9, 'C Piscine', 'c-piscine', 'piscine', '2026-03-02'),
+          cursusUser(21, '42cursus', '42cursus', 'main', '2026-04-13'),
           cursusUser(
             66,
             'C-Piscine-Reloaded',
             'c-piscine-reloaded',
+            'external',
             '2026-04-13',
           ),
           cursusUser(
             68,
             'Discovery Piscine - Cybersecurity',
             'discovery-piscine-cybersecurity',
+            'professional_training',
             '2026-06-15',
           ),
           cursusUser(
             80,
             'Discovery Piscine - Core Python Programming',
             'discovery-piscine-core-python-programming',
+            'professional_training',
             '2026-05-18',
           ),
         ],

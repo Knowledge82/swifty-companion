@@ -11,6 +11,14 @@ const String piscineCursusSlug = 'c-piscine';
 /// Slug of the cursus "C Piscine Reloaded".
 const String piscineReloadedCursusSlug = 'c-piscine-reloaded';
 
+/// Kind (`cursus.kind`) of the ordinary piscines: "C Piscine" of any campus
+/// (for example `c-piscine-brussels`).
+const String piscineKind = 'piscine';
+
+/// Kind of the old piscines (`piscine-c`, `piscine-c-decloisonnee`,
+/// `piscine-c-a-distance`, `bootcamp`).
+const String piscineDeprecatedKind = 'piscine_deprecated';
+
 /// A group on the profile screen into which completed projects are put.
 ///
 /// Two kinds:
@@ -66,10 +74,13 @@ final class CursusSection extends ProjectSection {
 /// 1. The project has a cursus (from `cursus_ids`) that the student really
 ///    has (`cursus_users`) and that is not the main `42cursus`: then the cursus
 ///    decides.
-///    - `c-piscine` -> Piscina;
-///    - `c-piscine-reloaded` -> Piscina Reloaded;
-///    - any other cursus (Discovery Piscines, future piscines of Outer Core)
-///      -> a [CursusSection] with the name of the cursus.
+///    - slug `c-piscine-reloaded` -> Piscina Reloaded;
+///    - slug `c-piscine`, or kind `piscine` / `piscine_deprecated` (piscines
+///      of other campuses and the old ones) -> Piscina;
+///    - any other cursus (Discovery Piscines, Basecamp, `42.zip` ...) -> a
+///      [CursusSection] with the name of the cursus.
+///    The slug check of `c-piscine` stays as a fallback for the case when the
+///    API does not send `kind`.
 /// 2. Otherwise (the project is only in `42cursus`, or nothing is known about
 ///    its cursus) the slug rules of [categoryOf] decide. They are the only way
 ///    to tell Common Core from Outer Core: both live in the same `42cursus`.
@@ -84,14 +95,17 @@ ProjectSection sectionOf(ProjectResult project, List<CursusProgress> cursuses) {
       continue;
     }
     final slug = cursus.slug?.toLowerCase();
+    final kind = cursus.kind?.toLowerCase();
     if (slug == mainCursusSlug) {
       continue;
     }
-    if (slug == piscineCursusSlug) {
-      return const KnownSection(ProjectCategory.piscine);
-    }
     if (slug == piscineReloadedCursusSlug) {
       return const KnownSection(ProjectCategory.piscineReloaded);
+    }
+    if (slug == piscineCursusSlug ||
+        kind == piscineKind ||
+        kind == piscineDeprecatedKind) {
+      return const KnownSection(ProjectCategory.piscine);
     }
     final name = cursus.name ?? cursus.slug;
     if (name != null) {
