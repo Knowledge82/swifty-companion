@@ -1254,3 +1254,36 @@ python3 tool/dump_projects.py --cursus
 | 3 | `python3 tool/dump_projects.py <login>` для студента с Discovery | колонка `section`: `Cursus: Discovery Piscine - …`, ни одной строки `Outer` для этих проектов |
 | 4 | Свой профиль на телефоне | разделы как раньше: ничего лишнего не появилось |
 | 5 | Профиль студента с Discovery на телефоне | под известными разделами ещё два, свёрнутые, по дате начала |
+
+### 24.12. Результат `dump_projects.py --cursus` (78 курсов школы)
+
+Вывод режима `--cursus` показал три важные вещи.
+
+**1. Бассейнов Outer Core (Mobile, Unity, Cybersecurity и других) среди курсов нет.** Курсов 78, это меньше размера страницы (100), значит список полный. Рядом с `42cursus` нет ни `piscine-mobile`, ни `piscine-unity`, ни «Pedago». Из этого следует **вариант B** из §24.7: такие бассейны лежат **внутри `42cursus`** со своими slug'ами проектов, и правила по slug отправляют их в Outer Core по умолчанию, то есть именно туда, где они должны быть. Никаких правок для них не нужно. Оговорка: в нумерации есть пропуски (`2, 24, 29, 30, 45, 55, 70, 71, 72`); это могут быть удалённые или скрытые курсы. Окончательно подтвердит только профиль студента, который проходил такой бассейн.
+
+**2. У курса есть поле `kind`.** Распределение:
+
+| `kind` | Сколько | Примеры |
+|---|---|---|
+| `external` | 28 | `c-piscine-reloaded` (66), `reloaded` (28), `piscine-embedded` (81), Madrid RPA |
+| `professional_training` | 12 | Discovery Piscines (68, 80, 79, 86, 3), Pro Piscine, Intermediate |
+| `piscine_community` | 10 | Basecamp в разных странах |
+| `test` | 8 | `42Test`, `kor-test` |
+| `external_deprecated` | 5 | старые внешние |
+| `piscine_deprecated` | 4 | `piscine-c` (4), `piscine-c-decloisonnee` (6), `piscine-c-a-distance` (7), BootCamp (11) |
+| `main_deprecated` | 3 | `42` (1), WeThinkCode_ (8), Formation Pole Emploi (10) |
+| `piscine` | 3 | `c-piscine` (9), `c-piscine-brussels` (64), `c-piscine-antwerp` (65) |
+| `main` | 3 | `42cursus` (21), `42.zip` (53), `42Senior` (78) |
+| `professional_training_deprecated` | 2 | Bootcamp Cybersecurity (58), Discovery Piscine - Python (69) |
+
+**3. Что это значит для наших правил.**
+
+| Находка | Последствие сейчас | Что можно улучшить |
+|---|---|---|
+| Бассейны других кампусов: `c-piscine-brussels` (64), `c-piscine-antwerp` (65) | студент оттуда получит раздел «C Piscine Brussels» вместо «Piscina» | считать `kind == piscine` разделом Piscina |
+| Старые бассейны: `piscine-c` (4), `piscine-c-decloisonnee` (6), `piscine-c-a-distance` (7), `bootcamp` (11), kind `piscine_deprecated` | раньше проекты `piscine-…` попадали по slug в Piscina; теперь у студента с таким курсом был бы отдельный раздел с английским названием | считать `piscine_deprecated` тоже Piscina |
+| Два курса «Reloaded»: `reloaded` (28) и `c-piscine-reloaded` (66), оба `external` | наше правило знает только slug `c-piscine-reloaded`; студент с курсом 28 получит раздел «Reloaded» по имени из API | уточнить, одно ли это; сам по себе `kind` тут не помогает |
+| Другие `main`: `42.zip` (53), `42Senior` (78) | это другие программы; сейчас они получают свои разделы по имени, что верно | оставить как есть |
+| `professional_training`, `external`, `test` и прочее | свои разделы по имени курса | оставить как есть |
+
+**Ограничение, которое надо проверить:** `kind` точно есть в ответе `/v2/cursus`, но неизвестно, приходит ли он внутри `cursus_users[].cursus` профиля (приложение читает именно оттуда). Для проверки колонка `kind` добавлена в таблицу курсов профильного дампа: `python3 tool/dump_projects.py <login>`. Если там `None`, поле не встроено, и опираться на него без дополнительного запроса нельзя.

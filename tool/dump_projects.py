@@ -9,7 +9,8 @@ Run from the project root (needs .env with FT_UID and FT_SECRET; secrets are NOT
     python3 tool/dump_projects.py --cursus         # ALL cursuses of the 42 network (GET /v2/cursus)
 
 What is printed:
-  1. the student's cursuses (cursus_users): id, name, slug, level, dates;
+  1. the student's cursuses (cursus_users): id, name, slug, kind, level, dates
+     (`kind` is None if the API does not embed it into cursus_users);
   2. ALL projects (not only completed ones) with the fields: section by the
      app's rules, slug, name, status, cursus_ids, validated, mark.
      The section is chosen like in lib/models/project_section.dart: FIRST by
@@ -266,11 +267,11 @@ def main():
         sys.exit(__doc__)
 
     print('== cursuses (cursus_users) ==')
-    print('cursus_id | name | slug | level | begin | end')
+    print('cursus_id | name | slug | kind | level | begin | end')
     for cu in data.get('cursus_users') or []:
         c = cu.get('cursus') or {}
         print(' | '.join(str(x) for x in (
-            cu.get('cursus_id'), c.get('name'), c.get('slug'), cu.get('level'),
+            cu.get('cursus_id'), c.get('name'), c.get('slug'), c.get('kind'), cu.get('level'),
             (cu.get('begin_at') or '')[:10], (cu.get('end_at') or '')[:10])))
 
     by_id = {}
