@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import '../core/api_exception.dart';
 import '../core/login.dart';
 import '../models/project_category.dart';
+import '../models/project_section.dart';
 import 'app_strings_en.dart';
 import 'app_strings_es.dart';
 
@@ -38,7 +39,7 @@ abstract class AppStrings {
     final strings = Localizations.of<AppStrings>(context, AppStrings);
     assert(
       strings != null,
-      'AppStrings.delegate не подключён к MaterialApp (localizationsDelegates)',
+      'AppStrings.delegate is not connected to MaterialApp (localizationsDelegates)',
     );
     return strings!;
   }
@@ -97,12 +98,22 @@ abstract class AppStrings {
   String get configUnreadable;
   String get configHint;
 
-  /// Name of a projects section. The `switch` over the enum is exhaustive.
+  /// Name of a known projects section. The `switch` over the enum is
+  /// exhaustive.
   String projectCategoryTitle(ProjectCategory category) => switch (category) {
         ProjectCategory.outerCore => projectsOuterCore,
         ProjectCategory.commonCore => projectsCommonCore,
         ProjectCategory.piscine => projectsPiscine,
         ProjectCategory.piscineReloaded => projectsPiscineReloaded,
+      };
+
+  /// Title of any projects section. A known section is translated; the section
+  /// of another cursus carries the cursus name from the API as it is (it is
+  /// data, not our text, and it cannot be known in advance). The `switch` over
+  /// the sealed class is exhaustive.
+  String projectSectionTitle(ProjectSection section) => switch (section) {
+        KnownSection(:final category) => projectCategoryTitle(category),
+        CursusSection(:final name) => name,
       };
 
   /// Text of a login problem. The `switch` over the enum is exhaustive.

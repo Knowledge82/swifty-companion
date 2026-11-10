@@ -136,7 +136,7 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         BrassPanel(
                           child: ProjectsSection(
-                            groups: profile.finishedProjectsByCategory(),
+                            groups: profile.finishedProjectsBySection(),
                           ),
                         ),
                       ],

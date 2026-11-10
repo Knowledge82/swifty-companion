@@ -14,7 +14,7 @@ void main() {
       testApp(
         Scaffold(
           body: SingleChildScrollView(
-            child: ProjectsSection(groups: profile.finishedProjectsByCategory()),
+            child: ProjectsSection(groups: profile.finishedProjectsBySection()),
           ),
         ),
       ),
@@ -102,6 +102,53 @@ void main() {
     expect(tester.getSize(inkWell).height, greaterThanOrEqualTo(48));
   });
 
+  testWidgets(
+      'a section of another cursus: its title is the cursus name from the API, '
+      'after the known sections', (tester) async {
+    final json = sampleUserJson()..remove('image');
+    (json['cursus_users'] as List).add({
+      'cursus_id': 68,
+      'level': 7.77,
+      'begin_at': '2026-06-15T00:00:00.000Z',
+      'cursus': {
+        'id': 68,
+        'name': 'Discovery Piscine - Cybersecurity',
+        'slug': 'discovery-piscine-cybersecurity',
+      },
+    });
+    (json['projects_users'] as List).add({
+      'status': 'finished',
+      'validated?': true,
+      'final_mark': 100,
+      'marked_at': '2026-06-16T10:00:00.000Z',
+      'cursus_ids': [68],
+      'project': {'slug': 'shell-0-0', 'name': 'Shell-0-0'},
+    });
+    final profile = UserProfile.fromJson(json);
+    await tester.pumpWidget(
+      testApp(
+        Scaffold(
+          body: SingleChildScrollView(
+            child: ProjectsSection(groups: profile.finishedProjectsBySection()),
+          ),
+        ),
+      ),
+    );
+
+    final discovery = find.text('Discovery Piscine - Cybersecurity · 1');
+    expect(discovery, findsOneWidget);
+    // Collapsed like the others, and below the known sections.
+    expect(find.text('Shell-0-0'), findsNothing);
+    expect(
+      tester.getTopLeft(discovery).dy,
+      greaterThan(tester.getTopLeft(find.text('Piscina · 1')).dy),
+    );
+
+    await tester.tap(discovery);
+    await tester.pumpAndSettle();
+    expect(find.text('Shell-0-0'), findsOneWidget);
+  });
+
   testWidgets('no projects: a message, no group headers', (tester) async {
     await tester.pumpWidget(
       testApp(const Scaffold(body: ProjectsSection(groups: {}))),
@@ -122,7 +169,7 @@ void main() {
       testApp(
         Scaffold(
           body: SingleChildScrollView(
-            child: ProjectsSection(groups: profile.finishedProjectsByCategory()),
+            child: ProjectsSection(groups: profile.finishedProjectsBySection()),
           ),
         ),
         textScale: 2,

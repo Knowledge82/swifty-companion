@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../core/display.dart';
 import '../l10n/app_strings.dart';
-import '../models/project_category.dart';
 import '../models/project_result.dart';
+import '../models/project_section.dart';
 import 'section_title.dart';
 
 /// The "Projects" section: completed projects (passed and failed), laid out in
-/// the groups Outer Core, Common Core, Piscina. Empty groups are not shown.
+/// groups: Outer Core, Common Core, Piscina, Piscina Reloaded and the cursuses
+/// the student has besides them (for example the Discovery Piscines). Empty
+/// groups are not shown.
 ///
 /// Every group is **collapsed** and expands on a tap on the header: a list of
 /// 40 projects at once would fill the whole screen. Which groups are expanded
@@ -17,19 +19,21 @@ import 'section_title.dart';
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key, required this.groups});
 
-  final Map<ProjectCategory, List<ProjectResult>> groups;
+  /// The groups in the order of display: the order of the keys of the map is
+  /// kept as it is (see `UserProfile.finishedProjectsBySection`).
+  final Map<ProjectSection, List<ProjectResult>> groups;
 
   @override
   State<ProjectsSection> createState() => _ProjectsSectionState();
 }
 
 class _ProjectsSectionState extends State<ProjectsSection> {
-  final Set<ProjectCategory> _expanded = {};
+  final Set<ProjectSection> _expanded = {};
 
-  void _toggle(ProjectCategory category) {
+  void _toggle(ProjectSection section) {
     setState(() {
-      if (!_expanded.remove(category)) {
-        _expanded.add(category);
+      if (!_expanded.remove(section)) {
+        _expanded.add(section);
       }
     });
   }
@@ -38,8 +42,8 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
     final nonEmpty = [
-      for (final category in ProjectCategory.values)
-        if (widget.groups[category]?.isNotEmpty ?? false) category,
+      for (final entry in widget.groups.entries)
+        if (entry.value.isNotEmpty) entry.key,
     ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,19 +52,19 @@ class _ProjectsSectionState extends State<ProjectsSection> {
         if (nonEmpty.isEmpty)
           Text(strings.projectsEmpty)
         else
-          for (final category in nonEmpty) ...[
+          for (final section in nonEmpty) ...[
             _GroupHeading(
-              title: strings.projectCategoryTitle(category),
-              count: widget.groups[category]!.length,
-              expanded: _expanded.contains(category),
-              onTap: () => _toggle(category),
+              title: strings.projectSectionTitle(section),
+              count: widget.groups[section]!.length,
+              expanded: _expanded.contains(section),
+              onTap: () => _toggle(section),
             ),
             _Collapsible(
-              expanded: _expanded.contains(category),
+              expanded: _expanded.contains(section),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final project in widget.groups[category]!)
+                  for (final project in widget.groups[section]!)
                     _ProjectRow(project: project),
                 ],
               ),

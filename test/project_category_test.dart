@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:swifty_companion/models/project_category.dart';
 import 'package:swifty_companion/models/project_result.dart';
+import 'package:swifty_companion/models/project_section.dart';
 import 'package:swifty_companion/models/user_profile.dart';
 
 import 'fixtures.dart';
@@ -180,24 +181,27 @@ void main() {
     });
   });
 
-  group('finishedProjectsByCategory', () {
+  group('finishedProjectsBySection', () {
     test('all sections are always present, in display order', () {
-      final grouped = const UserProfile(login: 'x').finishedProjectsByCategory();
-      expect(grouped.keys.toList(), ProjectCategory.values);
+      final grouped = const UserProfile(login: 'x').finishedProjectsBySection();
+      expect(
+        grouped.keys.toList(),
+        [for (final category in ProjectCategory.values) KnownSection(category)],
+      );
       expect(grouped.values.every((list) => list.isEmpty), isTrue);
     });
 
     test('projects are sorted into sections, newest first inside', () {
       final grouped =
-          UserProfile.fromJson(sampleUserJson()).finishedProjectsByCategory();
+          UserProfile.fromJson(sampleUserJson()).finishedProjectsBySection();
 
-      expect(grouped[ProjectCategory.outerCore], isEmpty);
+      expect(grouped[const KnownSection(ProjectCategory.outerCore)], isEmpty);
       expect(
-        grouped[ProjectCategory.commonCore]!.map((p) => p.name),
+        grouped[const KnownSection(ProjectCategory.commonCore)]!.map((p) => p.name),
         ['push_swap', 'ft_printf', 'libft'],
       );
       expect(
-        grouped[ProjectCategory.piscine]!.map((p) => p.name),
+        grouped[const KnownSection(ProjectCategory.piscine)]!.map((p) => p.name),
         ['c-piscine-shell-00'],
       );
     });
@@ -224,16 +228,16 @@ void main() {
           'project': {'slug': 'c-piscine-final-exam', 'name': 'C Piscine Final Exam'},
         },
       ]);
-      final grouped = UserProfile.fromJson(json).finishedProjectsByCategory();
+      final grouped = UserProfile.fromJson(json).finishedProjectsBySection();
       expect(
-        grouped[ProjectCategory.piscine]!.map((p) => p.name),
+        grouped[const KnownSection(ProjectCategory.piscine)]!.map((p) => p.name),
         ['C Piscine Final Exam', 'C Piscine Exam 00', 'c-piscine-shell-00'],
       );
     });
 
     test('unfinished projects go into no section', () {
       final grouped =
-          UserProfile.fromJson(sampleUserJson()).finishedProjectsByCategory();
+          UserProfile.fromJson(sampleUserJson()).finishedProjectsBySection();
       final all = grouped.values.expand((list) => list).map((p) => p.name);
       expect(all, isNot(contains('minishell')));
     });

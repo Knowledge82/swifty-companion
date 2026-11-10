@@ -6,11 +6,16 @@ Run from the project root (needs .env with FT_UID and FT_SECRET; secrets are NOT
     python3 tool/dump_projects.py LOGIN            # live request to the 42 API
     python3 tool/dump_projects.py LOGIN --deep     # + compare with the paged list and /exams
     python3 tool/dump_projects.py --file user.json # the same analysis of a saved response
+    python3 tool/dump_projects.py --cursus         # ALL cursuses of the 42 network (GET /v2/cursus)
 
 What is printed:
   1. the student's cursuses (cursus_users): id, name, slug, level, dates;
   2. ALL projects (not only completed ones) with the fields: section by the
      app's rules, slug, name, status, cursus_ids, validated, mark.
+     The section is chosen like in lib/models/project_section.dart: FIRST by
+     the cursus of the project (c-piscine -> Piscina, c-piscine-reloaded ->
+     Reloaded, any other cursus except 42cursus -> "Cursus: <its name>"), and
+     only then by the slug (Common Core / Outer Core).
 
 The --deep mode answers the question "does the API not return these projects
 at all, or do we lose them":
@@ -20,8 +25,13 @@ at all, or do we lose them":
   4. candidate projects by the words exam/rush/bsq: slug, name, status;
   5. a probe of `/v2/users/LOGIN/exams`: the response code and the number of records.
 
-The splitting rules (commonCoreSlugs, patterns) are read straight from
-lib/models/project_category.dart, so the script does not drift from the app.
+The --cursus mode does not need a login. It prints every cursus that exists
+in the 42 network: id, name, slug and `kind` (if the API gives it). Use it to
+see how the piscines of Outer Core (Mobile, Unity, Cybersecurity ...) are
+called and whether they are separate cursuses, without a live student.
+
+The splitting rules (commonCoreSlugs, patterns, cursus slugs) are read straight
+from lib/models/*.dart, so the script does not drift from the app.
 No dependencies: only the Python 3 standard library.
 """
 import json
@@ -38,6 +48,8 @@ API = 'https://api.intra.42.fr'
 HEADERS = {'User-Agent': 'swifty-companion-tool/1.0 (42 Barcelona student project)',
            'Accept': 'application/json'}
 CATEGORY_DART = os.path.join('lib', 'models', 'project_category.dart')
+SECTION_DART = os.path.join('lib', 'models', 'project_section.dart')
+CURSUS_DART = os.path.join('lib', 'models', 'cursus_progress.dart')
 
 
 def load_env(path='.env'):
@@ -69,8 +81,18 @@ def load_dart():
     return prefixes, patterns
 
 
+def load_consts(path):
+    """String constants `const String name = 'value';` from a Dart file."""
+    with open(path, encoding='utf-8') as f:
+        return dict(re.findall(r"const String (\w+) = '([^']+)';", f.read()))
+
+
 CORE = load_core_slugs()
 PREFIXES, PATTERNS = load_dart()
+SECTION_CONSTS = load_consts(SECTION_DART)
+PISCINE_SLUG = SECTION_CONSTS['piscineCursusSlug']
+RELOADED_SLUG = SECTION_CONSTS['piscineReloadedCursusSlug']
+MAIN_SLUG = load_consts(CURSUS_DART)['mainCursusSlug']
 
 
 def norm(slug):
@@ -92,6 +114,30 @@ def category(slug):
     if s in CORE or any(p.search(s) for p in PATTERNS):
         return 'Common'
     return 'Outer'
+
+
+def section(pu, cursuses):
+    """The section of a projects_users record: first by cursus, then by slug.
+
+    `cursuses` maps cursus_id -> (slug, name) for the cursuses the student has.
+    It is the same algorithm as `sectionOf` in lib/models/project_section.dart.
+    """
+    for cursus_id in pu.get('cursus_ids') or []:
+        info = cursuses.get(cursus_id)
+        if info is None:
+            continue
+        slug, name = info
+        slug = (slug or '').lower()
+        if slug == MAIN_SLUG:
+            continue
+        if slug == PISCINE_SLUG:
+            return 'Piscina'
+        if slug == RELOADED_SLUG:
+            return 'Reloaded'
+        title = name or slug
+        if title:
+            return f'Cursus: {title}'
+    return category((pu.get('project') or {}).get('slug'))
 
 
 def get_token():
@@ -181,11 +227,33 @@ def deep_checks(login, token, data):
             print('  ', {k: e.get(k) for k in ('id', 'name', 'begin_at', 'end_at', 'project_id') if k in e})
 
 
+def list_cursuses():
+    """GET /v2/cursus (all pages): every cursus of the 42 network."""
+    token = get_token()
+    cursuses, page = [], 1
+    while page <= 20:  # a safety limit: 2000 cursuses is plenty
+        chunk = api_get(token, f'/v2/cursus?page[size]=100&page[number]={page}',
+                        f'cursus, page {page}')
+        if not isinstance(chunk, list):
+            sys.exit('unexpected response of /v2/cursus')
+        cursuses.extend(chunk)
+        if len(chunk) < 100:
+            break
+        page += 1
+    print(f'== all cursuses of the 42 network: {len(cursuses)} ==')
+    print('id | name | slug | kind')
+    for c in sorted(cursuses, key=lambda c: c.get('id') or 0):
+        print(' | '.join(str(c.get(k)) for k in ('id', 'name', 'slug', 'kind')))
+
+
 def main():
     args = sys.argv[1:]
     deep = '--deep' in args
     args = [a for a in args if a != '--deep']
     token = None
+    if args == ['--cursus']:
+        list_cursuses()
+        return
     if len(args) == 2 and args[0] == '--file':
         if deep:
             sys.exit('--deep works only with a live request (LOGIN), not with --file')
@@ -205,12 +273,19 @@ def main():
             cu.get('cursus_id'), c.get('name'), c.get('slug'), cu.get('level'),
             (cu.get('begin_at') or '')[:10], (cu.get('end_at') or '')[:10])))
 
+    by_id = {}
+    for cu in data.get('cursus_users') or []:
+        c = cu.get('cursus') or {}
+        cursus_id = cu.get('cursus_id') if cu.get('cursus_id') is not None else c.get('id')
+        if cursus_id is not None:
+            by_id[cursus_id] = (c.get('slug'), c.get('name'))
+
     print('\n== projects (all statuses) ==')
     print('section | slug | name | status | cursus_ids | validated | mark')
     rows = []
     for pu in data.get('projects_users') or []:
         p = pu.get('project') or {}
-        rows.append((category(p.get('slug')), p.get('slug'), p.get('name'), pu.get('status'),
+        rows.append((section(pu, by_id), p.get('slug'), p.get('name'), pu.get('status'),
                      pu.get('cursus_ids'), pu.get('validated?'), pu.get('final_mark')))
     for r in sorted(rows, key=lambda r: (r[0], str(r[1]))):
         print(' | '.join(str(x) for x in r))

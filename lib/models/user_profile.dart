@@ -2,6 +2,7 @@ import '../core/json_reader.dart';
 import 'cursus_progress.dart';
 import 'project_category.dart';
 import 'project_result.dart';
+import 'project_section.dart';
 
 /// A student's profile: only what the app shows.
 /// Service and sensitive fields of the response (`anonymize_date`,
@@ -108,16 +109,35 @@ class UserProfile {
     return result;
   }
 
-  /// Completed projects by section (Outer Core, Common Core, Piscina). The map
-  /// always has all three sections, in the order of [ProjectCategory.values];
-  /// inside a section the order is the same as in [finishedProjects]: newest
+  /// Completed projects by section (see [sectionOf]).
+  ///
+  /// The order of the keys is the order of display (a `Map` literal keeps the
+  /// insertion order):
+  /// 1. the four known sections, **always present** (possibly with an empty
+  ///    list), in the order of [ProjectCategory.values];
+  /// 2. then the sections of other cursuses (Discovery Piscines and so on),
+  ///    **only if they have projects**, the oldest cursus first (see
+  ///    [orderCursusSections]).
+  ///
+  /// Inside a section the order is the same as in [finishedProjects]: newest
   /// first.
-  Map<ProjectCategory, List<ProjectResult>> finishedProjectsByCategory() {
-    final grouped = <ProjectCategory, List<ProjectResult>>{
-      for (final category in ProjectCategory.values) category: <ProjectResult>[],
+  Map<ProjectSection, List<ProjectResult>> finishedProjectsBySection() {
+    final grouped = <ProjectSection, List<ProjectResult>>{
+      for (final category in ProjectCategory.values)
+        KnownSection(category): <ProjectResult>[],
     };
+    final ofCursuses = <CursusSection, List<ProjectResult>>{};
+
     for (final project in finishedProjects()) {
-      grouped[categoryOf(project)]!.add(project);
+      final section = sectionOf(project, cursuses);
+      if (section is CursusSection) {
+        (ofCursuses[section] ??= <ProjectResult>[]).add(project);
+      } else {
+        grouped[section]!.add(project);
+      }
+    }
+    for (final section in orderCursusSections(ofCursuses.keys, cursuses)) {
+      grouped[section] = ofCursuses[section]!;
     }
     return grouped;
   }
