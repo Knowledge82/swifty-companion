@@ -312,6 +312,104 @@ void main() {
     });
   });
 
+  group('a student with an Outer Core piscine (Python for Data Science, dump)',
+      () {
+    // A real dump of an old-intake student: the piscine of Outer Core is NOT a
+    // separate cursus, its projects live in 42cursus (id 21).
+    final cursuses = [
+      cursus(9, 'c-piscine', name: 'C Piscine', kind: 'piscine'),
+      cursus(21, '42cursus', name: '42cursus', kind: 'main'),
+      cursus(66, 'c-piscine-reloaded', kind: 'external'),
+    ];
+
+    ProjectResult record(
+      String slug,
+      int cursusId, {
+      String status = 'finished',
+      bool? validated = true,
+      int? mark = 100,
+    }) =>
+        ProjectResult(
+          slug: slug,
+          name: slug,
+          status: status,
+          validated: validated,
+          finalMark: mark,
+          cursusIds: [cursusId],
+        );
+
+    test('the projects of the Outer Core piscine are Outer Core', () {
+      for (final slug in [
+        'python-0-starting',
+        'python-1-array',
+        'python-2-datatable',
+        'python-3-oop',
+        'python-4-dod',
+        'python-for-data-science',
+      ]) {
+        expect(
+          sectionOf(record(slug, 21), cursuses),
+          const KnownSection(ProjectCategory.outerCore),
+          reason: slug,
+        );
+      }
+    });
+
+    test('piscine-data-science lives in 42cursus: Outer Core, not Piscina', () {
+      // Its slug starts with `piscine`; by the slug alone it is Piscina.
+      expect(categoryOf(record('piscine-data-science', 21)),
+          ProjectCategory.piscine);
+      expect(
+        sectionOf(record('piscine-data-science', 21), cursuses),
+        const KnownSection(ProjectCategory.outerCore),
+      );
+    });
+
+    test('without cursus information the slug rule is used (known limit)', () {
+      expect(
+        sectionOf(record('piscine-data-science', 21), const []),
+        const KnownSection(ProjectCategory.piscine),
+      );
+    });
+
+    test('the python-N-... series is not confused with python-module-NN', () {
+      expect(categoryOf(record('python-module-03', 21)),
+          ProjectCategory.commonCore);
+      expect(categoryOf(record('python-3-oop', 21)), ProjectCategory.outerCore);
+    });
+
+    test('a profile: sections, unfinished records are hidden', () {
+      final profile = UserProfile(
+        login: 'student',
+        cursuses: cursuses,
+        projects: [
+          record('python-0-starting', 21, mark: 85),
+          record('python-for-data-science', 21, mark: 97),
+          // Not completed: waiting for correction, a group search.
+          record('piscine-data-science', 21,
+              status: 'waiting_for_correction', validated: false, mark: 0),
+          record('c-piscine-bsq', 9,
+              status: 'searching_a_group', validated: null, mark: null),
+          record('c-piscine-c-00', 9, mark: 77),
+          record('c-piscine-exam-02', 9, mark: 40),
+          // An exam stays in_progress but has a result: it counts.
+          record('exam-rank-03', 21, status: 'in_progress'),
+          record('42cursus-libft', 21, mark: 125),
+          record('c-piscine-reloaded', 66, validated: false, mark: 79),
+        ],
+      );
+
+      final grouped = profile.finishedProjectsBySection();
+      int count(ProjectCategory c) => grouped[KnownSection(c)]!.length;
+
+      expect(count(ProjectCategory.outerCore), 2);
+      expect(count(ProjectCategory.commonCore), 2);
+      expect(count(ProjectCategory.piscine), 2);
+      expect(count(ProjectCategory.piscineReloaded), 1);
+      expect(grouped.length, 4);
+    });
+  });
+
   group('a real student on the new Common Core (dump, no login)', () {
     // The records repeat the dump of a student who is in the middle of the new
     // Common Core and has never been in Outer Core. He also took two Discovery

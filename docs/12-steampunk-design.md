@@ -1312,3 +1312,24 @@ python3 tool/dump_projects.py --cursus
 3. Правило продублировано на Python (`tool/dump_projects.py`): константы читаются из Dart, а условие надо менять в двух местах.
 
 **Тесты** (`project_section_test.dart`): `piscine` и `piscine_deprecated` дают Piscina независимо от slug; регистр `kind` не важен; `main` с другим slug (`42.zip`) остаётся отдельным разделом; `piscine_community`, `professional_training`, `external`, `test` не считаются бассейнами; Reloaded с `external` остаётся Reloaded; курс `reloaded` (28) получает свой раздел; без `kind` работает запасное правило по slug. Тест на дампе студента теперь содержит настоящие `kind`.
+
+### 24.14. Бассейн Outer Core: подтверждение на живых данных (Python for Data Science)
+
+Студент старого набора, который проходил бассейн Outer Core «Python for Data Science», дал недостающий пример. Курсы у него только три (9, 21, 66): **отдельного курса у бассейна Outer Core нет**. Проекты `python-0-starting`, `python-1-array`, `python-2-datatable`, `python-3-oop`, `python-4-dod` и `python-for-data-science` все лежат в `42cursus` (`cursus_ids = [21]`). Значит, подтвердился вариант B из §24.7: правила по slug отправляют их в Outer Core по умолчанию, и это верное место. Серия `python-N-…` не пересекается с `python-module-NN` из новой программы Common Core (шаблон требует ровно `python-module-` и две цифры).
+
+**Находка: `piscine-data-science`.** В дампе есть запись `piscine-data-science` со статусом `waiting_for_correction`, курс `[21]`. Её slug начинается с `piscine`, и правило по slug (§9, пункт 2: «начинается с `c-piscine` или `piscine`») относило её в **Piscina**. Сейчас она не видна, потому что не завершена, но стоило бы ей закрыться, и она появилась бы в Piscina. Само правило `piscine` как префикс было моей догадкой о старых бассейнах (тест с `piscine-c-00` тоже выдуман); теперь старые бассейны определяются по курсу (§24.13).
+
+**Исправление.** В `sectionOf` запоминается, что проект принадлежит основному курсу `42cursus`. Если после всех проверок по курсу решение приняла только `categoryOf` и она вернула Piscina, а проект при этом в `42cursus`, результат заменяется на Outer Core. Логика: **проект основного курса не может быть проектом бассейна**, бассейн это всегда другой курс (9, 64, 66 и так далее).
+
+| Ситуация | Результат |
+|---|---|
+| `piscine-data-science`, `cursus_ids = [21]` | Outer Core (было Piscina) |
+| то же, но курсов студента нет (`cursus_users` пуст) | Piscina по slug: известное ограничение, данных о курсе нет |
+| `c-piscine-c-00`, `cursus_ids = [9]` | Piscina (решает курс, как раньше) |
+| `libft`, `cursus_ids = [21]` | Common Core (как раньше) |
+
+**Риск.** Если у какого-то студента проекты бассейна записаны под курсом 21 (например, ошибка данных школы), они уйдут в Outer Core. В обоих присланных дампах такого нет: все `c-piscine-*` имеют `[9]`.
+
+**Что ещё показал этот дамп (и что ожидаемо):** `exam-rank-03` со статусом `in_progress`, но с оценкой 100 показывается как завершённый (правило §23); `c-piscine-bsq` (`searching_a_group`) скрыт; раздел Reloaded показывает проваленный проект (79).
+
+**Тесты** (`project_section_test.dart`, группа «a student with an Outer Core piscine»): все шесть проектов Python это Outer Core; `piscine-data-science` из `42cursus` это Outer Core, хотя `categoryOf` по одному slug дал бы Piscina; без данных о курсе работает slug (ограничение зафиксировано); серии `python-N-…` и `python-module-NN` не смешиваются; профиль целиком: 2 / 2 / 2 / 1 по разделам, незавершённые записи скрыты.

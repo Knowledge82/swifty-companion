@@ -84,11 +84,16 @@ final class CursusSection extends ProjectSection {
 /// 2. Otherwise (the project is only in `42cursus`, or nothing is known about
 ///    its cursus) the slug rules of [categoryOf] decide. They are the only way
 ///    to tell Common Core from Outer Core: both live in the same `42cursus`.
+///    One correction: a project that is in `42cursus` is **never** put into
+///    Piscina by its slug. Example: `piscine-data-science`, the entry project
+///    of the Data Science piscine of Outer Core, has a slug that starts with
+///    `piscine`, but it lives in `42cursus`, so it is Outer Core.
 ///
 /// If a project belongs to several cursuses, the first suitable one in the
 /// order of `cursus_ids` wins. A cursus without both a name and a slug cannot
 /// be shown, so it is skipped.
 ProjectSection sectionOf(ProjectResult project, List<CursusProgress> cursuses) {
+  var inMainCursus = false;
   for (final id in project.cursusIds) {
     final cursus = _findCursus(cursuses, id);
     if (cursus == null) {
@@ -97,6 +102,7 @@ ProjectSection sectionOf(ProjectResult project, List<CursusProgress> cursuses) {
     final slug = cursus.slug?.toLowerCase();
     final kind = cursus.kind?.toLowerCase();
     if (slug == mainCursusSlug) {
+      inMainCursus = true;
       continue;
     }
     if (slug == piscineReloadedCursusSlug) {
@@ -112,7 +118,11 @@ ProjectSection sectionOf(ProjectResult project, List<CursusProgress> cursuses) {
       return CursusSection(cursusId: id, name: name);
     }
   }
-  return KnownSection(categoryOf(project));
+  final category = categoryOf(project);
+  if (inMainCursus && category == ProjectCategory.piscine) {
+    return const KnownSection(ProjectCategory.outerCore);
+  }
+  return KnownSection(category);
 }
 
 CursusProgress? _findCursus(List<CursusProgress> cursuses, int id) {

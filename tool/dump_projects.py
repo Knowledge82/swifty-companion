@@ -125,6 +125,7 @@ def section(pu, cursuses):
     `cursuses` maps cursus_id -> (slug, name, kind) for the cursuses the student has.
     It is the same algorithm as `sectionOf` in lib/models/project_section.dart.
     """
+    in_main = False
     for cursus_id in pu.get('cursus_ids') or []:
         info = cursuses.get(cursus_id)
         if info is None:
@@ -133,6 +134,7 @@ def section(pu, cursuses):
         slug = (slug or '').lower()
         kind = (kind or '').lower()
         if slug == MAIN_SLUG:
+            in_main = True
             continue
         if slug == RELOADED_SLUG:
             return 'Reloaded'
@@ -141,7 +143,12 @@ def section(pu, cursuses):
         title = name or slug
         if title:
             return f'Cursus: {title}'
-    return category((pu.get('project') or {}).get('slug'))
+    result = category((pu.get('project') or {}).get('slug'))
+    # A project of the main cursus is never Piscina by its slug
+    # (e.g. piscine-data-science of Outer Core).
+    if in_main and result == 'Piscina':
+        return 'Outer'
+    return result
 
 
 def get_token():
