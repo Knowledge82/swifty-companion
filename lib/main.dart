@@ -21,7 +21,11 @@ Future<void> main() async {
     await dotenv.load(fileName: '.env');
     final config = AppConfig.fromMap(dotenv.env);
     // Only the fact of loading; secret values are never written to the log.
-    debugPrint('Config loaded');
+    // Under `kDebugMode`, like the rest of the technical log: a release build
+    // stays silent (`debugPrint` is not removed from a release build).
+    if (kDebugMode) {
+      debugPrint('Config loaded');
+    }
     final deps = _buildDependencies(config);
     runApp(SwiftyApp(repository: deps.repository, photoLoader: deps.photos));
   } on ConfigException catch (e) {
@@ -69,16 +73,20 @@ class SwiftyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The search screen is the same in both branches below, so it is created
+    // once. It is a local variable and not a field: a field initializer cannot
+    // use other fields (`repository`), and a class with a `const` constructor
+    // may only have final fields that are constants or constructor parameters.
+    final search = SearchScreen(
+      repository: repository,
+      photoLoader: photoLoader,
+    );
     return MaterialApp(
       onGenerateTitle: (context) => AppStrings.of(context).appTitle,
       localizationsDelegates: AppStrings.localizationsDelegates,
       supportedLocales: AppStrings.supportedLocales,
       theme: buildSteampunkTheme(),
-      home: introEnabled
-          ? SplashScreen(
-              next: SearchScreen(repository: repository, photoLoader: photoLoader),
-            )
-          : SearchScreen(repository: repository, photoLoader: photoLoader),
+      home: introEnabled ? SplashScreen(next: search) : search,
     );
   }
 }
