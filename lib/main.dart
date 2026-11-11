@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';		// debugPrint, kDebugMode
+import 'package:flutter/material.dart';			// runApp, MaterialApp, StatelessWidget
+import 'package:flutter_dotenv/flutter_dotenv.dart';	// read .env
 
 import 'core/api_client.dart';
 import 'core/config.dart';
@@ -14,7 +14,7 @@ import 'ui/splash_screen.dart';
 import 'ui/steampunk/steampunk_theme.dart';
 
 Future<void> main() async {
-  // Needed to call platform code (reading an asset) before runApp.
+  // vinculamos Dart con plataforma (Android en nuestro caso)
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
