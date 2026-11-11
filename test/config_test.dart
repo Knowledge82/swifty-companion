@@ -45,12 +45,34 @@ void main() {
       );
     });
 
-    test('toString does not reveal secrets', () {
+    // The values are checked, not a word like "secret": the word is part of
+    // the field name `clientSecret`, so a check for it would depend on the
+    // letter case of the class text and not on whether a value leaks.
+    test('toString does not reveal the values', () {
       const config = AppConfig(
         clientId: 'u-secret-1',
         clientSecret: 's-secret-2',
       );
-      expect(config.toString(), isNot(contains('secret')));
+      expect(config.toString(), isNot(contains('u-secret-1')));
+      expect(config.toString(), isNot(contains('s-secret-2')));
+    });
+
+    test('string interpolation, as in a log message, hides the values too', () {
+      const config = AppConfig(
+        clientId: 'u-secret-1',
+        clientSecret: 's-secret-2',
+      );
+      final line = 'config is $config';
+      expect(line, isNot(contains('u-secret-1')));
+      expect(line, isNot(contains('s-secret-2')));
+    });
+
+    // The strongest check: if the text does not change when the values
+    // change, it cannot contain them. It cannot pass by coincidence.
+    test('toString does not depend on the values at all', () {
+      const first = AppConfig(clientId: 'aaa', clientSecret: 'bbb');
+      const second = AppConfig(clientId: 'xxx', clientSecret: 'yyy');
+      expect(first.toString(), second.toString());
     });
   });
 }
