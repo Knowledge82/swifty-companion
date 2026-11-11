@@ -960,7 +960,7 @@ Wrap(alignment: WrapAlignment.spaceBetween, spacing: 12, runSpacing: 2,
 | № | Что смотрим | Ожидаем |
 |---|---|---|
 | 1 | `flutter analyze` и `flutter test` | чисто, тесты проходят (новых: 2 группы в `project_category_test.dart`) |
-| 2 | Профиль Миши (mpeskov) в приложении | раздел «Common Core» с проектами новой программы, Outer Core пуст и скрыт |
+| 2 | Профиль Миши (студент новой программы) в приложении | раздел «Common Core» с проектами новой программы, Outer Core пуст и скрыт |
 | 3 | Твой профиль (старая программа) | без изменений |
 | 4 | Профиль студента новой программы, уже в Outer Core | его Outer-проекты в Outer Core; если нет, пришли `dump_projects.py` для него |
 

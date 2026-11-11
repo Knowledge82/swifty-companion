@@ -20,6 +20,12 @@ void main() {
       expect(validateLogin('ab-c_1'), isNull);
     });
 
+    test('hyphen and underscore are allowed on purpose', () {
+      expect(validateLogin('jean-luc'), isNull);
+      expect(validateLogin('jean_luc'), isNull);
+      expect(validateLogin('_'), isNull);
+    });
+
     test('dangerous and extra characters are rejected', () {
       expect(validateLogin('a b'), LoginProblem.invalidChars);
       expect(validateLogin('../me'), LoginProblem.invalidChars);

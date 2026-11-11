@@ -1,7 +1,11 @@
-/// Characters allowed in a 42 login. This is our assumption: logins in the
-/// intra consist of Latin letters, digits and hyphens. If the real set turns
-/// out to be wider, the server still answers 404 and we simply show "not
-/// found".
+/// Characters allowed in a 42 login: lower-case Latin letters, digits, hyphen
+/// and underscore. This is our assumption, not a documented rule of the intra.
+/// The underscore is allowed on purpose: it is safe inside a request address,
+/// and if such a login does not exist, the server answers 404 and we show
+/// "not found" (a check that is too strict would reject a real login before
+/// the request, which is worse). If the real set turns out to be wider, the
+/// same 404 path covers it. Input is lower-cased first (see [normalizeLogin]),
+/// so the pattern has no upper-case letters.
 final RegExp _loginPattern = RegExp(r'^[a-z0-9_-]+$');
 
 /// Brings the input to the form in which the login goes into the request:
