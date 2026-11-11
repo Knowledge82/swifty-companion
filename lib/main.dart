@@ -26,7 +26,16 @@ Future<void> main() async {
     runApp(SwiftyApp(repository: deps.repository, photoLoader: deps.photos));
   } on ConfigException catch (e) {
     runApp(ConfigErrorApp(missingKeys: e.missing));
-  } catch (_) {
+  } catch (error, stackTrace) {
+    // Anything else (an unreadable `.env`, a bug in the startup code) ends
+    // with the same "cannot read the configuration" screen, but the real cause
+    // must not vanish. In a debug build we print where it failed: the type of
+    // the error and the stack trace. The message text is deliberately NOT
+    // printed: we do not control what a library puts into it, and a log must
+    // never contain secrets.
+    if (kDebugMode) {
+      debugPrint('Startup failed: ${error.runtimeType}\n$stackTrace');
+    }
     runApp(const ConfigErrorApp(unreadable: true));
   }
 }
