@@ -538,6 +538,7 @@ Error: No Linux desktop project configured.
 | `Android sdkmanager not found` | Тот же блокер: `sdkmanager` живёт в `cmdline-tools` | Установить `cmdline-tools`, затем `flutter doctor --android-licenses` |
 | `Android license status unknown` | Лицензии не приняты | `flutter doctor --android-licenses` |
 | `No valid Android SDK platforms found in .../platforms. Directory was empty` | В SDK нет ни одной платформы `platforms/android-NN` | Раздел 21.3, шаг 6 |
+| `Your project's Android Gradle Plugin version (...) is lower than Flutter's minimum supported version` | Версия Flutter новее, чем та, на которой создавался проект (3.50 требует AGP не ниже 9.1.1) | Поднять `com.android.application` в `android/settings.gradle.kts` (см. [17](17-material-ui-migration.md), раздел 11) |
 | `Unable to locate Android SDK`, хотя `flutter config --android-sdk` уже выполнен | В папке SDK нет `platform-tools` (на пустом `goinfre` нового компьютера есть только `cmdline-tools`) | Раздел 21.3, шаги 3–4 |
 | `The SDK Manager CLI tool (sdkmanager) is deprecated` | Google заменяет `sdkmanager` на Android CLI | Информационное, ничего не делать |
 | `ninja is required for Linux development` | Нужен только для десктопной сборки под Linux | Игнорировать: мы собираем под Android; без `sudo` не поставить |
