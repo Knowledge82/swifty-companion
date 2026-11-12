@@ -28,6 +28,7 @@
 18. [Что проверено, а что нет](#18-что-проверено-а-что-нет)
 19. [Справочник команд](#19-справочник-команд)
 20. [Кампус: память Gradle, квота home, `build` в goinfre, `flutter clean`](#20-кампус-память-gradle-квота-home-build-в-goinfre-flutter-clean)
+21. [Android SDK «по частям» на новой машине кампуса (без Android Studio)](#21-android-sdk-по-частям-на-новой-машине-кампуса-без-android-studio)
 
 ---
 
@@ -242,7 +243,7 @@ ls androidSDK/cmdline-tools/latest/bin
 
 Последняя команда должна показать `sdkmanager`.
 
-> ✏️ **Допиши сам:** каким способом ты ставил `cmdline-tools` (я это в ходе работы не видела, сказать честно не могу).
+> На второй машине кампуса `cmdline-tools` ставили вручную (Способ 2: архив `commandlinetools-linux-*_latest.zip` и временная папка `cmdtools_tmp`). Какой способ использовался на первой машине, в записях не сохранилось. Полный чек-лист установки по частям: раздел 21.
 
 После этого:
 
@@ -536,6 +537,8 @@ Error: No Linux desktop project configured.
 | `cmdline-tools component is missing` | В SDK нет `cmdline-tools/latest` | Поставить Command-line Tools (SDK Manager или вручную, раздел 6.4) |
 | `Android sdkmanager not found` | Тот же блокер: `sdkmanager` живёт в `cmdline-tools` | Установить `cmdline-tools`, затем `flutter doctor --android-licenses` |
 | `Android license status unknown` | Лицензии не приняты | `flutter doctor --android-licenses` |
+| `No valid Android SDK platforms found in .../platforms. Directory was empty` | В SDK нет ни одной платформы `platforms/android-NN` | Раздел 21.3, шаг 6 |
+| `Unable to locate Android SDK`, хотя `flutter config --android-sdk` уже выполнен | В папке SDK нет `platform-tools` (на пустом `goinfre` нового компьютера есть только `cmdline-tools`) | Раздел 21.3, шаги 3–4 |
 | `The SDK Manager CLI tool (sdkmanager) is deprecated` | Google заменяет `sdkmanager` на Android CLI | Информационное, ничего не делать |
 | `ninja is required for Linux development` | Нужен только для десктопной сборки под Linux | Игнорировать: мы собираем под Android; без `sudo` не поставить |
 | `Lost connection to device` | Связь отладки оборвалась (вероятно, экран погас) | `flutter run` заново или `flutter attach`; включить Stay awake |
@@ -556,7 +559,7 @@ Error: No Linux desktop project configured.
 1. **Проверить, что осталось:** `ls ~/goinfre`.
 2. **Строки в `~/.zshrc`** (`PATH` для Flutter, для `platform-tools`, `GRADLE_USER_HOME`) лежат в домашней папке и, скорее всего, остаются на месте. Проверить: `cat ~/.zshrc`.
 3. **Flutter SDK:** повторить клонирование (раздел 4.1), затем `source ~/.zshrc`, `which flutter`, `flutter doctor`.
-4. **Android SDK:** восстановить в `~/goinfre/androidSDK` (через SDK Manager в Android Studio или вручную), убедиться, что есть `platform-tools`, `build-tools`, `platforms`, `cmdline-tools/latest`.
+4. **Android SDK:** восстановить в `~/goinfre/androidSDK` (через SDK Manager в Android Studio или вручную), убедиться, что есть `platform-tools`, `build-tools`, `platforms`, `cmdline-tools/latest`. Полный пошаговый чек-лист без Android Studio, таблица сообщений `doctor` и список того, что пропадает на новой машине: **раздел 21**.
 5. **Настройка пути:** `flutter config --android-sdk "$HOME/goinfre/androidSDK"`, затем `flutter doctor --android-licenses`. Если `flutter doctor` ругается на путь, который теперь не существует, сначала сбросить или поправить старые настройки.
 6. **Кэш Gradle:** он скачается сам при первой сборке. **Заложи ~16 минут** (на слабой машине).
 7. **Android Studio и плагины:** если конфигурационная папка IDE тоже чистится, поставить плагины Flutter и Dart заново (раздел 8).
@@ -730,3 +733,154 @@ flutter pub get
 | Ограничение памяти Gradle до 2 ГБ; после него сборка на кампусе прошла, APK (51,6 МБ) установлен на телефон | проверено |
 | Что зависание было именно из-за памяти, а не диска | гипотеза: `vmstat` в момент зависания не снимали |
 | `flutter clean` удаляет ссылку `build`, а не содержимое цели | проверено на практике (ссылка пропала, папка в goinfre осталась) |
+
+---
+
+## 21. Android SDK «по частям» на новой машине кампуса (без Android Studio)
+
+Этот раздел появился после второго подряд случая: на другой машине кампуса `goinfre` оказался пустым, и `flutter doctor` последовательно ругался на отсутствие SDK, потом на пустые `platforms`. Здесь собрано всё, чтобы в следующий раз пройти путь без вопросов.
+
+### 21.1. Два способа получить SDK и чем они отличаются
+
+| | С Android Studio | «По частям» (без IDE) |
+|---|---|---|
+| Кто качает компоненты | Окно **SDK Manager** одной галочкой | Ты сам командой `sdkmanager --install ...` |
+| Кто принимает лицензии | Диалог при установке | `flutter doctor --android-licenses` |
+| Кто вычисляет, что нужно | IDE ставит «рекомендованный набор» | Ты сам: Flutter не скажет, какая платформа ему нужна |
+| Что может пойти не так | Занимает много места и памяти, на кампусе тормозит | Легко забыть компонент: `doctor` сообщает по одному |
+| Когда выбирать | Если IDE нужна для работы | Если работаешь из терминала (наш случай) |
+
+Android Studio по сути оболочка над теми же командами. Всё, что она делает галочками, можно сделать командами; разница только в том, что IDE за тебя собирает полный список, а «по частям» его надо знать.
+
+### 21.2. Из чего состоит SDK и кому что нужно
+
+| Папка в `~/goinfre/androidSDK` | Что это | Кому нужно | Что без неё |
+|---|---|---|---|
+| `cmdline-tools/latest/` | Менеджер пакетов (`sdkmanager`, `bin/`, `lib/`) | Нам, чтобы установить остальное и принять лицензии | `cmdline-tools component is missing`, `sdkmanager not found` |
+| `platform-tools/` | `adb` (связь с телефоном) | Flutter: **по этой папке он признаёт каталог настоящим SDK** | `Unable to locate Android SDK`, хотя путь указан верно |
+| `platforms/android-NN/` | Библиотеки Android нужной версии | Компилятору: `compileSdk` берётся из Flutter | `No valid Android SDK platforms found ... Directory was empty` |
+| `build-tools/XX.Y.Z/` | Сборочные утилиты (упаковка APK) | Gradle при сборке | `doctor` и сборка ругаются на build-tools |
+| `licenses/` | Файлы с хешами принятых лицензий | Gradle и `sdkmanager`: без них не качаются платформы | `Android license status unknown` |
+| `ndk/` | Компилятор нативного кода | Gradle, при первой сборке докачивает сам | Долгая первая сборка (§12.2) |
+| `emulator/`, `sources/` | Эмулятор, исходники Android | Нам **не нужны** (телефон по USB) | ничего |
+
+Про «по этой папке Flutter признаёт SDK настоящим»: это вывод из наблюдения, а не цитата из кода Flutter. На практике, когда в SDK был только `cmdline-tools`, `doctor` писал `Unable to locate Android SDK`; после установки `platform-tools` эта строка пропала.
+
+### 21.3. Полный чек-лист с нуля
+
+Условия: Flutter уже склонирован (раздел 4), в `~/.zshrc` есть `PATH` для него, JDK 17 найден (раздел 7). Команды без комментариев в строке (раздел 15, первая строка).
+
+**1. Скачать «Command line tools only» для Linux** со страницы https://developer.android.com/studio#command-line-tools-only и положить архив в `~/goinfre`.
+
+**2. Разложить в нужную структуру** (должно получиться `cmdline-tools/latest/bin/sdkmanager`):
+
+```bash
+cd ~/goinfre
+mkdir -p cmdtools_tmp androidSDK/cmdline-tools
+unzip commandlinetools-linux-*_latest.zip -d cmdtools_tmp
+mv cmdtools_tmp/cmdline-tools androidSDK/cmdline-tools/latest
+ls androidSDK/cmdline-tools/latest/bin
+```
+
+**3. Поставить `platform-tools`:**
+
+```bash
+~/goinfre/androidSDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/goinfre/androidSDK --install "platform-tools"
+```
+
+`--sdk_root` задаёт корень SDK явно: так надёжнее, чем рассчитывать на то, что утилита сама поймёт, где она лежит. Кавычки вокруг имени пакета обязательны: `;` в именах пакетов оболочка читает как разделитель команд.
+
+**4. Сказать Flutter, где SDK:**
+
+```bash
+flutter config --android-sdk "$HOME/goinfre/androidSDK"
+```
+
+**5. Принять лицензии** (на каждый вопрос `y`):
+
+```bash
+flutter doctor --android-licenses
+```
+
+**6. Узнать, какая платформа нужна этой версии Flutter, и поставить её с build-tools.** Номер платформы зависит от версии Flutter (`compileSdk = flutter.compileSdkVersion` в `android/app/build.gradle.kts`), поэтому его не угадывают, а читают из установленного Flutter:
+
+```bash
+grep -rn "compileSdkVersion" ~/goinfre/flutter/packages/flutter_tools/gradle/src/main/
+~/goinfre/androidSDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/goinfre/androidSDK --list | grep "build-tools;" | tail -5
+```
+
+Первая команда показывает номер платформы `NN`, вторая список build-tools (выбирай самую свежую **без** `rc`, это не стабильная версия). Затем:
+
+```bash
+~/goinfre/androidSDK/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/goinfre/androidSDK --install "platforms;android-NN" "build-tools;XX.Y.Z"
+```
+
+**7. Проверить:** `flutter doctor`. Строка про Android toolchain должна быть зелёной. Красная строка про `ninja` и «Linux toolchain» не мешает (раздел 5).
+
+**8. Вернуть то, что хранилось в `goinfre` и пропало вместе с ним** (раздел 21.5):
+
+```bash
+mkdir -p ~/goinfre/swifty_build
+mkdir -p ~/goinfre/.gradle
+```
+
+и файл `~/goinfre/.gradle/gradle.properties` с лимитами памяти (раздел 20.1).
+
+**9. Проверка цепочки:** `echo $GRADLE_USER_HOME`, `which adb` и `adb devices` (телефон по кабелю), затем `flutter pub get && flutter analyze && flutter test`. Первая сборка будет долгой: докачивается NDK и всё остальное (§12.2).
+
+### 21.4. Таблица: что говорит `flutter doctor` и чего не хватает
+
+| Сообщение | Чего не хватает | Что делать |
+|---|---|---|
+| `Unable to locate Android SDK` | Папки `platform-tools` (или неверный путь) | Шаги 3–4; проверить `ls ~/goinfre/androidSDK` |
+| `cmdline-tools component is missing` / `sdkmanager not found` | `cmdline-tools/latest` | Шаги 1–2 |
+| `Android license status unknown` | Принятых лицензий | Шаг 5 |
+| `No valid Android SDK platforms found in .../platforms. Directory was empty` | Ни одной платформы | Шаг 6 |
+| сообщение про `build-tools` | Папки `build-tools` | Шаг 6 (точный текст сообщения я не видела, поэтому не привожу) |
+| `adb: command not found` | `platform-tools` нет в `PATH` | Раздел 9.3 |
+
+Сообщения идут **по одному**: поставил один компонент, и `doctor` показывает следующий. Это не значит, что ты что-то сделал не так.
+
+### 21.5. Что пропадает на новой машине, а что остаётся
+
+`goinfre` свой у каждой машины и периодически чистится. Домашняя папка общая, поэтому там остаётся то, что в ней лежит. Отсюда ловушка: в общем проекте остаются ссылки на то, чего на новой машине нет.
+
+| Что | Где лежит | На новой машине |
+|---|---|---|
+| Исходники, `.git`, `~/.zshrc` (`PATH`, `GRADLE_USER_HOME`) | домашняя папка | на месте |
+| Ссылка `build -> ~/goinfre/swifty_build` в проекте | домашняя папка | на месте, но **висит в воздухе**: цели нет. Лечится `mkdir -p ~/goinfre/swifty_build` |
+| Flutter SDK | `~/goinfre/flutter` | **нет**, клонировать заново (раздел 4); версия может оказаться новее (мы видели 3.47 на одной машине и 3.50 на другой) |
+| Android SDK | `~/goinfre/androidSDK` | **нет**, чек-лист 21.3 |
+| Кэш Gradle и **лимиты памяти** (`gradle.properties`) | `~/goinfre/.gradle` | **нет**; без файла Gradle берёт шаблонные 8 ГБ и машина может повиснуть |
+| Конфиг IDE | `~/goinfre/android-studio-config` | нет, если IDE нужна |
+
+Мини-проверка после чистого `goinfre`: `ls ~/goinfre` должно показать `flutter`, `androidSDK`, `swifty_build`, а `ls -a ~/goinfre` ещё и `.gradle`.
+
+### 21.6. Подводные камни
+
+- **Номер платформы зависит от версии Flutter.** Не копируй `android-36` из чужой инструкции: прочти номер из установленного Flutter (шаг 6).
+- **Разные версии Flutter на разных машинах.** После наладки SDK запусти `flutter analyze` и `flutter test` и убедись, что поведение не изменилось. Закрепить версию можно способом из раздела 17.4.
+- **Кавычки.** Имена пакетов с `;` берут в кавычки; пути с `~` внутри кавычек не раскрываются, поэтому пиши `$HOME`.
+- **JDK обязателен для `sdkmanager`** (раздел 7). Без Java утилита не запустится.
+- **Не прерывай первую сборку** (NDK распаковывается долго, раздел 12.2).
+- **Комментарии `#` в строке команды в zsh не комментарии** (раздел 15).
+- **Предупреждение про устаревший `sdkmanager`** информационное (раздел 6.5).
+
+### 21.7. Альтернативы
+
+| Вариант | Плюсы | Минусы |
+|---|---|---|
+| Android Studio и её SDK Manager | Меньше знать наизусть | Тяжёлая, на кампусе тормозит; лишний слой |
+| Как в этом разделе, по частям | Лёгкий, понятный, повторяемый | Надо знать список компонентов |
+| Скрипт, который делает шаги 2–8 одной командой | Следующий раз за минуту | Его надо написать и проверить на чистом `goinfre`; архив всё равно скачивается руками. Пока не сделано |
+| Работать дома, на кампусе только `analyze` и `test` | Никакой возни с SDK | Для демонстрации APK нужен дом или заранее собранный файл |
+
+### 21.8. Что проверено, а что нет
+
+| Утверждение | Статус |
+|---|---|
+| `platform-tools` ставится командой `sdkmanager --install` из `cmdline-tools`, после чего папка появляется и `Unable to locate Android SDK` пропадает | подтверждено на второй машине |
+| При пустой `platforms` `doctor` пишет `No valid Android SDK platforms found ... Directory was empty` | подтверждено текстом из вывода |
+| После установки платформы и build-tools `flutter doctor` проходит (кроме `ninja`) | подтверждено словами «всё заебись»; точные номера версий я не записала |
+| Команда `grep` выше находит номер `compileSdkVersion` | предложена, её вывод я не видела |
+| Что именно Flutter проверяет для признания SDK валидным | вывод из наблюдения, не из исходников |
