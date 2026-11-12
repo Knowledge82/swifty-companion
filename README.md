@@ -61,6 +61,7 @@
 | Этап 9: переход с `package:flutter/material.dart` (устарел в Flutter 3.50) на пакет `material_ui`; новый список делегатов переводов | 🟡 в ветке `migrate-material-ui`: проверено на Flutter 3.50.0 и на телефоне, **ждёт проверки на 3.47.x и слияния в `main`** | [docs/17](docs/17-material-ui-migration.md) |
 | Этап 8: что осталось до защиты (сценарии ошибок, адаптивность, аудит секретов, релизная сборка, вопросы) | ⏳ чек-лист для тебя | [docs/14-remaining-work.md](docs/14-remaining-work.md) |
 | Миграция на `material_ui`: что устарело в Flutter 3.50, что поменяли, риски, откат | 🟡 в ветке `migrate-material-ui` | [docs/17-material-ui-migration.md](docs/17-material-ui-migration.md) |
+| Release-сборка: как собрать, чем отличается от debug, подпись, чек-лист перед сдачей | 🟡 написано, **release после миграции ещё не собирался** | [docs/18-release-build.md](docs/18-release-build.md) |
 | Справка: Flutter и React Native, плюсы и минусы обоих | ✅ написано | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) |
 
 Сейчас приложение полностью работает: поиск по логину, профиль с фото, полями, скиллами и проектами, обработка ошибок, один токен на сессию с автообновлением. Осталась **проверка вручную** и подготовка к защите: подробный список в [docs/14-remaining-work.md](docs/14-remaining-work.md).
@@ -326,6 +327,8 @@ flutter run -d <ID_устройства>   # ID берётся из flutter devi
 | [docs/14-remaining-work.md](docs/14-remaining-work.md) | Этап 8: что осталось, статусы «телефон / тесты», сценарии ошибок, адаптивность, бонус, аудит секретов, релиз, чистый клон, вопросы на защиту |
 | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) | Flutter и React Native: устройство, сравнение по темам, цифры рынка с оговорками, плюсы и минусы, когда что выбирать |
 | [docs/16-code-walkthrough.md](docs/16-code-walkthrough.md) | Разбор кода для защиты: структура проекта, точка входа и запуск, импорты в Dart, `json_reader`, `display`, строки и руны, ленивые конвейеры, `config`, `api_constants`, `api_exception` |
+| [docs/17-material-ui-migration.md](docs/17-material-ui-migration.md) | Миграция с `package:flutter/material.dart` на `material_ui` (Flutter 3.50): что устарело, что поменяли, риски, откат (в ветке `migrate-material-ui`) |
+| [docs/18-release-build.md](docs/18-release-build.md) | Release-сборка: команда, отличия от debug, установка, подпись, ловушки (`INTERNET`, `.env` в APK), чек-лист перед сдачей, альтернативы |
 
 Документация обновляется после каждого этапа или по запросу.
 
