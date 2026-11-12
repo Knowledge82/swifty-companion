@@ -61,7 +61,7 @@
 | Этап 9: переход с `package:flutter/material.dart` (устарел в Flutter 3.50) на пакет `material_ui`; новый список делегатов переводов | ✅ слито в `main` (ветка `migrate-material-ui` удалена): проверено на Flutter 3.50.0 и на телефоне; на 3.47.x **не проверялось** | [docs/17](docs/17-material-ui-migration.md) |
 | Этап 8: что осталось до защиты (сценарии ошибок, адаптивность, аудит секретов, релизная сборка, вопросы) | ⏳ чек-лист для тебя | [docs/14-remaining-work.md](docs/14-remaining-work.md) |
 | Миграция на `material_ui`: что устарело в Flutter 3.50, что поменяли, риски, откат | ✅ в `main` | [docs/17-material-ui-migration.md](docs/17-material-ui-migration.md) |
-| Release-сборка: как собрать, чем отличается от debug, подпись, чек-лист перед сдачей | 🟡 написано, **release после миграции ещё не собирался** | [docs/18-release-build.md](docs/18-release-build.md) |
+| Release-сборка: как собрать, чем отличается от debug, подпись, чек-лист перед сдачей | 🟡 написано; release на 3.50.0 собран и установлен, чек-лист по пунктам не пройден | [docs/18-release-build.md](docs/18-release-build.md) |
 | Справка: Flutter и React Native, плюсы и минусы обоих | ✅ написано | [docs/15-flutter-vs-react-native.md](docs/15-flutter-vs-react-native.md) |
 
 Сейчас приложение полностью работает: поиск по логину, профиль с фото, полями, скиллами и проектами, обработка ошибок, один токен на сессию с автообновлением. Осталась **проверка вручную** и подготовка к защите: подробный список в [docs/14-remaining-work.md](docs/14-remaining-work.md).
