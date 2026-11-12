@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';		// debugPrint, kDebugMode
-import 'package:flutter/material.dart';			// runApp, MaterialApp, StatelessWidget
 import 'package:flutter_dotenv/flutter_dotenv.dart';	// read .env
+import 'package:material_ui/material_ui.dart';			// runApp, MaterialApp, StatelessWidget
 
 import 'core/api_client.dart';
 import 'core/config.dart';

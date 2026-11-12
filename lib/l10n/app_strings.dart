@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/api_exception.dart';
 import '../core/login.dart';
@@ -26,13 +26,17 @@ abstract class AppStrings {
   static const LocalizationsDelegate<AppStrings> delegate =
       _AppStringsDelegate();
 
-  /// Our dictionary + Flutter's own built-in translations (the "Back" tooltip,
-  /// month names, the copy context menu, etc.).
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
+  /// Our dictionary + the built-in translations of the Material, Cupertino and
+  /// base widgets (the "Back" tooltip, month names, the copy context menu,
+  /// etc.). Since Flutter 3.50 the last three come as one list,
+  /// `GlobalMaterialLocalizations.delegates`, from the `material_ui` package
+  /// (the old per-library delegates are deprecated, see docs/17).
+  ///
+  /// `final` and not `const`: we have not verified that the list from the
+  /// package is a compile-time constant, and a `final` list works either way.
+  static final List<LocalizationsDelegate<dynamic>> localizationsDelegates = [
     delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
+    ...GlobalMaterialLocalizations.delegates,
   ];
 
   static AppStrings of(BuildContext context) {

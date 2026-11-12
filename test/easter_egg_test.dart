@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:swifty_companion/models/user_profile.dart';
 import 'package:swifty_companion/ui/easter_egg.dart';
 import 'package:swifty_companion/ui/profile_screen.dart';

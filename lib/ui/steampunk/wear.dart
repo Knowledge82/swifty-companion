@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // Small "aging" tricks: rivets, bolts, oxide stains, scratches.
 // All the functions only draw on a ready canvas and store nothing.

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:swifty_companion/ui/splash_screen.dart' show splashBackgroundColor;
 import 'package:swifty_companion/ui/steampunk/gear_motion.dart';
 import 'package:swifty_companion/ui/steampunk/gears.dart';

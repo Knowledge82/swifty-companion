@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:swifty_companion/ui/steampunk/logo42.dart';
 
 /// Reads the polygons from the SVG file: the attributes `points="x,y x,y ..."`.
