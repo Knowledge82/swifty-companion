@@ -175,7 +175,7 @@ String loginProblemText(LoginProblem problem) => switch (problem) { ... };  // �
 ## 8. Что остаётся на русском
 
 - Вся документация (договорённость проекта).
-- Отладочный журнал (`Получен токен…`, `GET …`, `Фото не загрузилось…`), он только для разработчика и только в debug.
+- Отладочный журнал (`Token received…`, `GET …`, `Photo failed to load…`), он только для разработчика и только в debug.
 - `ApiException.message` и `ConfigException.message`: описание для разработчика и тестов.
 - Комментарии в коде.
 

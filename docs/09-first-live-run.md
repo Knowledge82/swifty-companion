@@ -126,7 +126,7 @@ IconData get _icon => switch (error) {
 В отладочной сборке в консоль (`flutter run`, вкладка Run в Android Studio) пишется:
 
 ```text
-Получен токен, срок жизни 7200 с
+Token received, lifetime 7200 s
 GET /v2/users/jdoe → 200, 48213 байт, 912 мс
 ```
 
@@ -135,7 +135,7 @@ GET /v2/users/jdoe → 200, 48213 байт, 912 мс
 ```text
 GET /v2/users/jdoe → 401, 54 байт, 120 мс
 Токен отвергнут сервером и сброшен
-Получен токен, срок жизни 7200 с
+Token received, lifetime 7200 s
 GET /v2/users/jdoe → 200, 48213 байт, 880 мс
 ```
 
